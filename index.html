@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rlan's Apps</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f766e'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='Arial' font-weight='700'>R</text></svg>">
+<style>
+:root{--bg:#f6f7f8;--card:#fff;--text:#16181d;--muted:#5f6670;--line:#e3e6ea;--accent:#0f766e;--accent-soft:#e6f4f2;--shadow:0 1px 2px rgba(0,0,0,.04),0 4px 14px rgba(0,0,0,.05)}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#181b21;--text:#e9ecf1;--muted:#9aa3ae;--line:#272b33;--accent:#2dd4bf;--accent-soft:#14302d;--shadow:none}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:880px;margin:0 auto;padding:48px 16px 64px}
+header{margin-bottom:36px}
+h1{font-size:30px;letter-spacing:-.02em}
+.sub{color:var(--muted);margin-top:4px}
+.search{margin-top:20px;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px}
+.search:focus{outline:2px solid var(--accent);outline-offset:1px}
+section{margin-top:32px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+a.card{display:flex;gap:14px;align-items:flex-start;padding:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);text-decoration:none;color:inherit;transition:border-color .15s,transform .15s}
+a.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+a.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.icon{flex:none;width:42px;height:42px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.icon svg{width:22px;height:22px}
+.name{font-weight:600}
+.desc{color:var(--muted);font-size:14px;margin-top:2px}
+.url{color:var(--accent);font-size:12px;margin-top:6px;word-break:break-all}
+.empty{display:none;color:var(--muted);margin-top:24px}
+footer{margin-top:48px;color:var(--muted);font-size:13px}
+footer a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Rlan's Apps</h1>
+    <p class="sub">All my sites and tools in one place.</p>
+    <input class="search" id="q" type="search" placeholder="Search apps…" aria-label="Search apps">
+  </header>
+
+  <section data-group>
+    <h2>Trading</h2>
+    <div class="grid">
+      <a class="card" href="https://rlan214.github.io/tradingjournal/tradingjournal.html">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></div>
+        <div><div class="name">Trading Planner</div><div class="desc">Daily journal, monthly P&amp;L calendar and rule tracking.</div><div class="url">tradingjournal/tradingjournal.html</div></div>
+      </a>
+      <a class="card" href="https://rlan214.github.io/tradingjournal/tickcalc.html">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h8"/></svg></div>
+        <div><div class="name">Tick / Point / Dollar Calculator</div><div class="desc">Futures converter for ES, MES, NQ, MNQ, GC and MGC.</div><div class="url">tradingjournal/tickcalc.html</div></div>
+      </a>
+    </div>
+  </section>
+
+  <section data-group>
+    <h2>Health</h2>
+    <div class="grid">
+      <a class="card" href="https://rlan214.github.io/recovery-daily/">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+        <div><div class="name">Recovery Daily</div><div class="desc">Knee rehab checklist, daily check-in and progress.</div><div class="url">recovery-daily</div></div>
+      </a>
+    </div>
+  </section>
+
+  <section data-group>
+    <h2>Family</h2>
+    <div class="grid">
+      <a class="card" href="https://rlan214.github.io/Dad/">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M6 8h12"/></svg></div>
+        <div><div class="name">Ricardo Abalos Landingin – Novena</div><div class="desc">Novena prayers and hymns in memory of Dad.</div><div class="url">Dad</div></div>
+      </a>
+    </div>
+  </section>
+
+  <p class="empty" id="empty">No apps match that search.</p>
+
+  <footer>Source on <a href="https://github.com/rlan214">github.com/rlan214</a></footer>
+</div>
+<script>
+const q=document.getElementById('q'),empty=document.getElementById('empty');
+q.addEventListener('input',()=>{
+  const t=q.value.trim().toLowerCase();let any=false;
+  document.querySelectorAll('[data-group]').forEach(s=>{
+    let shown=0;
+    s.querySelectorAll('a.card').forEach(c=>{const m=!t||c.textContent.toLowerCase().includes(t);c.style.display=m?'':'none';if(m)shown++;});
+    s.style.display=shown?'':'none';if(shown)any=true;
+  });
+  empty.style.display=any?'none':'block';
+});
+</script>
+</body>
+</html>
