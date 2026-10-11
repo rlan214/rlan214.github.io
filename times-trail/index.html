@@ -1,5 +1,11 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Times Trail">
+<link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" href="apple-touch-icon.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head><body>
 <title>Times Trail</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,6 +52,8 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .screen{height:100%;display:flex;flex-direction:column;max-width:560px;margin:0 auto}
 .num{font-variant-numeric:tabular-nums}
+#app{position:relative;z-index:1;height:100%}
+button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
 
 .btn{display:block;width:100%;padding:14px 18px;border-radius:16px;font-family:var(--f-display);font-weight:600;font-size:1.1rem;letter-spacing:.04em;text-transform:uppercase;
   background:var(--accent);color:var(--on-color);box-shadow:0 5px 0 var(--accent-deep);transition:transform .06s, box-shadow .06s}
@@ -79,15 +87,15 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 .quick small{color:var(--muted);font-size:.74rem;line-height:1.2;display:block}
 
 .unit{margin-top:26px}
-.banner{border-radius:18px;padding:14px 16px;color:var(--on-color);display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 4px 0 var(--deep)}
+.banner{border-radius:18px;padding:14px 16px;background:var(--c);color:var(--bt,var(--on-color));position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 4px 0 var(--deep)}
 .banner .eyebrow{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;opacity:.9;font-weight:800}
 .banner h2{margin:2px 0 0;font-family:var(--f-display);font-weight:600;font-size:1.35rem}
 .banner .tipline{margin:4px 0 0;font-size:.85rem;font-weight:700;opacity:.92}
 .banner .big{font-family:var(--f-display);font-weight:700;font-size:2.3rem;line-height:1;opacity:.9;flex:none}
 .banner.locked{background:var(--lock)!important;color:var(--muted);box-shadow:0 4px 0 var(--lock-deep)}
 .trail{display:flex;flex-direction:column;align-items:center;gap:18px;padding:22px 0 4px}
-.node-wrap{position:relative;display:flex;flex-direction:column;align-items:center}
-.node{width:76px;height:70px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:1.9rem;color:var(--on-color);
+.node-wrap{position:relative;display:flex;flex-direction:column;align-items:center;transform:translateX(calc(var(--o,0) * var(--spread,1) * 1px))}
+.node{position:relative;width:76px;height:70px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:1.9rem;color:var(--bt,var(--on-color));
   background:var(--c);box-shadow:0 7px 0 var(--deep);transition:transform .06s, box-shadow .06s}
 .node svg{width:34px;height:34px}
 .node .sm{font-size:1.45rem;letter-spacing:-.02em}
@@ -97,6 +105,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 .node-label{margin-top:12px;font-size:.8rem;font-weight:800;color:var(--muted);letter-spacing:.04em}
 .start-tag{position:absolute;top:-38px;background:var(--surface);border:2px solid var(--line);color:var(--accent);font-family:var(--f-display);font-weight:700;letter-spacing:.06em;padding:4px 12px;border-radius:12px;font-size:.9rem;animation:bob 1.4s ease-in-out infinite;white-space:nowrap}
 .start-tag::after{content:"";position:absolute;left:50%;bottom:-8px;width:12px;height:12px;background:var(--surface);border-right:2px solid var(--line);border-bottom:2px solid var(--line);transform:translateX(-50%) rotate(45deg)}
+.node-wrap.current{margin-top:24px}
 .node-wrap.current .node{outline:6px solid color-mix(in srgb, var(--c) 28%, transparent);outline-offset:4px}
 @keyframes bob{50%{transform:translateY(-5px)}}
 .finale{margin-top:30px;text-align:center;color:var(--muted);font-size:.9rem}
@@ -211,6 +220,216 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 .missed div{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .missed span{background:var(--bad-soft);color:var(--fb-bad);border-radius:8px;padding:3px 9px;font-weight:800}
 
+/* ---------- iPad and large screens ---------- */
+@media (min-width:700px){
+  body{font-size:18px;--spread:1.7}
+  .screen{max-width:780px}
+  .topbar{padding:14px 24px}
+  .brand{font-size:1.6rem}
+  .stat{font-size:1.15rem} .stat svg{width:26px;height:26px}
+  .iconbtn{width:48px;height:48px} .iconbtn svg{width:26px;height:26px}
+  .home-scroll{padding:24px 28px 140px}
+  .goal{padding:18px 20px;border-radius:22px} .goal .ring{width:70px;height:70px} .goal h3{font-size:1.3rem} .goal p{font-size:1rem}
+  .quick{gap:14px;margin-top:14px} .quick button{padding:16px 10px;border-radius:20px} .quick .qi{width:50px;height:50px;border-radius:14px} .quick .qi svg{width:26px;height:26px} .quick b{font-size:1.08rem} .quick small{font-size:.85rem}
+  .unit{margin-top:40px}
+  .banner{padding:22px 26px;border-radius:24px} .banner .eyebrow{font-size:.85rem} .banner h2{font-size:1.9rem} .banner .tipline{font-size:1.02rem} .banner .big{font-size:3.3rem} .banner .big svg{width:66px;height:66px}
+  .trail{gap:30px;padding:34px 0 10px}
+  .node{width:100px;height:94px;font-size:2.5rem} .node svg{width:44px;height:44px}
+  .node-label{font-size:.92rem}
+  .start-tag{top:-46px;font-size:1.02rem}
+  .lesson-top{padding:20px 28px 10px;gap:16px} .bar{height:22px;border-radius:11px} .bar i{border-radius:11px} .score{font-size:1.3rem}
+  .stage{padding:14px 32px;gap:22px}
+  .kicker{font-size:1.85rem} .combo{font-size:.95rem}
+  .mascot{width:124px;height:124px}
+  .bubble{font-size:clamp(2.6rem,6.2vw,4.4rem);padding:24px 14px;border-radius:26px}
+  .bubble.seq{font-size:clamp(2rem,4.6vw,3.1rem)}
+  .helper{font-size:1.12rem;padding:14px 18px;border-radius:18px}
+  .array-box svg{width:auto;max-height:240px}
+  .choices{gap:16px} .choice{font-size:2.5rem;padding:26px 8px;border-radius:22px} .choice small{font-size:.8rem}
+  .keypad{gap:14px;width:100%;max-width:580px;margin:0 auto} .key{font-size:2.3rem;padding:18px 0;border-radius:20px} .key svg{width:36px;height:36px}
+  .lesson-foot{padding:18px 28px calc(22px + env(safe-area-inset-bottom,0px))}
+  .btn{font-size:1.3rem;padding:18px 22px;border-radius:20px}
+  .fb h4{font-size:1.65rem} .fb p{font-size:1.12rem} .fb .how{font-size:1.06rem} .fb .badge{width:56px;height:56px} .fb .badge svg{width:32px;height:32px}
+  .intro{gap:24px;padding:28px} .intro h1{font-size:2.9rem} .intro .tip{font-size:1.35rem;padding:18px 22px} .ladder{gap:10px;max-width:34em} .ladder span{font-size:1.55rem;min-width:3.6em} .intro .mascot{width:136px;height:136px}
+  .rules{max-width:32em} .rules li{font-size:1.12rem;padding:14px 18px}
+  .results{gap:20px} .results h1{font-size:2.9rem} .results .sub{font-size:1.1rem} .results .mascot{width:170px;height:170px}
+  .tiles{max-width:540px;gap:14px} .tile .h{font-size:.8rem;padding:7px 0} .tile .v{font-size:2.1rem;padding:14px 0}
+  .exam-grid{max-width:540px;gap:10px} .exam-grid span{font-size:1.02rem;padding:10px 0}
+  .missed{max-width:540px}
+  .res-foot{padding:18px 28px calc(22px + env(safe-area-inset-bottom,0px));width:100%;max-width:640px;margin:0 auto}
+  .overlay{align-items:center;padding:24px}
+  .sheet{max-width:620px;border-radius:26px;padding:26px 26px}
+}
+/* iPad landscape: question on the left, answer pad on the right */
+@media (min-width:960px) and (orientation:landscape){
+  .screen.lesson{max-width:1120px}
+  .screen.lesson .stage{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);column-gap:48px;row-gap:18px;align-content:center}
+  .screen.lesson .stage > *{grid-column:1}
+  .screen.lesson .stage > #ans{grid-column:2;grid-row:1 / span 4;align-self:center}
+  .screen.lesson .bubble{font-size:clamp(2.4rem,4.4vw,3.8rem)}
+  .screen.lesson .lesson-foot{flex-direction:row;align-items:center;gap:24px}
+  .screen.lesson .lesson-foot .fb{flex:1;min-width:0}
+  .screen.lesson .lesson-foot .btn{width:auto;min-width:300px;margin-left:auto}
+}
+
+/* ---------- seasonal themes (shared) ---------- */
+body.seasonal{color-scheme:dark}
+body.seasonal .topbar{background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+body.seasonal .stat.streak,body.seasonal .combo{color:var(--sun)}
+body.seasonal .results h1{color:var(--sun)}
+body.seasonal .results h1.miss{color:var(--accent)}
+body.seasonal .node-label{color:var(--ink);opacity:.82;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+body.seasonal .finale{color:var(--ink);opacity:.8}
+body.seasonal .goal,body.seasonal .quick button{box-shadow:0 3px 0 var(--line),0 10px 26px rgba(0,0,0,.28)}
+body.seasonal .banner{background:radial-gradient(120% 150% at 0% 0%,rgba(255,255,255,.3),transparent 55%),var(--c);box-shadow:0 5px 0 var(--deep),0 12px 30px rgba(0,0,0,.35)}
+body.seasonal .banner > *{position:relative;z-index:1}
+body.seasonal .banner::before{content:"";position:absolute;pointer-events:none;background-repeat:no-repeat;background-size:contain}
+body.seasonal .bar{background:var(--bar-track);box-shadow:inset 0 2px 0 rgba(0,0,0,.3)}
+body.seasonal .bar i{background:var(--stripes);box-shadow:inset 0 -5px 0 rgba(0,0,0,.14);background-size:56px 100%;animation:stripes 1.4s linear infinite}
+body.seasonal .bar.drop i{background:var(--bad);animation:none}
+@keyframes stripes{to{background-position:56px 0}}
+body.seasonal .bubble{box-shadow:0 10px 28px rgba(0,0,0,.32)}
+body.seasonal .key,body.seasonal .choice{background:linear-gradient(var(--key-top),var(--key-bot));border-color:var(--key-edge);box-shadow:0 4px 0 var(--key-shadow)}
+body.seasonal .key:active,body.seasonal .choice:active{box-shadow:0 1px 0 var(--key-shadow)}
+body.seasonal .choice.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);box-shadow:0 4px 0 var(--accent-deep)}
+body.seasonal .lesson-foot{background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+body.seasonal .lesson-foot.good{background:var(--foot-good)}
+body.seasonal .lesson-foot.bad{background:var(--foot-bad)}
+body.seasonal .helper{background:var(--helper)}
+body.seasonal .helper b{color:var(--sun)}
+body.seasonal .intro .tip{color:var(--ink)}
+body.seasonal .sheet{background:var(--sheet)}
+body.seasonal .rules li,body.seasonal .ladder span,body.seasonal .missed,body.seasonal .tile{background:var(--surface)}
+.fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:25}
+
+/* scene behind everything */
+#scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:var(--sky)}
+#scene .stars{position:absolute;left:-10px;top:-10px;width:2px;height:2px;border-radius:50%}
+#scene .s2{width:3px;height:3px;animation:twinkle 3.4s ease-in-out infinite alternate}
+@keyframes twinkle{from{opacity:.2}to{opacity:1}}
+#scene .moon{position:absolute;top:calc(9vh + env(safe-area-inset-top,0px));right:7vw;width:clamp(70px,14vw,170px);aspect-ratio:1;border-radius:50%;background:var(--moon);box-shadow:var(--moon-glow)}
+#scene .moon i{position:absolute;border-radius:50%;background:var(--crater)}
+#scene .moon i:nth-child(1){width:22%;height:22%;left:22%;top:50%}
+#scene .moon i:nth-child(2){width:14%;height:14%;left:58%;top:26%}
+#scene .moon i:nth-child(3){width:10%;height:10%;left:62%;top:64%}
+#scene .ground{position:absolute;left:0;bottom:0;width:100%;height:clamp(130px,27vh,320px)}
+#scene .flyer{position:absolute;left:0;animation:fly 18s linear infinite}
+#scene .flyer svg{display:block;width:100%;height:auto}
+@keyframes fly{0%{transform:translate(-20vw,0)}25%{transform:translate(18vw,-3vh)}50%{transform:translate(50vw,2vh)}75%{transform:translate(82vw,-2vh)}100%{transform:translate(118vw,1vh)}}
+body[data-view="lesson"] #scene .flyer,body[data-view="lesson"] #scene .ghosty,body[data-view="lesson"] #scene .ground,body[data-view="lesson"] #scene .fog,body[data-view="lesson"] #scene .sn3{display:none}
+body[data-view="lesson"] #scene .moon{opacity:.55}
+
+/* decorations beside each unit */
+.trail{position:relative}
+.decor{position:absolute;top:50%;width:78px;transform:translateY(-50%);pointer-events:none}
+.decor.l{left:-6px} .decor.r{right:-6px}
+.decor svg{display:block;width:100%;height:auto;overflow:visible}
+.decor .spin{animation:dangle 3.6s ease-in-out infinite}
+@keyframes dangle{50%{transform:translateY(9px)}}
+.decor .bub{transform-box:fill-box;transform-origin:center;animation:bub 2.4s ease-in infinite}
+.decor .bub.d2{animation-delay:.8s} .decor .bub.d3{animation-delay:1.6s}
+@keyframes bub{0%{transform:translateY(0);opacity:0}20%{opacity:1}100%{transform:translateY(-24px);opacity:0}}
+.decor .floaty,#scene .ghosty{animation:floaty 5s ease-in-out infinite}
+@keyframes floaty{50%{transform:translateY(-14px) rotate(-4deg)}}
+.tw{animation:twinkle 1.6s ease-in-out infinite alternate}
+.tw.d2{animation-delay:.5s} .tw.d3{animation-delay:1s}
+@media (min-width:700px){ .decor{width:128px} .decor.l{left:6px} .decor.r{right:6px} }
+
+/* ---------- Halloween ---------- */
+body.theme-halloween{
+  --bg:#1A1030; --surface:#2A1C47; --ink:#FBF4FF; --muted:#BBA9D8; --line:#43306A;
+  --accent:#FF8A1F; --accent-deep:#B9520A; --accent-soft:#4A2B2E;
+  --sun:#FFD447; --sun-deep:#D9A21B; --sun-soft:#40361C;
+  --good:#7BDB4A; --good-deep:#3F8F1E; --good-soft:#1E3A22;
+  --bad:#FF5C8A; --bad-deep:#C2335E; --bad-soft:#47203A;
+  --lock:#3A2C55; --lock-deep:#251A3A; --on-color:#2A1206;
+  --fb-good:var(--good); --fb-bad:var(--bad);
+  --glass:rgba(22,11,44,.8); --foot-good:rgba(23,53,32,.92); --foot-bad:rgba(63,26,51,.92);
+  --helper:#33224F; --sheet:#22163C; --bar-track:#2A1C47;
+  --key-top:#36265E; --key-bot:#2A1C47; --key-edge:#4A3473; --key-shadow:#140A28;
+  --stripes:repeating-linear-gradient(90deg,#FFF4E0 0 18px,#FFD447 18px 37px,#FF8A1F 37px 56px);
+  --sky:linear-gradient(180deg,#0E0720 0%,#1E1042 52%,#3B1C5E 100%);
+  --moon:radial-gradient(circle at 38% 36%,#FFF8DC,#FFE7A0 55%,#F4C95A);
+  --moon-glow:0 0 40px 8px rgba(255,220,120,.35),0 0 150px 60px rgba(255,160,60,.14);
+  --crater:rgba(214,170,80,.38);
+  background-color:#1A1030;
+}
+body.theme-halloween .banner::before{right:-8px;top:-8px;width:92px;height:92px;opacity:.5;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='M100 0L4 4M100 0L22 52M100 0L52 88M100 0L97 100'/%3E%3Cpath d='M78 1Q82 12 84 17Q91 18 99 22M56 2Q63 22 66 34Q82 38 98 44M34 3Q44 32 49 52Q72 60 98 66M14 4Q26 42 33 70Q64 80 97 88'/%3E%3C/svg%3E")}
+body.theme-halloween .node{width:88px;height:74px;color:#4A1C04;border-radius:48% 48% 44% 44% / 56% 56% 46% 46%;
+  background:radial-gradient(ellipse at 50% 26%,rgba(255,255,255,.32),transparent 46%),linear-gradient(90deg,rgba(0,0,0,.24) 0 5%,transparent 16% 29%,rgba(0,0,0,.16) 33% 36%,transparent 40% 60%,rgba(0,0,0,.16) 64% 67%,transparent 71% 84%,rgba(0,0,0,.24) 95%),#FF8A1F;
+  box-shadow:0 7px 0 #A8460A,0 14px 24px rgba(0,0,0,.4)}
+body.theme-halloween .node::after{content:"";position:absolute;top:-11px;left:50%;width:11px;height:17px;margin-left:-5px;border-radius:3px 7px 2px 2px;background:#5B8A2B;transform:rotate(12deg);box-shadow:inset -2px 0 0 #3D5E1C}
+body.theme-halloween .node:active{box-shadow:0 2px 0 #A8460A}
+body.theme-halloween .node.done{background:radial-gradient(ellipse at 50% 55%,#FFC14D,transparent 70%),linear-gradient(90deg,rgba(0,0,0,.2) 0 5%,transparent 16% 29%,rgba(0,0,0,.12) 33% 36%,transparent 40% 60%,rgba(0,0,0,.12) 64% 67%,transparent 71% 84%,rgba(0,0,0,.2) 95%),#FF9A2E;
+  box-shadow:0 7px 0 #A8460A,0 0 30px 8px rgba(255,190,60,.5)}
+body.theme-halloween .node.locked{color:#A493C6;background:radial-gradient(ellipse at 50% 26%,rgba(255,255,255,.14),transparent 46%),linear-gradient(90deg,rgba(0,0,0,.24) 0 5%,transparent 16% 29%,rgba(0,0,0,.16) 33% 36%,transparent 40% 60%,rgba(0,0,0,.16) 64% 67%,transparent 71% 84%,rgba(0,0,0,.24) 95%),#4C3C6E;box-shadow:0 7px 0 #2A1F3D,0 12px 20px rgba(0,0,0,.35)}
+body.theme-halloween .node.locked::after{background:#3A3050;box-shadow:none}
+body.theme-halloween .node-wrap.current .node{outline:none;box-shadow:0 7px 0 #A8460A,0 0 0 7px rgba(255,138,31,.25),0 0 34px 10px rgba(255,138,31,.5)}
+body.theme-halloween .node svg.jack{width:56px;height:40px;filter:drop-shadow(0 0 4px #FFD447)}
+body.theme-halloween #scene .fog{position:absolute;bottom:-4vh;width:90vw;height:20vh;border-radius:50%;background:radial-gradient(closest-side,rgba(215,195,255,.2),transparent);animation:drift 26s ease-in-out infinite alternate}
+body.theme-halloween #scene .f1{left:-30vw}
+body.theme-halloween #scene .f2{left:40vw;animation-duration:34s;animation-direction:alternate-reverse}
+@keyframes drift{to{transform:translateX(26vw)}}
+body.theme-halloween #scene .bat{width:clamp(34px,5vw,56px)}
+body.theme-halloween #scene .bat svg{animation:flap .2s ease-in-out infinite alternate;transform-origin:50% 45%}
+@keyframes flap{to{transform:scaleY(.4)}}
+body.theme-halloween #scene .b1{top:15vh;animation-delay:-3s}
+body.theme-halloween #scene .b2{top:24vh;width:clamp(26px,3.6vw,40px);animation-duration:23s;animation-delay:-11s}
+body.theme-halloween #scene .b3{top:8vh;width:clamp(22px,3vw,34px);animation-duration:28s;animation-delay:-18s}
+body.theme-halloween #scene .ghosty{position:absolute;right:4vw;top:62vh;width:clamp(44px,7vw,84px);opacity:.88}
+#scene .win{animation:flicker 5s infinite}
+#scene .win.w2{animation-delay:1.7s} #scene .win.w3{animation-delay:3.1s}
+@keyframes flicker{0%,100%{opacity:1}46%{opacity:1}48%{opacity:.45}50%{opacity:.95}53%{opacity:.6}56%{opacity:1}}
+
+/* ---------- Christmas ---------- */
+body.theme-christmas{
+  --bg:#0F1E36; --surface:#18304F; --ink:#F4F8FF; --muted:#A9BCD8; --line:#2C4A70;
+  --accent:#E8434E; --accent-deep:#A11D2A; --accent-soft:#40232F;
+  --sun:#FFD166; --sun-deep:#D9A53A; --sun-soft:#3A3524;
+  --good:#3DD68C; --good-deep:#1F9A5D; --good-soft:#163C33;
+  --bad:#FF8AA0; --bad-deep:#C93F5D; --bad-soft:#40213A;
+  --lock:#2A3F5E; --lock-deep:#1A2B44; --on-color:#FFFFFF;
+  --fb-good:var(--good); --fb-bad:var(--bad);
+  --glass:rgba(8,18,38,.8); --foot-good:rgba(18,58,44,.92); --foot-bad:rgba(61,29,48,.92);
+  --helper:#1F3A60; --sheet:#132A47; --bar-track:#18304F;
+  --key-top:#21416B; --key-bot:#18304F; --key-edge:#2F5281; --key-shadow:#081325;
+  --stripes:repeating-linear-gradient(90deg,#FFFFFF 0 14px,#E8434E 14px 28px);
+  --sky:linear-gradient(180deg,#050C1C 0%,#0F2244 55%,#26497A 100%);
+  --moon:radial-gradient(circle at 38% 36%,#FFFFFF,#EEF4FF 55%,#CFDDF2);
+  --moon-glow:0 0 40px 8px rgba(220,235,255,.35),0 0 150px 60px rgba(160,200,255,.14);
+  --crater:rgba(160,180,215,.35);
+  background-color:#0F1E36;
+}
+body.theme-christmas .banner::after{content:"";position:absolute;left:0;right:0;top:-1px;height:13px;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 13'%3E%3Cpath d='M0 0h48v5c-3 0-3 6-8 6s-4-5-8-5-4 7-8 7-4-6-8-6-3 5-7 5-4-6-9-6z' fill='white'/%3E%3C/svg%3E") repeat-x;background-size:48px 13px}
+body.theme-christmas .banner::before{right:4px;top:0;width:46px;height:37px;opacity:.95;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 56'%3E%3Cpath d='M34 34C24 22 10 26 4 16c8 2 10-4 16-2-2-6 4-8 4-14 6 8 14 14 10 34z' fill='%231E7A45' stroke='%23115A30' stroke-width='1.5'/%3E%3Cpath d='M36 34c10-12 24-8 30-18-8 2-10-4-16-2 2-6-4-8-4-14-6 8-14 14-10 34z' fill='%2325914F' stroke='%23115A30' stroke-width='1.5'/%3E%3Ccircle cx='30' cy='38' r='6' fill='%23E8434E'/%3E%3Ccircle cx='41' cy='38' r='6' fill='%23D62839'/%3E%3Ccircle cx='35.5' cy='46' r='6' fill='%23E8434E'/%3E%3Ccircle cx='28' cy='36' r='1.8' fill='white' opacity='.7'/%3E%3Ccircle cx='39' cy='36' r='1.8' fill='white' opacity='.7'/%3E%3C/svg%3E")}
+body.theme-christmas .unit .banner{padding-top:22px}
+body.theme-christmas .node{width:82px;height:82px;border-radius:50%;margin-top:8px;
+  background:radial-gradient(circle at 33% 28%,rgba(255,255,255,.85) 0 6%,rgba(255,255,255,.25) 13%,transparent 32%),radial-gradient(circle at 50% 62%,var(--c) 52%,var(--deep) 100%);
+  box-shadow:0 6px 0 var(--deep),0 14px 24px rgba(0,0,0,.4)}
+body.theme-christmas .node::before{content:"";position:absolute;top:-10px;left:50%;width:24px;height:13px;margin-left:-12px;border-radius:5px 5px 2px 2px;background:linear-gradient(90deg,#9C7124,#FFE7A0 45%,#B8862B)}
+body.theme-christmas .node::after{content:"";position:absolute;top:-21px;left:50%;width:12px;height:13px;margin-left:-6px;border:3px solid #D9B45A;border-radius:50% 50% 40% 40%}
+body.theme-christmas .node:active{box-shadow:0 2px 0 var(--deep)}
+body.theme-christmas .node.done{color:#7A5208;background:radial-gradient(circle at 33% 28%,rgba(255,255,255,.9) 0 6%,rgba(255,255,255,.3) 13%,transparent 32%),radial-gradient(circle at 50% 62%,#FFD166 50%,#C98F22 100%);box-shadow:0 6px 0 #9C6A12,0 0 30px 8px rgba(255,209,102,.5)}
+body.theme-christmas .node.locked{color:#8FA6C6;background:radial-gradient(circle at 33% 28%,rgba(255,255,255,.45) 0 6%,transparent 30%),radial-gradient(circle at 50% 62%,#3A5175 52%,#22344F 100%);box-shadow:0 6px 0 #18283F,0 12px 20px rgba(0,0,0,.35)}
+body.theme-christmas .node.locked::before{background:linear-gradient(90deg,#5B6C86,#9AAAC2 45%,#5B6C86)}
+body.theme-christmas .node.locked::after{border-color:#5B6C86}
+body.theme-christmas .node-wrap.current .node{outline:none;box-shadow:0 6px 0 var(--deep),0 0 0 7px rgba(255,255,255,.16),0 0 34px 10px rgba(255,255,255,.35)}
+body.theme-christmas .node svg.star{width:46px;height:46px;filter:drop-shadow(0 0 3px #FFF6C8)}
+body.theme-christmas .start-tag{top:-50px}
+body.theme-christmas #scene .sleigh{top:13vh;width:clamp(120px,18vw,210px);animation-duration:30s;animation-delay:-6s}
+body.theme-christmas #scene .snow{position:absolute;left:0;top:0;border-radius:50%;animation:fall linear infinite}
+body.theme-christmas #scene .sn1{width:2px;height:2px;animation-duration:34s}
+body.theme-christmas #scene .sn2{width:3px;height:3px;animation-duration:22s}
+body.theme-christmas #scene .sn3{width:5px;height:5px;animation-duration:14s;opacity:.9}
+@keyframes fall{from{transform:translateY(-100vh)}to{transform:translateY(0)}}
+#scene .smoke{transform-box:fill-box;transform-origin:center;animation:smoke 4.5s ease-out infinite}
+#scene .smoke.d2{animation-delay:1.5s} #scene .smoke.d3{animation-delay:3s}
+@keyframes smoke{0%{transform:translate(0,0) scale(.6);opacity:0}20%{opacity:.8}100%{transform:translate(14px,-46px) scale(1.6);opacity:0}}
+#scene .bulb{animation:twinkle 1.2s ease-in-out infinite alternate}
+#scene .bulb:nth-child(2n){animation-delay:.4s} #scene .bulb:nth-child(3n){animation-delay:.8s}
+@media (min-width:700px){ body.theme-christmas .node{width:100px;height:100px} body.theme-halloween .node{width:106px;height:90px} body.theme-halloween .node svg.jack{width:66px;height:48px} body.theme-christmas .node svg.star{width:56px;height:56px} }
+
+body.theme-christmas .btn.good,body.theme-christmas .btn.bad,body.theme-christmas .tile[style*="--sun"] .h,body.theme-christmas .tile[style*="--good"] .h{color:#10233A}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -220,7 +439,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 (function(){
 /* ---------- storage (this device only) ---------- */
 const KEY = 'timesTrail.v2';
-const defaults = () => ({done:{}, xp:0, streak:{count:0,last:null}, daily:{date:null,xp:0}, facts:{}, log:[], exam:{best:null, passed:null, last:null}, sound:true, unlockAll:false, goal:30, name:''});
+const defaults = () => ({done:{}, xp:0, streak:{count:0,last:null}, daily:{date:null,xp:0}, facts:{}, log:[], exam:{best:null, passed:null, last:null}, sound:true, unlockAll:false, goal:30, name:'', theme:'auto', division:true});
 let S = defaults();
 try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(defaults(), JSON.parse(raw)); } catch(e){}
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
@@ -289,8 +508,15 @@ const KINDS = [
   {k:'div', name:'Divide'},
   {k:'mix', name:'Master'}
 ];
-const LESSONS = [];
-ORDER.forEach(n => KINDS.forEach(K => LESSONS.push({id:n+K.k, unit:n, kind:K.k, name:K.name})));
+const divOn = () => S.division !== false;
+const activeKinds = () => divOn() ? KINDS : KINDS.filter(K => K.k !== 'div');
+const pickOp = (pMul=.5) => (!divOn() || Math.random() < pMul) ? '×' : '÷';
+let LESSONS = [];
+function rebuildLessons(){
+  LESSONS = [];
+  ORDER.forEach(n => activeKinds().forEach(K => LESSONS.push({id:n+K.k, unit:n, kind:K.k, name:K.name})));
+}
+rebuildLessons();
 const isUnlocked = (i) => S.unlockAll || i===0 || !!S.done[LESSONS[i-1].id];
 const currentIdx = () => LESSONS.findIndex(l => !S.done[l.id]);
 const UNIT_COLORS = [['var(--accent)','var(--accent-deep)'],['var(--good)','var(--good-deep)'],['var(--bad)','var(--bad-deep)'],['var(--sun)','var(--sun-deep)']];
@@ -327,8 +553,8 @@ function buildExam(){
     const stale = shuffle(all.filter(b => prev.has(factKey([n,b]))));
     const bs = fresh.concat(stale).slice(0,3);
     const a = fact(n, bs[0], '×'); a.table = n; list.push(finalize(a, 'type'));
-    const d = fact(n, bs[1], '÷'); d.table = n; list.push(finalize(d, 'type'));
-    const m = fact(n, bs[2], Math.random()<.5 ? '×' : '÷'); m.table = n; list.push(finalize(m, 'missing'));
+    const d = fact(n, bs[1], divOn() ? '÷' : '×'); d.table = n; list.push(finalize(d, 'type'));
+    const m = fact(n, bs[2], pickOp()); m.table = n; list.push(finalize(m, 'missing'));
   });
   S.exam.lastFacts = list.map(q => factKey(q.f)); save();
   return shuffle(list);
@@ -372,18 +598,18 @@ function makeGenerator(L){
       const earlier = ORDER.slice(Math.max(0, pos-2), pos);
       const useEarlier = earlier.length && step%4===2;
       const t = useEarlier ? earlier[ri(0, earlier.length-1)] : n;
-      const q = fact(t, useEarlier ? ri(1,12) : b, Math.random()<.5 ? '×' : '÷');
+      const q = fact(t, useEarlier ? ri(1,12) : b, pickOp());
       if (useEarlier) q.earlier = t;
       return finalize(q, step%3===1 ? 'missing' : 'type');
     }
     if (L.kind==='weak'){
       const list = weakFacts();
       const f = list.length ? list[step % list.length].f : [ri(2,9), ri(2,9)];
-      return finalize(fact(f[0], f[1], Math.random()<.5?'×':'÷'), step%4===3 ? 'missing' : 'type');
+      return finalize(fact(f[0], f[1], pickOp()), step%4===3 ? 'missing' : 'type');
     }
     // review: only tables she has started
     const t = unlockedTables();
-    const q = fact(t[ri(0,t.length-1)], ri(1,12), Math.random()<.55?'×':'÷');
+    const q = fact(t[ri(0,t.length-1)], ri(1,12), pickOp(.55));
     return finalize(q, step%5===4 ? 'choice' : (step%3===2 ? 'missing' : 'type'));
   };
 }
@@ -405,6 +631,10 @@ const I = {
   bulb:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2zM9 19h6v1.5a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 20.5z"/></svg>',
   send:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 11.5 21 3l-6.5 18-3-7.5zM11.5 13.5 21 3"/></svg>',
   trophy:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V18h3v3H8v-3h3v-3.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zm0 4H6v1a2 2 0 0 0 1 1.7zm10 0v2.7A2 2 0 0 0 18 8V7z"/></svg>',
+  jack:'<svg class="jack" viewBox="0 0 52 36" aria-hidden="true"><path d="M9 15l6-10 6 10zM31 15l6-10 6 10z" fill="#FFE27A"/><path d="M23 21l3-5 3 5z" fill="#FFE27A"/><path d="M7 23Q26 40 45 23L40 25 37 29 34 25 30 29 26 25 22 29 18 25 15 29 12 25Z" fill="#FFE27A"/></svg>',
+  star:'<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.95 6.1 6.7.95-4.85 4.7 1.15 6.65L12 17.45 6.05 20.6l1.15-6.65L2.35 9.25l6.7-.95z" fill="#FFF6C8" stroke="#9C6A12" stroke-width="1.1" stroke-linejoin="round"/></svg>',
+  house:'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 32L30 12l22 20" fill="none" stroke="#1C0F38" stroke-width="5" stroke-linejoin="round"/><path d="M12 60V32l18-16 18 16v28z" fill="#1C0F38"/><path d="M42 60V22h12v38z" fill="#1C0F38"/><path d="M40 24l8-20 8 20z" fill="#1C0F38"/><rect x="18" y="36" width="7" height="8" fill="#FFD447"/><rect x="31" y="36" width="7" height="8" fill="#FFD447"/><rect x="45" y="28" width="6" height="7" rx="3" fill="#FFB347"/><path d="M24 60v-8a4 4 0 0 1 8 0v8z" fill="#FFB347"/></svg>',
+  gift:'<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="9" y="28" width="46" height="30" rx="4" fill="#FFFFFF"/><rect x="6" y="20" width="52" height="12" rx="3" fill="#FFE3E5"/><rect x="28" y="20" width="8" height="38" fill="#FFD166"/><path d="M32 20c-6-11-19-10-16-2 2 4 10 3 16 2zm0 0c6-11 19-10 16-2-2 4-10 3-16 2z" fill="#FFD166"/></svg>',
   target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".8" fill="currentColor"/></svg>'
 };
 function pip(mood='happy', size){
@@ -413,14 +643,15 @@ function pip(mood='happy', size){
     : '<path d="M38 56q12 13 24 0" fill="#3A2A10"/><path d="M43 62q7 4 14 0" fill="#E2554B"/>';
   const brows = mood==='sad' ? '<path d="M30 33l10 4M70 33l-10 4" stroke="#3A2A10" stroke-width="3.5" stroke-linecap="round"/>' : '';
   const sz = size ? `width="${size}" height="${size}"` : 'class="mascot"';
-  return `<svg ${sz} viewBox="0 0 100 100" aria-hidden="true">
+  const T = TH(), hat = T ? T.hat : '';
+  return `<svg ${sz} viewBox="${hat ? '0 -22 100 122' : '0 0 100 100'}" aria-hidden="true">
     <rect x="47" y="2" width="6" height="96" rx="3" fill="var(--lock-deep)"/>
     <ellipse cx="50" cy="52" rx="44" ry="38" fill="#FFB020" stroke="#C98400" stroke-width="3"/>
     <ellipse cx="36" cy="30" rx="12" ry="6" fill="#fff" opacity=".45"/>${brows}
     <circle cx="36" cy="45" r="6" fill="#3A2A10"/><circle cx="64" cy="45" r="6" fill="#3A2A10"/>
     <circle cx="38" cy="43" r="2" fill="#fff"/><circle cx="66" cy="43" r="2" fill="#fff"/>
     <circle cx="25" cy="57" r="5" fill="#F07A55" opacity=".5"/><circle cx="75" cy="57" r="5" fill="#F07A55" opacity=".5"/>
-    ${mouth}</svg>`;
+    ${mouth}${hat}</svg>`;
 }
 function arraySVG(rows, cols){
   const s = 26, pad = 8, w = cols*s + pad*2, h = rows*s + pad*2;
@@ -444,8 +675,231 @@ function tone(freqs, dur=.12, type='triangle'){
     });
   } catch(e){}
 }
-const sfx = { good:()=>tone([660,880]), bad:()=>tone([220,180],.15,'square'), win:()=>tone([523,659,784,1047],.13), tap:()=>tone([440],.04) };
+function glide(){
+  if (!S.sound) return;
+  try {
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime;
+    o.type = 'sine'; o.frequency.setValueAtTime(330,t); o.frequency.linearRampToValueAtTime(560,t+.45); o.frequency.linearRampToValueAtTime(290,t+1.1);
+    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.12,t+.1); g.gain.exponentialRampToValueAtTime(.0001,t+1.2);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t+1.25);
+  } catch(e){}
+}
+const sfx = {
+  good: () => { const n = seasonName(); n==='christmas' ? tone([1319,1760],.08) : n==='halloween' ? tone([587,880],.11) : tone([660,880]); },
+  bad: () => tone([220,180],.15,'square'),
+  win: () => { const n = seasonName();
+    if (n==='halloween'){ tone([392,466,587,784],.14); setTimeout(glide, 650); }
+    else if (n==='christmas') tone([659,659,659,659,659,659,659,784,523,587,659],.13);
+    else tone([523,659,784,1047],.13); },
+  tap: () => tone([440],.04)
+};
 
+/* ---------- seasonal themes ---------- */
+const candyCorn = (x,y,r) => `<g transform="translate(${x} ${y}) rotate(${r})"><path d="M0 -15L12 15Q0 19 -12 15Z" fill="#FFF4E0"/><path d="M-4 -5L4 -5L12 15Q0 19 -12 15Z" fill="#FF8A1F"/><path d="M-8 5L8 5L12 15Q0 19 -12 15Z" fill="#FFD447"/></g>`;
+const GHOST = `<svg viewBox="0 0 60 70" aria-hidden="true"><path d="M30 4C16 4 8 15 8 29v33l7-6 7 6 8-6 8 6 7-6 7 6V29C52 15 44 4 30 4z" fill="#F4EEFF"/><ellipse cx="22" cy="28" rx="3.5" ry="5" fill="#2A1C47"/><ellipse cx="38" cy="28" rx="3.5" ry="5" fill="#2A1C47"/><ellipse cx="30" cy="40" rx="4" ry="3.2" fill="#2A1C47"/><circle cx="16" cy="36" r="3.2" fill="#FF9EC0" opacity=".6"/><circle cx="44" cy="36" r="3.2" fill="#FF9EC0" opacity=".6"/></svg>`;
+const BAT = `<svg viewBox="0 0 80 40" aria-hidden="true"><path d="M40 14c3 0 5 2 6 5 4-6 12-10 22-10-4 3-6 7-5 11-4-2-8-1-10 3-2-3-6-4-9-1-1 3-3 6-4 8-1-2-3-5-4-8-3-3-7-2-9 1-2-4-6-5-10-3 1-4-1-8-5-11 10 0 18 4 22 10 1-3 3-5 6-5z" fill="#140A28" stroke="#5B4A86" stroke-width="1"/><path d="M36.5 13l1.2-5 2.3 4 2.3-4 1.2 5z" fill="#140A28"/><circle cx="38" cy="17.5" r="1.1" fill="#FFD447"/><circle cx="42" cy="17.5" r="1.1" fill="#FFD447"/></svg>`;
+const SLEIGH = `<svg viewBox="0 0 170 56" aria-hidden="true" fill="#0A1426">
+  <path d="M50 26Q86 18 128 23M50 27Q74 26 92 28" stroke="#0A1426" stroke-width="1.2" fill="none"/>
+  <ellipse cx="100" cy="29" rx="12" ry="5.5"/><path d="M92 33l-4 9M95 34l-1 9M106 33l3 9M109 31l6 8" stroke="#0A1426" stroke-width="2.3" stroke-linecap="round"/><path d="M109 25l6-8 5 1-3 6z"/><path d="M115 16l-2-7M115 16l4-6M113 12l-3-3M118 12l3-3" stroke="#0A1426" stroke-width="1.7" stroke-linecap="round" fill="none"/>
+  <ellipse cx="138" cy="26" rx="13" ry="6"/><path d="M129 30l-5 10M132 31l-2 11M146 30l4 10M149 28l7 9" stroke="#0A1426" stroke-width="2.4" stroke-linecap="round"/><path d="M148 22l6-8 5 1-3 6z"/><path d="M153 13l-2-7M153 13l4-6M151 9l-3-3M156 9l3-3" stroke="#0A1426" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <circle cx="160" cy="15.5" r="4" fill="#FF4D4D" opacity=".35"/><circle cx="160" cy="15.5" r="2.2" fill="#FF4D4D"/>
+  <circle cx="19" cy="15" r="9"/><circle cx="35" cy="12" r="5.5"/><path d="M29 16h12l2 10H27z"/><path d="M31 8q4-8 10-2l-3 2z"/>
+  <path d="M6 22h42l6-8h6l-4 15q-2 8-12 8H15q-8 0-10-8z"/>
+  <path d="M2 43h53q6 0 8-5" stroke="#0A1426" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M15 37v6M45 37v6" stroke="#0A1426" stroke-width="2.6"/>
+</svg>`;
+
+const HALLOWEEN_GROUND = `<svg class="ground" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+ <defs><radialGradient id="pglow"><stop offset="0" stop-color="#FFB347" stop-opacity=".75"/><stop offset="1" stop-color="#FFB347" stop-opacity="0"/></radialGradient></defs>
+ <path d="M0 190C200 150 380 170 520 160S700 118 860 140S1100 170 1200 165V300H0Z" fill="#2B1650"/>
+ <g transform="translate(640 52)"><path d="M8 86V42L40 16l32 26v44z" fill="#1C0F38"/><path d="M60 86V34h20v52z" fill="#1C0F38"/><path d="M56 36L70 4l14 32z" fill="#1C0F38"/><path d="M2 46L40 12l36 32" fill="none" stroke="#1C0F38" stroke-width="6" stroke-linejoin="round"/>
+  <rect class="win" x="18" y="52" width="10" height="12" rx="1" fill="#FFD447"/><rect class="win w2" x="44" y="52" width="10" height="12" rx="1" fill="#FFD447"/><rect class="win w3" x="66" y="44" width="8" height="11" rx="4" fill="#FFB347"/><path d="M32 86V72a6 6 0 0 1 12 0v14z" fill="#0F0722"/></g>
+ <g stroke="#120A24" stroke-linecap="round" fill="none" transform="translate(110 238)"><path d="M0 0C4-40 0-70-10-100" stroke-width="12"/><path d="M-4-60C-28-70-36-86-42-100M-2-46C18-56 30-72 36-90M-8-86C-14-100-12-114-6-124M-40-96C-48-98-54-94-58-88M34-86C42-90 50-88 56-82" stroke-width="6"/></g>
+ <g stroke="#120A24" stroke-linecap="round" fill="none" transform="translate(1100 232) scale(-1 1)"><path d="M0 0C4-40 0-70-10-100" stroke-width="12"/><path d="M-4-60C-28-70-36-86-42-100M-2-46C18-56 30-72 36-90M-8-86C-14-100-12-114-6-124" stroke-width="6"/></g>
+ <path d="M0 236C140 210 280 214 400 230S640 208 820 224S1080 208 1200 220V300H0Z" fill="#170C2E"/>
+ <g fill="#2E2350"><path d="M420 234v-28a13 13 0 0 1 26 0v28z"/><path d="M458 236v-18a9 9 0 0 1 18 0v18z"/><path d="M880 228v-26a12 12 0 0 1 24 0v26z"/><rect x="922" y="198" width="7" height="32"/><rect x="915" y="206" width="21" height="6"/></g>
+ <text x="433" y="224" font-size="8" font-weight="800" text-anchor="middle" fill="#170C2E" font-family="Fredoka, Nunito, sans-serif">BOO</text>
+ <g stroke="#120A24" stroke-width="5" stroke-linecap="round"><path d="M520 230v-24M540 228v-27M560 227v-25M580 226v-27M600 226v-25M510 214h100"/></g>
+ <g transform="translate(360 224)"><circle r="36" fill="url(#pglow)"/><ellipse rx="16" ry="12" fill="#FF8A1F"/><path d="M0 -12q1-6 5-7" stroke="#3D6B2A" stroke-width="3" fill="none"/><path d="M-9 -3l3-5 3 5zM3 -3l3-5 3 5zM-9 3q9 7 18 0l-3 1-3 2-3-2-3 2-3-2z" fill="#FFE27A"/></g>
+ <g transform="translate(792 222)"><circle r="30" fill="url(#pglow)"/><ellipse rx="13" ry="10" fill="#FF8A1F"/><path d="M0 -10q1-5 4-6" stroke="#3D6B2A" stroke-width="3" fill="none"/><path d="M-7 -2l2.5-4 2.5 4zM2.5 -2l2.5-4 2.5 4zM-7 2.5q7 6 14 0z" fill="#FFE27A"/></g>
+</svg>`;
+
+const CHRISTMAS_GROUND = `<svg class="ground" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+ <defs>
+  <symbol id="pine" viewBox="0 0 60 100"><rect x="26" y="82" width="8" height="18" fill="#3A2416"/><path d="M30 0L52 34H40L58 60H44L60 86H0L16 60H2L20 34H8z" fill="#15452F"/><path d="M30 0L40 15 34 13 30 18 26 13 20 15zM18 36L24 34 30 39 36 34 42 36 40 40 30 42 20 40zM14 62L22 60 30 65 38 60 46 62 44 66 30 68 16 66z" fill="#EAF2FF"/></symbol>
+  <radialGradient id="wglow"><stop offset="0" stop-color="#FFD98A" stop-opacity=".7"/><stop offset="1" stop-color="#FFD98A" stop-opacity="0"/></radialGradient>
+ </defs>
+ <path d="M0 185C200 150 380 165 520 158S700 120 860 135S1100 165 1200 160V300H0Z" fill="#B9CDE6"/>
+ <use href="#pine" x="120" y="112" width="40" height="66"/><use href="#pine" x="380" y="98" width="40" height="66"/><use href="#pine" x="432" y="108" width="32" height="54"/><use href="#pine" x="800" y="90" width="44" height="72"/><use href="#pine" x="1040" y="102" width="44" height="72"/>
+ <g transform="translate(600 62)">
+  <circle cx="60" cy="62" r="80" fill="url(#wglow)" opacity=".55"/>
+  <rect x="78" y="2" width="14" height="30" fill="#4A2A1E"/><rect x="76" y="0" width="18" height="5" fill="#F4F8FF"/>
+  <circle class="smoke" cx="85" cy="-8" r="6" fill="#DDE6F3"/><circle class="smoke d2" cx="85" cy="-8" r="7" fill="#DDE6F3"/><circle class="smoke d3" cx="85" cy="-8" r="8" fill="#DDE6F3"/>
+  <path d="M14 40h92v52H14z" fill="#6B3A26"/><path d="M14 52h92M14 64h92M14 76h92" stroke="#5A2F1F" stroke-width="2"/>
+  <path d="M2 46L60 6l58 40z" fill="#3E2016"/><path d="M2 46L60 6l58 40-7 5L60 15 9 51z" fill="#F4F8FF"/>
+  <rect x="24" y="56" width="18" height="16" fill="#FFD166"/><rect x="78" y="56" width="18" height="16" fill="#FFD166"/><path d="M33 56v16M24 64h18M87 56v16M78 64h18" stroke="#6B3A26" stroke-width="2"/>
+  <rect x="50" y="60" width="20" height="32" rx="3" fill="#3E2016"/><circle cx="60" cy="70" r="5" fill="none" stroke="#2FBF71" stroke-width="3"/><circle cx="60" cy="75" r="1.8" fill="#E8434E"/>
+  <g><circle class="bulb" cx="16" cy="50" r="3" fill="#E8434E"/><circle class="bulb" cx="27" cy="50" r="3" fill="#FFD166"/><circle class="bulb" cx="38" cy="50" r="3" fill="#3DD68C"/><circle class="bulb" cx="49" cy="50" r="3" fill="#6EC3FF"/><circle class="bulb" cx="60" cy="50" r="3" fill="#E8434E"/><circle class="bulb" cx="71" cy="50" r="3" fill="#FFD166"/><circle class="bulb" cx="82" cy="50" r="3" fill="#3DD68C"/><circle class="bulb" cx="93" cy="50" r="3" fill="#6EC3FF"/><circle class="bulb" cx="104" cy="50" r="3" fill="#E8434E"/></g>
+ </g>
+ <path d="M0 232C140 206 280 214 400 226S640 204 820 220S1080 206 1200 214V300H0Z" fill="#EAF2FF"/>
+ <use href="#pine" x="20" y="150" width="56" height="92"/><use href="#pine" x="300" y="150" width="56" height="92"/><use href="#pine" x="512" y="164" width="44" height="72"/><use href="#pine" x="950" y="144" width="60" height="98"/><use href="#pine" x="1120" y="150" width="56" height="92"/>
+ <g transform="translate(838 134)">
+  <path d="M8 46L-8 34M36 46l16-12" stroke="#6B3A26" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="22" cy="68" r="22" fill="#FFFFFF" stroke="#C9D8EC" stroke-width="2"/><circle cx="22" cy="38" r="16" fill="#FFFFFF" stroke="#C9D8EC" stroke-width="2"/><circle cx="22" cy="14" r="12" fill="#FFFFFF" stroke="#C9D8EC" stroke-width="2"/>
+  <rect x="10" y="2" width="24" height="4" fill="#1A1A2E"/><rect x="13" y="-12" width="18" height="15" fill="#1A1A2E"/><rect x="13" y="-2" width="18" height="3" fill="#E8434E"/>
+  <circle cx="18" cy="12" r="1.6" fill="#1A1A2E"/><circle cx="26" cy="12" r="1.6" fill="#1A1A2E"/><path d="M22 15l9 2-9 2z" fill="#FF8A1F"/>
+  <path d="M10 24h24v5H10z" fill="#E8434E"/><path d="M27 28h5v12h-5z" fill="#E8434E"/><circle cx="22" cy="38" r="1.8" fill="#1A1A2E"/><circle cx="22" cy="46" r="1.8" fill="#1A1A2E"/>
+ </g>
+</svg>`;
+
+const DECOR_H = [
+ `<svg viewBox="0 0 90 82"><path d="M10 78V36a16 16 0 0 1 32 0v42z" fill="#4B3B6B"/><path d="M14 78V38a12 12 0 0 1 24 0v40z" fill="#5C4A84"/><text x="26" y="54" font-size="10" font-weight="800" text-anchor="middle" fill="#2A1C47" font-family="Fredoka, Nunito, sans-serif">BOO</text><path d="M52 80V50a12 12 0 0 1 24 0v30z" fill="#4B3B6B"/><path d="M64 54v12M59 59h10" stroke="#2A1C47" stroke-width="3" stroke-linecap="round"/><path d="M0 82Q8 70 16 77Q24 68 32 76Q42 66 52 75Q60 68 68 76Q78 69 90 82Z" fill="#2E5A24"/></svg>`,
+ `<svg viewBox="0 0 80 80">${candyCorn(22,58,-16)}${candyCorn(48,62,12)}${candyCorn(34,34,4)}<g transform="translate(62 30) rotate(-20)"><path d="M-10 0l-9-7v14zM10 0l9-7v14z" fill="#A66BFF"/><circle r="9" fill="#B98AFF"/><path d="M-4 -8l-3 16M4 -8l-3 16" stroke="#7E4FD6" stroke-width="2.5"/></g></svg>`,
+ `<svg viewBox="0 0 80 80"><path d="M54 74Q74 70 70 52Q67 42 74 36" fill="none" stroke="#6B5A90" stroke-width="9" stroke-linecap="round"/><path d="M54 74Q74 70 70 52Q67 42 74 36" fill="none" stroke="#0E0819" stroke-width="5" stroke-linecap="round"/><ellipse cx="38" cy="60" rx="20" ry="17" fill="#0E0819" stroke="#6B5A90" stroke-width="2"/><path d="M21 34L22 14L32 24Q38 22 44 24L54 14L55 34Q56 46 38 47Q20 46 21 34Z" fill="#0E0819" stroke="#6B5A90" stroke-width="2"/><ellipse class="tw" cx="31" cy="33" rx="3.6" ry="4.6" fill="#FFD447"/><ellipse class="tw" cx="45" cy="33" rx="3.6" ry="4.6" fill="#FFD447"/><rect x="30.3" y="29.5" width="1.4" height="7" rx=".7" fill="#0E0819"/><rect x="44.3" y="29.5" width="1.4" height="7" rx=".7" fill="#0E0819"/><path d="M36 39l2 2 2-2" stroke="#FF9EC0" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M26 40h-9M26 42l-8 3M50 40h9M50 42l8 3" stroke="#6B5A90" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+ `<svg viewBox="0 0 80 80"><path d="M18 78l4-8M62 78l-4-8" stroke="#2B2140" stroke-width="4" stroke-linecap="round"/><ellipse cx="40" cy="54" rx="28" ry="22" fill="#1A1228" stroke="#6B5A90" stroke-width="2"/><ellipse cx="40" cy="35" rx="27" ry="7" fill="#2B2140"/><ellipse cx="40" cy="35" rx="22" ry="5" fill="#7BDB4A"/><ellipse cx="34" cy="34" rx="7" ry="1.6" fill="#B5F58A"/><path d="M20 38q2 6 0 10" stroke="#7BDB4A" stroke-width="3" stroke-linecap="round" fill="none"/><circle class="bub" cx="32" cy="30" r="3" fill="#9CF06A"/><circle class="bub d2" cx="46" cy="29" r="2.4" fill="#9CF06A"/><circle class="bub d3" cx="40" cy="31" r="2" fill="#9CF06A"/></svg>`,
+ `<svg viewBox="0 0 80 90"><g class="spin"><path d="M40 -60V44" stroke="#C9B8E8" stroke-width="1.2"/><g stroke="#0E0819" stroke-width="2.6" stroke-linecap="round" fill="none"><path d="M33 50l-10-8-6 4M33 54l-12-2-6 6M33 58l-11 4-4 8M35 61l-6 10-2 7M47 50l10-8 6 4M47 54l12-2 6 6M47 58l11 4 4 8M45 61l6 10 2 7"/></g><ellipse cx="40" cy="57" rx="10" ry="11" fill="#0E0819" stroke="#6B5A90" stroke-width="1.6"/><circle cx="40" cy="45" r="6.5" fill="#0E0819" stroke="#6B5A90" stroke-width="1.6"/><circle cx="37.5" cy="45" r="1.8" fill="#fff"/><circle cx="42.5" cy="45" r="1.8" fill="#fff"/><path d="M37 49q3 2 6 0" stroke="#FF9EC0" stroke-width="1.2" fill="none"/></g></svg>`,
+ `<div class="floaty">${GHOST}</div>`
+];
+const DECOR_C = [
+ `<svg viewBox="0 0 80 80"><rect x="40" y="28" width="32" height="48" rx="3" fill="#2FBF71"/><rect x="53" y="28" width="6" height="48" fill="#F4F8FF"/><rect x="8" y="42" width="40" height="34" rx="3" fill="#E8434E"/><rect x="25" y="42" width="6" height="34" fill="#FFD166"/><rect x="8" y="54" width="40" height="6" fill="#FFD166"/><path d="M28 42c-8-10-18-6-12 0 4 3 9 1 12 0zm0 0c8-10 18-6 12 0-4 3-9 1-12 0z" fill="#FFD166"/><path d="M56 28c-6-8-14-5-9 0 3 2 7 1 9 0zm0 0c6-8 14-5 9 0-3 2-7 1-9 0z" fill="#F4F8FF"/></svg>`,
+ `<svg viewBox="0 0 80 80"><path d="M44 78V28a13 13 0 0 0-26 0v4" fill="none" stroke="#FFFFFF" stroke-width="11" stroke-linecap="round"/><path d="M44 78V28a13 13 0 0 0-26 0v4" fill="none" stroke="#E8434E" stroke-width="11" stroke-dasharray="6 8"/><path d="M38 58l-10-5v10zM50 58l10-5v10z" fill="#2FBF71"/><circle cx="44" cy="58" r="3.4" fill="#1F9A5D"/></svg>`,
+ `<svg viewBox="0 0 80 80"><path d="M40 8a11 11 0 0 1 11 11c0 4-2 7-5 9h2c6 0 18 2 20 7 1 3-2 5-6 5H54l2 14 10 14c2 3 0 6-4 6-2 0-4-1-5-3l-9-11h-4l-9 11c-1 2-3 3-5 3-4 0-6-3-4-6l10-14 2-14H23c-4 0-7-2-6-5 2-5 14-7 20-7h2c-3-2-5-5-5-9A11 11 0 0 1 40 8z" fill="#C0743F"/><circle cx="36" cy="17" r="1.9" fill="#3A1E0E"/><circle cx="44" cy="17" r="1.9" fill="#3A1E0E"/><path d="M35 22q5 4 10 0" stroke="#FFFFFF" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="40" cy="36" r="2.4" fill="#E8434E"/><circle cx="40" cy="44" r="2.4" fill="#2FBF71"/><path d="M21 37l3-2 3 2 3-2M50 35l3 2 3-2 3 2M30 70l3-2 3 2M44 70l3-2 3 2" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>`,
+ `<svg viewBox="0 0 80 80"><rect x="36" y="64" width="8" height="13" fill="#6B3A26"/><path d="M40 10L58 34H50L64 52H54L68 68H12L26 52H16L30 34H22z" fill="#1E9E5A"/><path d="M30 34q10 6 20 0M24 52q16 8 32 0" stroke="#FFD166" stroke-width="2" fill="none"/><circle class="tw" cx="34" cy="28" r="2.6" fill="#E8434E"/><circle class="tw d2" cx="46" cy="40" r="2.6" fill="#6EC3FF"/><circle class="tw d3" cx="30" cy="46" r="2.6" fill="#FFD166"/><circle class="tw" cx="50" cy="60" r="2.6" fill="#E8434E"/><circle class="tw d2" cx="26" cy="62" r="2.6" fill="#FFFFFF"/><circle class="tw d3" cx="42" cy="56" r="2.6" fill="#FFD166"/><path class="tw" d="M40 1l2.6 5.4 6 .8-4.4 4.2 1 6L40 14.6l-5.2 2.8 1-6-4.4-4.2 6-.8z" fill="#FFD166"/></svg>`,
+ `<svg viewBox="0 0 80 80"><path d="M44 14V4a5 5 0 0 0-10 0" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/><path d="M44 14V4a5 5 0 0 0-10 0" fill="none" stroke="#E8434E" stroke-width="4" stroke-dasharray="2.5 3"/><path d="M28 20h24v30c0 4 2 6 6 8l6 3c6 3 6 13-2 14-4 1-8-1-12-3l-14-7c-5-3-8-7-8-13z" fill="#E8434E"/><path d="M50 62l6 3c6 3 6 13-2 14-4 1-8-1-12-3l-2-1c2-6 6-11 10-13z" fill="#F4F8FF" opacity=".9"/><rect x="24" y="10" width="32" height="12" rx="6" fill="#F4F8FF"/><path d="M34 34l2 2-2 2-2-2zM42 42l2 2-2 2-2-2zM32 48l2 2-2 2-2-2z" fill="#FFD166"/></svg>`,
+ `<svg viewBox="0 0 80 80"><path d="M24 54L8 44M56 54l16-10" stroke="#6B3A26" stroke-width="3" stroke-linecap="round"/><circle cx="40" cy="60" r="17" fill="#F4F8FF"/><circle cx="40" cy="34" r="12" fill="#F4F8FF"/><rect x="29" y="20" width="22" height="4" fill="#1A1A2E"/><rect x="32" y="6" width="16" height="15" fill="#1A1A2E"/><rect x="32" y="16" width="16" height="3" fill="#E8434E"/><circle cx="36" cy="32" r="1.6" fill="#1A1A2E"/><circle cx="44" cy="32" r="1.6" fill="#1A1A2E"/><path d="M40 35l9 2-9 2z" fill="#FF8A1F"/><path d="M29 43h22v5H29z" fill="#E8434E"/><path d="M44 47h5v12h-5z" fill="#E8434E"/><circle cx="40" cy="56" r="1.8" fill="#1A1A2E"/><circle cx="40" cy="64" r="1.8" fill="#1A1A2E"/></svg>`
+];
+
+const THEMES = {
+  halloween: {
+    months:[9], label:'Halloween',
+    units:[['#FF8A1F','#B9520A','#2A1206'],['#7BDB4A','#3F8F1E','#10280A'],['#A66BFF','#6533C2','#FFFFFF'],['#FFD447','#C29412','#2A1E02']],
+    exam:['#7A3FC0','#3E1C6E','#FFFFFF'], examTitle:'The Haunted House', examIcon:'house',
+    examLine:'Make it all the way through the Haunted House!',
+    hat:`<path d="M15 21Q52 9 87 21Q52 30 15 21Z" fill="#2B1840"/><path d="M30 19Q42 6 49 -18Q59 0 72 19Q52 13 30 19Z" fill="#3B2160"/><path d="M31 17Q51 10 71 17L72 21Q51 14 30 21Z" fill="#FF8A1F"/><rect x="46" y="11.5" width="8" height="7" rx="1" fill="none" stroke="#FFD447" stroke-width="2"/>`,
+    done:'jack', praise:['Spooktacular!','Boo-tiful!','Fang-tastic!','Wicked smart!','Hocus pocus, correct!'], fire:'Witchy fast!',
+    wrong:'Eek! Not quite', perfect:'Perfectly spooky!', complete:'Spooktacular!',
+    sky:`<div class="fog f1"></div><div class="fog f2"></div><div class="flyer bat b1">${BAT}</div><div class="flyer bat b2">${BAT}</div><div class="flyer bat b3">${BAT}</div><div class="ghosty">${GHOST}</div>`,
+    ground:HALLOWEEN_GROUND, decor:DECOR_H, fx:['corn','corn','wrap','pump','star'],
+    colors:['#FF8A1F','#FFD447','#7BDB4A','#B98AFF','#FF5C8A']
+  },
+  christmas: {
+    months:[10,11], label:'Christmas',
+    units:[['#D62839','#8E1220','#FFFFFF'],['#1E9E5A','#0F6B3A','#FFFFFF'],['#FFD166','#C9932A','#3A2A06'],['#5DADEC','#2D73B3','#08233D']],
+    exam:['#C81E2E','#7E0F1A','#FFFFFF'], examTitle:'Santa’s Workshop', examIcon:'gift',
+    examLine:'Help Santa finish every toy in his workshop!',
+    hat:`<path d="M24 20Q36 -16 66 -12Q84 -8 84 10L76 20Z" fill="#E8434E"/><path d="M60 -10Q78 -8 83 6" stroke="#B22433" stroke-width="3" fill="none"/><circle cx="84" cy="11" r="8" fill="#FFFFFF"/><rect x="18" y="13" width="66" height="13" rx="6.5" fill="#FFFFFF"/>`,
+    done:'star', praise:['Ho ho ho!','Snow-tastic!','You sleighed it!','Tree-mendous!','Jolly good!'], fire:'Faster than Rudolph!',
+    wrong:'Brrr! Not quite', perfect:'Holly jolly perfect!', complete:'Jolly good!',
+    sky:`<div class="snow sn1"></div><div class="snow sn2"></div><div class="flyer sleigh">${SLEIGH}</div><div class="snow sn3"></div>`,
+    ground:CHRISTMAS_GROUND, decor:DECOR_C, fx:['flake','flake','star','ball','gift'],
+    colors:['#FFFFFF','#FFD166','#E8434E','#3DD68C','#6EC3FF']
+  }
+};
+function seasonName(){
+  const t = S.theme || 'auto';
+  if (t==='classic') return null;
+  if (THEMES[t]) return t;
+  const m = new Date().getMonth();
+  return Object.keys(THEMES).find(k => THEMES[k].months.includes(m)) || null;
+}
+const TH = () => THEMES[seasonName()] || null;
+const unitColors = () => TH() ? TH().units : UNIT_COLORS.map(x => [x[0], x[1], 'var(--on-color)']);
+
+function starShadows(n, maxY, glow){
+  const a = [];
+  for (let i=0;i<n;i++) a.push(`${(Math.random()*100).toFixed(1)}vw ${(Math.random()*maxY).toFixed(1)}vh 0 ${Math.random()<.25?glow:0}px rgba(255,255,255,${(.45+Math.random()*.55).toFixed(2)})`);
+  return a.join(',');
+}
+function snowShadows(n){
+  const a = [];
+  for (let i=0;i<n;i++){
+    const x = (Math.random()*100).toFixed(1), y = Math.random()*100, o = (.5+Math.random()*.5).toFixed(2);
+    a.push(`${x}vw ${y.toFixed(1)}vh 0 0 rgba(255,255,255,${o})`, `${x}vw ${(y+100).toFixed(1)}vh 0 0 rgba(255,255,255,${o})`);
+  }
+  return a.join(',');
+}
+function applySeason(view){
+  const name = seasonName(), b = document.body;
+  b.classList.toggle('seasonal', !!name);
+  Object.keys(THEMES).forEach(k => b.classList.toggle('theme-'+k, k===name));
+  if (view) b.dataset.view = view;
+  let sc = document.getElementById('scene');
+  if (sc && sc.dataset.theme !== name){ sc.remove(); sc = null; }
+  if (name && !sc){
+    sc = document.createElement('div');
+    sc.id = 'scene'; sc.dataset.theme = name; sc.setAttribute('aria-hidden','true');
+    sc.innerHTML = `<div class="stars s1"></div><div class="stars s2"></div><div class="moon"><i></i><i></i><i></i></div>${THEMES[name].sky}${THEMES[name].ground}`;
+    b.prepend(sc);
+    sc.querySelector('.s1').style.boxShadow = starShadows(80, 70, .6);
+    sc.querySelector('.s2').style.boxShadow = starShadows(24, 60, 1.2);
+    [['.sn1',110],['.sn2',55],['.sn3',22]].forEach(([sel,n]) => { const el = sc.querySelector(sel); if (el) el.style.boxShadow = snowShadows(n); });
+  }
+}
+function decorFor(u){
+  const T = TH(); if (!T) return null;
+  const d = document.createElement('div');
+  d.className = 'decor ' + (u%2 ? 'r' : 'l');
+  d.setAttribute('aria-hidden','true');
+  d.innerHTML = T.decor[u % T.decor.length];
+  return d;
+}
+
+/* candy / snow bursts */
+function burst(x, y, n, rain){
+  try { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch(e){}
+  const T = TH();
+  const cv = document.createElement('canvas'); cv.className = 'fx'; document.body.appendChild(cv);
+  const dpr = Math.min(2, window.devicePixelRatio||1), W = innerWidth, H = innerHeight;
+  cv.width = W*dpr; cv.height = H*dpr;
+  const g = cv.getContext('2d'); g.scale(dpr,dpr);
+  const kinds = T ? T.fx : ['rect'];
+  const cols = T ? T.colors : ['#2F6BE0','#1FA35B','#FFB020','#DE444A','#9B6BFF'];
+  const P = [...Array(n)].map(() => ({
+    x: rain ? Math.random()*W : x, y: rain ? -30 - Math.random()*H*.7 : y,
+    vx: rain ? (Math.random()-.5)*1.4 : (Math.random()-.5)*10, vy: rain ? 2+Math.random()*3 : -4-Math.random()*8,
+    r: Math.random()*6.28, vr: (Math.random()-.5)*.25, s: 9+Math.random()*9,
+    k: kinds[Math.floor(Math.random()*kinds.length)], c: cols[Math.floor(Math.random()*cols.length)]
+  }));
+  const life = rain ? 3400 : 1100, t0 = performance.now();
+  function shape(p){
+    const s = p.s;
+    g.save(); g.translate(p.x, p.y); g.rotate(p.r);
+    if (p.k==='corn'){
+      g.beginPath(); g.moveTo(0,-s); g.lineTo(s*.75,s*.8); g.quadraticCurveTo(0,s*1.05,-s*.75,s*.8); g.closePath(); g.save(); g.clip();
+      g.fillStyle='#FFF4E0'; g.fillRect(-s,-s,2*s,2*s); g.fillStyle='#FF8A1F'; g.fillRect(-s,-s/3,2*s,2*s); g.fillStyle='#FFD447'; g.fillRect(-s,s*.35,2*s,s); g.restore();
+    } else if (p.k==='wrap'){
+      g.fillStyle=p.c; g.beginPath(); g.arc(0,0,s*.45,0,6.29); g.fill();
+      g.beginPath(); g.moveTo(-s*.4,0); g.lineTo(-s,-s*.4); g.lineTo(-s,s*.4); g.closePath(); g.moveTo(s*.4,0); g.lineTo(s,-s*.4); g.lineTo(s,s*.4); g.closePath(); g.fill();
+    } else if (p.k==='pump'){
+      g.fillStyle='#FF8A1F'; g.beginPath(); g.ellipse(0,0,s*.6,s*.48,0,0,6.29); g.fill(); g.fillStyle='#3D6B2A'; g.fillRect(-1.5,-s*.7,3,s*.3);
+    } else if (p.k==='star'){
+      g.fillStyle=p.c; g.beginPath();
+      for (let i=0;i<10;i++){ const a=i*Math.PI/5-Math.PI/2, rr=i%2?s*.25:s*.6; g.lineTo(Math.cos(a)*rr, Math.sin(a)*rr); }
+      g.closePath(); g.fill();
+    } else if (p.k==='flake'){
+      g.strokeStyle='#FFFFFF'; g.lineWidth=2; g.lineCap='round'; g.beginPath();
+      for (let i=0;i<6;i++){ const a=i*Math.PI/3; g.moveTo(0,0); g.lineTo(Math.cos(a)*s*.55, Math.sin(a)*s*.55); }
+      g.stroke();
+    } else if (p.k==='ball'){
+      g.fillStyle=p.c; g.beginPath(); g.arc(0,0,s*.45,0,6.29); g.fill(); g.fillStyle='rgba(255,255,255,.7)'; g.beginPath(); g.arc(-s*.15,-s*.15,s*.12,0,6.29); g.fill(); g.fillStyle='#FFD166'; g.fillRect(-s*.15,-s*.6,s*.3,s*.18);
+    } else if (p.k==='gift'){
+      g.fillStyle=p.c==='#FFFFFF'?'#E8434E':p.c; g.fillRect(-s*.45,-s*.4,s*.9,s*.8); g.fillStyle='#FFD166'; g.fillRect(-s*.08,-s*.4,s*.16,s*.8); g.fillRect(-s*.45,-s*.08,s*.9,s*.16);
+    } else {
+      g.fillStyle=p.c; g.fillRect(-s/2,-s/4,s,s/2);
+    }
+    g.restore();
+  }
+  function frame(now){
+    const t = now - t0;
+    g.clearRect(0,0,W,H);
+    g.globalAlpha = t > life*.7 ? Math.max(0, 1-(t-life*.7)/(life*.3)) : 1;
+    P.forEach(p => { p.vy += rain ? .04 : .34; p.x += p.vx; p.y += p.vy; p.r += p.vr; shape(p); });
+    if (t < life) requestAnimationFrame(frame); else cv.remove();
+  }
+  requestAnimationFrame(frame);
+}
+
+const doneFace = () => { const T = TH(); return !T ? I.check : T.done==='jack' ? I.jack : I.star; };
 /* ---------- shared UI ---------- */
 let toastT;
 function toast(msg){
@@ -466,6 +920,9 @@ document.addEventListener('keydown', e => { if (keyHandler) keyHandler(e); });
 /* ---------- HOME ---------- */
 function renderHome(scrollToCurrent=true){
   setKeys(null);
+  rebuildLessons();
+  applySeason('home');
+  const KS = activeKinds();
   const cur = currentIdx();
   const weakCount = weakFacts().length;
   const txp = todayXP();
@@ -491,22 +948,22 @@ function renderHome(scrollToCurrent=true){
     </main></div>`);
   const units = scr.querySelector('#units');
   ORDER.forEach((n, u) => {
-    const [c,d] = UNIT_COLORS[u%4];
-    const firstIdx = u*4;
+    const [c,d,bt] = unitColors()[u%4];
+    const firstIdx = u*KS.length;
     const unitLocked = !isUnlocked(firstIdx);
-    const doneCount = KINDS.filter(K=>S.done[n+K.k]).length;
-    const sec = $(`<section class="unit" style="--c:${c};--deep:${d}">
-      <div class="banner ${unitLocked?'locked':''}" style="background:${c}">
-        <div><div class="eyebrow">Unit ${u+1} · ${doneCount}/4 done</div><h2>The ${n}s</h2><p class="tipline">${esc(TIPS[n])}</p></div>
+    const doneCount = KS.filter(K=>S.done[n+K.k]).length;
+    const sec = $(`<section class="unit" style="--c:${c};--deep:${d};--bt:${bt}">
+      <div class="banner ${unitLocked?'locked':''}">
+        <div><div class="eyebrow">Unit ${u+1} · ${doneCount}/${KS.length} done</div><h2>The ${n}s</h2><p class="tipline">${esc(TIPS[n])}</p></div>
         <div class="big">×${n}</div>
       </div><div class="trail"></div></section>`);
     const trail = sec.querySelector('.trail');
-    KINDS.forEach((K,j) => {
+    KS.forEach((K,j) => {
       const i = firstIdx + j, L = LESSONS[i];
       const unlocked = isUnlocked(i), done = !!S.done[L.id];
       const off = [-55, 0, 55, 0][j] * (u%2 ? -1 : 1);
-      const face = !unlocked ? I.lock : done ? I.check : K.k==='learn' ? I.bulb : K.k==='mul' ? '×' : K.k==='div' ? '÷' : '<span class="sm">×÷</span>';
-      const w = $(`<div class="node-wrap ${i===cur?'current':''}" style="transform:translateX(${off}px)">
+      const face = !unlocked ? I.lock : done ? doneFace() : K.k==='learn' ? I.bulb : K.k==='mul' ? '×' : K.k==='div' ? '÷' : '<span class="sm">×÷</span>';
+      const w = $(`<div class="node-wrap ${i===cur?'current':''}" style="--o:${off}">
         ${i===cur?'<div class="start-tag">START</div>':''}
         <button class="node ${!unlocked?'locked':''} ${done?'done':''}" aria-label="The ${n}s, ${K.name}${done?', done':''}${unlocked?'':', locked'}">${face}</button>
         <div class="node-label">${K.name.toUpperCase()}</div></div>`);
@@ -516,16 +973,18 @@ function renderHome(scrollToCurrent=true){
       };
       trail.appendChild(w);
     });
+    const dec = decorFor(u); if (dec) trail.appendChild(dec);
     units.appendChild(sec);
   });
   const examUnlocked = S.unlockAll || ORDER.every(n => S.done[n+'mix']);
   const examCurrent = cur===-1 && !S.exam.passed;
   const examLine = S.exam.best===null ? (examUnlocked ? 'All 12 tables mixed together.' : 'Unlocks after every Master lesson.')
     : `Best score ${S.exam.best}%${S.exam.passed ? ' · Passed' : ` · Need ${EXAM_PASS}% to pass`}`;
-  const ex = $(`<section class="unit exam" style="--c:var(--accent-deep);--deep:var(--ink)">
-    <div class="banner ${examUnlocked?'':'locked'}" style="background:var(--accent-deep)">
-      <div><div class="eyebrow">Final exam · ${EXAM_N} questions</div><h2>All 12 tables</h2><p class="tipline">${examLine}</p></div>
-      <div class="big">${I.trophy}</div>
+  const TT = TH(), [ec,ed,eb] = TT ? TT.exam : ['var(--accent-deep)','var(--ink)','var(--on-color)'];
+  const ex = $(`<section class="unit exam" style="--c:${ec};--deep:${ed};--bt:${eb}">
+    <div class="banner ${examUnlocked?'':'locked'}">
+      <div><div class="eyebrow">Final exam · ${EXAM_N} questions</div><h2>${TT ? TT.examTitle : 'All 12 tables'}</h2><p class="tipline">${examLine}</p></div>
+      <div class="big">${TT ? I[TT.examIcon] : I.trophy}</div>
     </div>
     <div class="trail"><div class="node-wrap ${examCurrent?'current':''}">
       ${examCurrent?'<div class="start-tag">START</div>':''}
@@ -551,8 +1010,8 @@ function renderHome(scrollToCurrent=true){
 function buildReport(){
   const now = new Date();
   const who = S.name || 'Times Trail';
-  const finished = ORDER.filter(n => KINDS.every(K => S.done[n+K.k]));
-  const started = ORDER.filter(n => !finished.includes(n) && KINDS.some(K => S.done[n+K.k]));
+  const finished = ORDER.filter(n => activeKinds().every(K => S.done[n+K.k]));
+  const started = ORDER.filter(n => !finished.includes(n) && activeKinds().some(K => S.done[n+K.k]));
   const weekAgo = Date.now() - 7*864e5;
   const week = S.log.filter(e => e.t >= weekAgo);
   const days = new Set(week.map(e => dayKey(new Date(e.t)))).size;
@@ -564,9 +1023,10 @@ function buildReport(){
     `${who} — math progress (${now.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})})`,
     ``,
     `Streak: ${liveStreak()} day${liveStreak()===1?'':'s'} · Total XP: ${S.xp}`,
+    `Practicing: ${divOn() ? 'multiplication and division' : 'multiplication only'}`,
     `Tables mastered: ${finished.length ? finished.map(n=>n+'s').join(', ') : 'none yet'}`,
     `Final exam: ${S.exam.best===null ? 'not taken yet' : `best ${S.exam.best}%, last ${S.exam.last.pct}%${S.exam.passed ? ` — PASSED ${new Date(S.exam.passed).toLocaleDateString(undefined,{month:'short',day:'numeric'})}` : ` (needs ${EXAM_PASS}%)`}`}`,
-    `Working on: ${started.length ? started.map(n=>`${n}s (${KINDS.filter(K=>S.done[n+K.k]).length}/4)`).join(', ') : '—'}`,
+    `Working on: ${started.length ? started.map(n=>`${n}s (${activeKinds().filter(K=>S.done[n+K.k]).length}/${activeKinds().length})`).join(', ') : '—'}`,
     ``,
     `Last 7 days: ${week.length} lesson${week.length===1?'':'s'} on ${days} day${days===1?'':'s'}, about ${mins} min`,
     `First-try accuracy: ${acc===null ? '—' : acc+'%'}`,
@@ -699,19 +1159,28 @@ function openBackup(){
   document.body.appendChild(o);
 }
 
+const THEME_OPTS = ['auto','halloween','christmas','classic'];
+const themeLabel = () => ({auto:'Auto', halloween:'Halloween', christmas:'Christmas', classic:'Classic'})[S.theme || 'auto'];
 function openSettings(){
   const o = $(`<div class="overlay"><div class="sheet" role="dialog" aria-label="Settings">
     <h3>Settings</h3>
     <div class="row"><span>Name<small>Shown on the report</small></span><input id="nm" maxlength="20" value="${esc(S.name)}" placeholder="Her name" autocomplete="off"></div>
     <div class="row"><span>Sound effects</span><button class="switch" role="switch" id="sw-sound" aria-checked="${S.sound}" aria-label="Sound effects"></button></div>
-    <div class="row"><span>Unlock every lesson<small>Let her jump to any table</small></span><button class="switch" role="switch" id="sw-unlock" aria-checked="${S.unlockAll}" aria-label="Unlock every lesson"></button></div>
+    <div class="row"><span>Division<small>Turn off for multiplication only</small></span><button class="switch" role="switch" id="sw-div" aria-checked="${divOn()}" aria-label="Division"></button></div>
+    <div class="row"><span>Theme<small>Auto: Halloween in Oct, Christmas in Nov–Dec</small></span><button class="btn ghost" id="theme" style="width:auto;padding:6px 14px;font-size:.95rem">${themeLabel()}</button></div>
+    <div class="row"><span>Unlock every lesson<small>Jump ahead to any table</small></span><button class="switch" role="switch" id="sw-unlock" aria-checked="${S.unlockAll}" aria-label="Unlock every lesson"></button></div>
     <div class="row"><span>Daily goal<small>Tap to change</small></span><button class="btn ghost" id="goal" style="width:auto;padding:6px 14px;font-size:.95rem">${S.goal} XP</button></div>
     <div class="row"><span>Backup &amp; restore<small>Save progress as a code, or load one</small></span><button class="btn ghost" id="bk" style="width:auto;padding:6px 14px;font-size:.95rem">Open</button></div>
     <button class="btn ghost" id="reset" style="color:var(--bad)">Reset progress</button>
     <button class="btn" id="close">Done</button>
   </div></div>`);
   const tog = (id, key) => { const b = o.querySelector(id); b.onclick = () => { S[key] = !S[key]; b.setAttribute('aria-checked', S[key]); save(); }; };
-  tog('#sw-sound','sound'); tog('#sw-unlock','unlockAll');
+  tog('#sw-sound','sound'); tog('#sw-unlock','unlockAll'); tog('#sw-div','division');
+  o.querySelector('#theme').onclick = (e) => {
+    const i = THEME_OPTS.indexOf(S.theme || 'auto');
+    S.theme = THEME_OPTS[(i+1) % THEME_OPTS.length]; save();
+    e.currentTarget.textContent = themeLabel(); applySeason();
+  };
   o.querySelector('#bk').onclick = () => { o.remove(); renderHome(false); openBackup(); };
   o.querySelector('#nm').oninput = (e) => { S.name = e.target.value.trim(); save(); };
   const goals = [20,30,50,80];
@@ -729,6 +1198,7 @@ function openSettings(){
 
 /* ---------- LEARN intro ---------- */
 function showIntro(L){
+  applySeason('lesson');
   const n = L.unit;
   const ladder = [...Array(12)].map((_,k)=>`<span class="num">${n*(k+1)}<em>${n}×${k+1}</em></span>`).join('');
   const scr = $(`<div class="screen">
@@ -750,6 +1220,7 @@ function showIntro(L){
 
 /* ---------- FINAL EXAM intro ---------- */
 function showExamIntro(){
+  applySeason('lesson');
   const start = () => startLesson({id:'exam', kind:'exam', name:'Final Exam'});
   const scr = $(`<div class="screen">
     <div class="lesson-top"><button class="iconbtn" id="quit" aria-label="Back">${I.x}</button></div>
@@ -758,10 +1229,11 @@ function showExamIntro(){
       <h1>Final Exam</h1>
       <ul class="rules">
         <li><b>${EXAM_N} questions</b> from all 12 tables, mixed up</li>
-        <li>Multiply, divide and missing numbers. <b>Type every answer.</b></li>
+        <li>${divOn() ? 'Multiply, divide and missing numbers.' : 'Multiplying and missing numbers.'} <b>Type every answer.</b></li>
         <li>Each question counts once. No do-overs and no points taken away.</li>
         <li>Get <b>${EXAM_PASS}%</b> (${Math.ceil(EXAM_N*EXAM_PASS/100)} right) to pass.</li>
       </ul>
+      ${TH() ? `<p class="flip">${TH().examLine}</p>` : ''}
       ${S.exam.best!==null ? `<p class="flip">Your best so far: ${S.exam.best}%</p>` : ''}
     </div>
     <div class="res-foot"><button class="btn" id="go">Start the exam</button></div></div>`);
@@ -774,6 +1246,7 @@ function showExamIntro(){
 /* ---------- LESSON (IXL-style: wrong answers push progress back) ---------- */
 function startLesson(L){
   if (L.kind==='weak' && !weakFacts().length){ toast('No missed facts to fix yet.'); return; }
+  applySeason('lesson');
   const gen = makeGenerator(L);
   const exam = L.kind==='exam', TOTAL = exam ? EXAM_N : GOAL;
   const byTable = {};
@@ -783,7 +1256,7 @@ function startLesson(L){
   const t0 = Date.now();
   let q, input, phase;
 
-  const scr = $(`<div class="screen">
+  const scr = $(`<div class="screen lesson">
     <div class="lesson-top">
       <button class="iconbtn" id="quit" aria-label="Quit lesson">${I.x}</button>
       <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${TOTAL}" aria-valuenow="0"><i></i></div>
@@ -885,8 +1358,10 @@ function startLesson(L){
       progress++; combo++;
       if (!q.retry) firstTryRight++;
       sfx.good();
-      stage.querySelector('#bubble').classList.add('pop');
-      const praise = combo>=5 ? 'On fire!' : ['Nice!','Correct!','Great job!','You got it!','Awesome!'][ri(0,4)];
+      const bub = stage.querySelector('#bubble'); bub.classList.add('pop');
+      const br = bub.getBoundingClientRect(); burst(br.left + br.width/2, br.top + br.height/2, 16);
+      const TP = TH(), PR = TP ? TP.praise : ['Nice!','Correct!','Great job!','You got it!','Awesome!'];
+      const praise = combo>=5 ? (TP ? TP.fire : 'On fire!') : PR[ri(0, PR.length-1)];
       foot.className = 'lesson-foot good';
       foot.innerHTML = `<div class="fb"><div class="badge">${I.check}</div><div><h4>${praise}</h4><p class="num">${full}</p></div></div><button class="btn good" id="go">Continue</button>`;
       setBar(false);
@@ -906,7 +1381,7 @@ function startLesson(L){
       const m = stage.querySelector('.mascot'); if (m) m.outerHTML = pip('sad');
       const how = q.kind==='skip' ? `Add ${q.n} each time: ${q.seq[2]} + ${q.n} = ${q.ans}.` : explain(q);
       foot.className = 'lesson-foot bad';
-      foot.innerHTML = `<div class="fb"><div class="badge">${I.x}</div><div><h4>Not quite${lost?` · −${lost}`:''}</h4><p class="num">Answer: ${full}</p><p class="how">${esc(how)}</p></div></div><button class="btn bad" id="go">Got it</button>`;
+      foot.innerHTML = `<div class="fb"><div class="badge">${I.x}</div><div><h4>${TH() ? TH().wrong : 'Not quite'}${lost?` · −${lost}`:''}</h4><p class="num">Answer: ${full}</p><p class="how">${esc(how)}</p></div></div><button class="btn bad" id="go">Got it</button>`;
       setBar(!exam);
     }
     S.facts[k] = rec; save();
@@ -947,12 +1422,12 @@ function startLesson(L){
     const label = L.unit ? `${L.unit}s ${L.name}` : L.name;
     S.log.push({t:Date.now(), label, acc:accuracy, wrong:wrongs, secs});
     if (S.log.length > 200) S.log = S.log.slice(-200);
-    save(); sfx.win();
+    save(); applySeason('results'); sfx.win(); setTimeout(() => burst(0, 0, TH() ? 90 : 70, true), 200);
     const mm = Math.floor(secs/60), ss = String(secs%60).padStart(2,'0');
     const res = $(`<div class="screen">
       <div class="results">
         ${pip('wow')}
-        <h1 class="${exam && !passed ? 'miss' : ''}">${exam ? (accuracy===100 ? 'Perfect Final Exam!' : passed ? 'You passed the Final Exam!' : 'Almost there!') : (wrongs===0 ? 'Perfect lesson!' : 'Lesson complete!')}</h1>
+        <h1 class="${exam && !passed ? 'miss' : ''}">${exam ? (accuracy===100 ? 'Perfect Final Exam!' : passed ? 'You passed the Final Exam!' : 'Almost there!') : (wrongs===0 ? (TH() ? TH().perfect : 'Perfect lesson!') : (TH() ? TH().complete : 'Lesson complete!'))}</h1>
         <p class="sub">${exam ? `${answered - wrongs} of ${TOTAL} right · ${passed ? 'Passed' : `need ${EXAM_PASS}% to pass. Practice the red tables and try again.`}` : esc(L.unit ? `The ${L.unit}s · ${L.name}` : L.name)}</p>
         <div class="tiles">
           <div class="tile" style="--t:var(--sun)"><div class="h">XP</div><div class="v num">+${gained}</div></div>
