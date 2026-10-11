@@ -128,6 +128,15 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 .sheet .btn{margin-top:10px}
 .report{margin:0;white-space:pre-wrap;word-break:break-word;background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:14px;font-family:ui-monospace, "SF Mono", Menlo, Consolas, monospace;font-size:.84rem;line-height:1.5;color:var(--ink);user-select:text;-webkit-user-select:text}
 .sheet a.btn{text-decoration:none;text-align:center}
+.sheet h3.gap{margin-top:16px}
+.both{display:flex;flex-direction:column;gap:8px}
+.report.code{word-break:break-all;max-height:7.5em;overflow:auto;font-size:.74rem;color:var(--muted)}
+.sheet textarea{font:inherit;font-size:.85rem;font-weight:600;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:10px 12px;width:100%;min-width:0;resize:vertical;word-break:break-all}
+.sheet textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.rmsg{margin:2px 0 0;font-weight:700;font-size:.9rem;min-height:1.2em}
+.rmsg.ok{color:var(--fb-good)}
+.rmsg.err{color:var(--fb-bad)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* ---------- INTRO (Learn lesson) ---------- */
 .intro{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center}
@@ -570,23 +579,120 @@ function buildReport(){
   }
   return lines.join('\n');
 }
+/* ---------- backup codes ---------- */
+const BK_LABEL = 'Backup code (Settings → Backup & restore):';
+const b64enc = (u8) => { let t = ''; for (let i=0;i<u8.length;i+=0x8000) t += String.fromCharCode.apply(null, u8.subarray(i,i+0x8000)); return btoa(t); };
+const b64dec = (str) => Uint8Array.from(atob(str), c => c.charCodeAt(0));
+async function pipeBytes(bytes, stream){ return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer()); }
+async function makeBackup(){
+  const data = JSON.stringify(Object.assign({}, S, {log:S.log.slice(-60), saved:Date.now()}));
+  let bytes = new TextEncoder().encode(data), tag = 'TT2';
+  if (window.CompressionStream){ try { bytes = await pipeBytes(bytes, new CompressionStream('deflate-raw')); tag = 'TT2Z'; } catch(e){} }
+  return tag + '-' + b64enc(bytes);
+}
+async function readBackup(text){
+  const at = text.lastIndexOf('TT2');
+  if (at < 0) throw new Error('none');
+  const m = text.slice(at).replace(/\s+/g,'').match(/^(TT2Z?)-([A-Za-z0-9+/]+=*)/);
+  if (!m) throw new Error('format');
+  let bytes = b64dec(m[2]);
+  if (m[1]==='TT2Z') bytes = await pipeBytes(bytes, new DecompressionStream('deflate-raw'));
+  const obj = JSON.parse(new TextDecoder().decode(bytes));
+  if (!obj || typeof obj.done!=='object' || typeof obj.xp!=='number' || !Array.isArray(obj.log)) throw new Error('data');
+  return obj;
+}
+function describeBackup(o){
+  const mastered = ORDER.filter(n => o.done[n+'mix']).length;
+  const when = o.saved ? new Date(o.saved).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'unknown date';
+  return `Found: ${o.name || 'no name'} · ${o.xp} XP · ${mastered} of 12 tables mastered${o.exam && o.exam.passed ? ' · exam passed' : ''} · backed up ${when}`;
+}
+function copyText(text, btn, fallbackEl, label){
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = label; }, 2000);
+  }).catch(() => {
+    const r = document.createRange(); r.selectNodeContents(fallbackEl);
+    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    btn.textContent = 'Selected — press copy';
+  });
+}
+const hasUndo = () => { try { return localStorage.getItem(KEY+'.undo') !== null; } catch(e){ return false; } };
+
+/* ---------- progress report for a parent ---------- */
 function openReport(){
   const text = buildReport();
+  let full = text;
   const o = $(`<div class="overlay"><div class="sheet" role="dialog" aria-label="Send progress to Dad">
     <h3>Send to Dad</h3>
-    <p>Copy this and text it, or tap Text it.</p>
-    <pre class="report" id="rep">${esc(text)}</pre>
+    <p>Copy this and text it to Dad. The backup code at the bottom keeps your progress safe.</p>
+    <div class="both" id="both"><pre class="report" id="rep">${esc(text)}</pre><pre class="report code" id="code">Making backup code…</pre></div>
     <button class="btn" id="copy">Copy report</button>
     <a class="btn ghost" id="sms" href="sms:?&body=${encodeURIComponent(text)}">Text it</a>
     <button class="btn ghost" id="close">Close</button>
   </div></div>`);
-  o.querySelector('#copy').onclick = async (e) => {
-    try { await navigator.clipboard.writeText(text); e.target.textContent = 'Copied'; }
-    catch(err){
-      const r = document.createRange(); r.selectNodeContents(o.querySelector('#rep'));
-      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
-      e.target.textContent = 'Selected — press copy';
+  makeBackup().then(code => {
+    full = text + '\n\n' + BK_LABEL + '\n' + code;
+    o.querySelector('#code').textContent = BK_LABEL + '\n' + code;
+    o.querySelector('#sms').href = 'sms:?&body=' + encodeURIComponent(full);
+  }).catch(() => { o.querySelector('#code').hidden = true; });
+  o.querySelector('#copy').onclick = (e) => copyText(full, e.currentTarget, o.querySelector('#both'), 'Copy report');
+  o.querySelector('#close').onclick = () => o.remove();
+  o.onclick = (e) => { if (e.target===o) o.remove(); };
+  document.body.appendChild(o);
+}
+
+/* ---------- backup & restore sheet ---------- */
+function openBackup(){
+  let code = '', found = null, armed = false, token = 0;
+  const o = $(`<div class="overlay"><div class="sheet" role="dialog" aria-label="Backup and restore">
+    <h3>Backup</h3>
+    <p>All the progress on this device, saved as one code. Text it to Dad to keep it safe.</p>
+    <pre class="report code" id="code">Making backup code…</pre>
+    <button class="btn" id="copyb">Copy backup code</button>
+    <h3 class="gap">Restore</h3>
+    <p>Paste a backup code, or a whole Send to Dad message, to load that progress here. It replaces the progress on this device.</p>
+    <label class="sr" for="rcode">Backup code</label>
+    <textarea id="rcode" rows="3" placeholder="Paste a code that starts with TT2" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+    <p class="rmsg" id="rmsg" aria-live="polite"></p>
+    <button class="btn good" id="restore" disabled>Restore this progress</button>
+    ${hasUndo() ? '<button class="btn ghost" id="undo">Undo last restore</button>' : ''}
+    <button class="btn ghost" id="close">Close</button>
+  </div></div>`);
+  const codeEl = o.querySelector('#code');
+  makeBackup().then(c => { code = c; codeEl.textContent = c; })
+    .catch(() => { codeEl.textContent = 'This browser could not make a backup code.'; });
+  o.querySelector('#copyb').onclick = (e) => { if (code) copyText(code, e.currentTarget, codeEl, 'Copy backup code'); };
+
+  const ta = o.querySelector('#rcode'), msg = o.querySelector('#rmsg'), rb = o.querySelector('#restore');
+  ta.oninput = async () => {
+    const my = ++token;
+    found = null; armed = false; rb.disabled = true; rb.textContent = 'Restore this progress';
+    const v = ta.value.trim();
+    if (!v){ msg.textContent = ''; return; }
+    try {
+      const obj = await readBackup(v);
+      if (my !== token) return;
+      found = obj; msg.className = 'rmsg ok'; msg.textContent = describeBackup(obj); rb.disabled = false;
+    } catch(err){
+      if (my !== token) return;
+      msg.className = 'rmsg err';
+      msg.textContent = 'That code isn’t complete. Copy the whole code, starting with TT2, and paste it again.';
     }
+  };
+  rb.onclick = () => {
+    if (!found) return;
+    if (!armed){ armed = true; rb.textContent = 'Tap again to replace progress here'; return; }
+    try { localStorage.setItem(KEY+'.undo', JSON.stringify(S)); } catch(e){}
+    const data = Object.assign({}, found); delete data.saved;
+    S = Object.assign(defaults(), data); save();
+    o.remove(); renderHome(true); toast('Progress restored.');
+  };
+  const u = o.querySelector('#undo');
+  if (u) u.onclick = () => {
+    try {
+      const prev = JSON.parse(localStorage.getItem(KEY+'.undo'));
+      S = Object.assign(defaults(), prev); save(); localStorage.removeItem(KEY+'.undo');
+      o.remove(); renderHome(false); toast('Restore undone.');
+    } catch(e){ toast('Nothing to undo.'); }
   };
   o.querySelector('#close').onclick = () => o.remove();
   o.onclick = (e) => { if (e.target===o) o.remove(); };
@@ -600,11 +706,13 @@ function openSettings(){
     <div class="row"><span>Sound effects</span><button class="switch" role="switch" id="sw-sound" aria-checked="${S.sound}" aria-label="Sound effects"></button></div>
     <div class="row"><span>Unlock every lesson<small>Let her jump to any table</small></span><button class="switch" role="switch" id="sw-unlock" aria-checked="${S.unlockAll}" aria-label="Unlock every lesson"></button></div>
     <div class="row"><span>Daily goal<small>Tap to change</small></span><button class="btn ghost" id="goal" style="width:auto;padding:6px 14px;font-size:.95rem">${S.goal} XP</button></div>
+    <div class="row"><span>Backup &amp; restore<small>Save progress as a code, or load one</small></span><button class="btn ghost" id="bk" style="width:auto;padding:6px 14px;font-size:.95rem">Open</button></div>
     <button class="btn ghost" id="reset" style="color:var(--bad)">Reset progress</button>
     <button class="btn" id="close">Done</button>
   </div></div>`);
   const tog = (id, key) => { const b = o.querySelector(id); b.onclick = () => { S[key] = !S[key]; b.setAttribute('aria-checked', S[key]); save(); }; };
   tog('#sw-sound','sound'); tog('#sw-unlock','unlockAll');
+  o.querySelector('#bk').onclick = () => { o.remove(); renderHome(false); openBackup(); };
   o.querySelector('#nm').oninput = (e) => { S.name = e.target.value.trim(); save(); };
   const goals = [20,30,50,80];
   o.querySelector('#goal').onclick = (e) => { S.goal = goals[(goals.indexOf(S.goal)+1)%goals.length]; e.target.textContent = S.goal+' XP'; save(); };
