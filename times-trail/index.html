@@ -439,7 +439,7 @@ body.theme-christmas .btn.good,body.theme-christmas .btn.bad,body.theme-christma
 (function(){
 /* ---------- storage (this device only) ---------- */
 const KEY = 'timesTrail.v2';
-const defaults = () => ({done:{}, xp:0, streak:{count:0,last:null}, daily:{date:null,xp:0}, facts:{}, log:[], exam:{best:null, passed:null, last:null}, sound:true, unlockAll:false, goal:30, name:'', theme:'auto', division:true});
+const defaults = () => ({done:{}, xp:0, streak:{count:0,last:null}, daily:{date:null,xp:0}, facts:{}, log:[], exam:{best:null, passed:null, last:null}, sound:true, unlockAll:false, goal:30, name:'', theme:'auto', division:true, enhanced:true});
 let S = defaults();
 try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(defaults(), JSON.parse(raw)); } catch(e){}
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
@@ -685,14 +685,103 @@ function glide(){
     o.connect(g).connect(ac.destination); o.start(t); o.stop(t+1.25);
   } catch(e){}
 }
+/* enhanced audio: clicks, bells and a little echo */
+const enh = () => S.sound && S.enhanced !== false;
+let bus = null, noiseBuf = null;
+function actx(){ ac = ac || new (window.AudioContext||window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); return ac; }
+function out(){
+  if (bus) return bus;
+  const a = actx(), comp = a.createDynamicsCompressor(), dry = a.createGain(), send = a.createGain();
+  const dly = a.createDelay(), fb = a.createGain(), wet = a.createGain();
+  dry.gain.value = .9; dly.delayTime.value = .17; fb.gain.value = .28; wet.gain.value = .22;
+  dry.connect(comp); comp.connect(a.destination);
+  send.connect(dly); dly.connect(fb); fb.connect(dly); dly.connect(wet); wet.connect(comp);
+  bus = {dry, send}; return bus;
+}
+function bell(f, when=0, dur=.9, vol=.15, wetAmt=.6){
+  try {
+    const a = actx(), b = out(), t = a.currentTime + when;
+    [[1,1],[2,.45],[2.76,.25],[5.4,.1]].forEach(([r,v]) => {
+      const o = a.createOscillator(), g = a.createGain();
+      o.type = 'sine'; o.frequency.value = f*r;
+      g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(vol*v,t+.008); g.gain.exponentialRampToValueAtTime(.0001,t+dur/Math.sqrt(r));
+      o.connect(g); g.connect(b.dry);
+      if (wetAmt){ const sg = a.createGain(); sg.gain.value = wetAmt; g.connect(sg); sg.connect(b.send); }
+      o.start(t); o.stop(t+dur+.05);
+    });
+  } catch(e){}
+}
+function sweep(f1, f2, when=0, dur=.28, vol=.2, type='sine'){
+  try {
+    const a = actx(), b = out(), t = a.currentTime + when, o = a.createOscillator(), g = a.createGain();
+    o.type = type; o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+.015); g.gain.exponentialRampToValueAtTime(.0001,t+dur+.05);
+    o.connect(g); g.connect(b.dry); o.start(t); o.stop(t+dur+.1);
+  } catch(e){}
+}
+function noise(when=0, dur=.05, freq=3000, vol=.3, type='bandpass', toBus=false){
+  try {
+    const a = actx(), t = a.currentTime + when;
+    if (!noiseBuf){
+      noiseBuf = a.createBuffer(1, Math.floor(a.sampleRate*.25), a.sampleRate);
+      const d = noiseBuf.getChannelData(0); for (let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+    }
+    const n = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+    n.buffer = noiseBuf; f.type = type; f.frequency.value = freq; f.Q.value = 1.2;
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    n.connect(f); f.connect(g); g.connect(toBus ? out().dry : a.destination); n.start(t); n.stop(t+dur+.02);
+  } catch(e){}
+}
+function click(kind){
+  if (!enh()) return;
+  if (kind === 'key'){ noise(0,.035,2600+Math.random()*400,.32); sweep(1500,900,0,.03,.07); }
+  else if (kind === 'big'){ noise(0,.06,1000,.42); sweep(420,200,0,.05,.12); }
+  else { noise(0,.03,3400,.24); }
+}
+document.addEventListener('pointerdown', e => {
+  const b = e.target.closest('button, a.btn');
+  if (!b || b.disabled) return;
+  click(b.classList.contains('key') || b.classList.contains('choice') ? 'key'
+      : (b.classList.contains('btn') || b.classList.contains('node')) ? 'big' : 'small');
+}, {passive:true});
+
 const sfx = {
-  good: () => { const n = seasonName(); n==='christmas' ? tone([1319,1760],.08) : n==='halloween' ? tone([587,880],.11) : tone([660,880]); },
-  bad: () => tone([220,180],.15,'square'),
-  win: () => { const n = seasonName();
+  good: () => {
+    const n = seasonName();
+    if (enh()){
+      if (n==='christmas'){ bell(1319,0,.8,.13); bell(1760,.09,1.1,.13); noise(.02,.12,8000,.06,'highpass',true); }
+      else if (n==='halloween'){ bell(587,0,.7,.12); bell(880,.1,1,.12); }
+      else { bell(880,0,.6,.12); bell(1319,.08,.9,.12); }
+      return;
+    }
+    n==='christmas' ? tone([1319,1760],.08) : n==='halloween' ? tone([587,880],.11) : tone([660,880]);
+  },
+  bad: () => {
+    if (enh()){ sweep(320,150,0,.26,.24); sweep(160,90,0,.3,.14,'triangle'); return; }
+    tone([220,180],.15,'square');
+  },
+  win: () => {
+    const n = seasonName();
+    if (enh()){
+      if (n==='halloween'){
+        [392,466,587,784].forEach((f,i) => bell(f, i*.14, 1.1, .12));
+        [196,233,294].forEach(f => sweep(f, f*.995, .6, 1.4, .05, 'triangle'));
+        setTimeout(glide, 750);
+      } else if (n==='christmas'){
+        const mel = [659,659,659,0,659,659,659,0,659,784,523,587,659];
+        mel.forEach((f,i) => { if (f) bell(f, i*.13, .7, .12); if (i%2===0) noise(i*.13,.08,9000,.05,'highpass',true); });
+        [523,659,784].forEach(f => bell(f, 13*.13, 1.6, .07));
+      } else {
+        [523,659,784,1047].forEach((f,i) => bell(f, i*.12, .9, .12));
+        [523,659,784].forEach(f => bell(f, .55, 1.6, .07));
+      }
+      return;
+    }
     if (n==='halloween'){ tone([392,466,587,784],.14); setTimeout(glide, 650); }
     else if (n==='christmas') tone([659,659,659,659,659,659,659,784,523,587,659],.13);
-    else tone([523,659,784,1047],.13); },
-  tap: () => tone([440],.04)
+    else tone([523,659,784,1047],.13);
+  },
+  tap: () => { if (!enh()) tone([440],.04); }
 };
 
 /* ---------- seasonal themes ---------- */
@@ -1166,6 +1255,7 @@ function openSettings(){
     <h3>Settings</h3>
     <div class="row"><span>Name<small>Shown on the report</small></span><input id="nm" maxlength="20" value="${esc(S.name)}" placeholder="Her name" autocomplete="off"></div>
     <div class="row"><span>Sound effects</span><button class="switch" role="switch" id="sw-sound" aria-checked="${S.sound}" aria-label="Sound effects"></button></div>
+    <div class="row"><span>Enhanced audio<small>Button clicks and richer sounds</small></span><button class="switch" role="switch" id="sw-enh" aria-checked="${S.enhanced !== false}" aria-label="Enhanced audio"></button></div>
     <div class="row"><span>Division<small>Turn off for multiplication only</small></span><button class="switch" role="switch" id="sw-div" aria-checked="${divOn()}" aria-label="Division"></button></div>
     <div class="row"><span>Theme<small>Auto: Halloween in Oct, Christmas in Nov–Dec</small></span><button class="btn ghost" id="theme" style="width:auto;padding:6px 14px;font-size:.95rem">${themeLabel()}</button></div>
     <div class="row"><span>Unlock every lesson<small>Jump ahead to any table</small></span><button class="switch" role="switch" id="sw-unlock" aria-checked="${S.unlockAll}" aria-label="Unlock every lesson"></button></div>
@@ -1175,7 +1265,7 @@ function openSettings(){
     <button class="btn" id="close">Done</button>
   </div></div>`);
   const tog = (id, key) => { const b = o.querySelector(id); b.onclick = () => { S[key] = !S[key]; b.setAttribute('aria-checked', S[key]); save(); }; };
-  tog('#sw-sound','sound'); tog('#sw-unlock','unlockAll'); tog('#sw-div','division');
+  tog('#sw-sound','sound'); tog('#sw-unlock','unlockAll'); tog('#sw-div','division'); tog('#sw-enh','enhanced');
   o.querySelector('#theme').onclick = (e) => {
     const i = THEME_OPTS.indexOf(S.theme || 'auto');
     S.theme = THEME_OPTS[(i+1) % THEME_OPTS.length]; save();
