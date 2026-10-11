@@ -430,6 +430,26 @@ body.theme-christmas #scene .sn3{width:5px;height:5px;animation-duration:14s;opa
 @media (min-width:700px){ body.theme-christmas .node{width:100px;height:100px} body.theme-halloween .node{width:106px;height:90px} body.theme-halloween .node svg.jack{width:66px;height:48px} body.theme-christmas .node svg.star{width:56px;height:56px} }
 
 body.theme-christmas .btn.good,body.theme-christmas .btn.bad,body.theme-christmas .tile[style*="--sun"] .h,body.theme-christmas .tile[style*="--good"] .h{color:#10233A}
+/* Daily Mix card + fact map */
+.daily{display:flex;align-items:center;gap:14px;width:100%;margin-top:12px;padding:14px 16px;border-radius:18px;background:var(--accent);color:var(--on-color);box-shadow:0 5px 0 var(--accent-deep);text-align:left}
+.daily:active{transform:translateY(3px);box-shadow:0 2px 0 var(--accent-deep)}
+.daily .di{width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.22);display:grid;place-items:center;flex:none}
+.daily .di svg{width:26px;height:26px}
+.daily .dt{flex:1;min-width:0}
+.daily b{display:block;font-family:var(--f-display);font-weight:600;font-size:1.2rem;line-height:1.15}
+.daily small{display:block;font-weight:700;opacity:.92;font-size:.84rem}
+.daily .dm{text-align:right;flex:none}
+.daily .dm b{font-size:1.6rem;line-height:1}
+.fmap{overflow-x:auto;padding:4px 0;flex:none}
+.sheet > *{flex-shrink:0}
+.fmap table{border-collapse:separate;border-spacing:3px;margin:0 auto;font-size:.68rem;font-weight:800;color:var(--muted)}
+.fmap th{width:20px;height:18px;text-align:center;font-weight:800}
+.fmap td{width:20px;height:20px;border-radius:5px;padding:0}
+.fmap .ok{background:var(--good)} .fmap .mid{background:var(--sun)} .fmap .bad{background:var(--bad)} .fmap .new{background:var(--line)}
+.fmap-key{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;font-size:.8rem;font-weight:700;color:var(--muted);margin:4px 0 8px}
+.fmap-key i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.missed.win span{background:var(--good-soft);color:var(--fb-good)}
+@media (min-width:700px){ .daily{padding:18px 22px;border-radius:22px;margin-top:14px} .daily b{font-size:1.45rem} .daily small{font-size:.95rem} .daily .di{width:58px;height:58px;border-radius:16px} .daily .di svg{width:32px;height:32px} .daily .dm b{font-size:2rem} .fmap td,.fmap th{width:26px;height:26px} .fmap table{font-size:.8rem} }
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -462,6 +482,8 @@ const GOAL = 10;      // correct answers to finish a lesson
 const DROP = 3;       // progress lost on a wrong answer
 const EXAM_N = 36;    // final exam: 3 questions from each of the 12 tables
 const EXAM_PASS = 90; // percent needed to pass
+const DAILY_N = 20;   // Daily Mix length
+const FAST_MS = 4000; // a typed answer this fast counts as remembered, not counted out
 const TIPS = {
   1:'Anything times 1 stays the same number.',
   2:'Times 2 means double it.',
@@ -559,7 +581,53 @@ function buildExam(){
   S.exam.lastFacts = list.map(q => factKey(q.f)); save();
   return shuffle(list);
 }
+function poolTables(){ const t = ORDER.filter(n => S.unlockAll || S.done[n+'learn']); return t.length ? t : [1,2,10]; }
+function factWeight(k){
+  const r = S.facts[k], now = Date.now();
+  if (!r || (r.c||0) + (r.w||0) === 0) return 2.5;                       // never tried: worth a look
+  let w = 1 + 2.5 * (r.w / Math.max(1, r.c + r.w))                        // misses pull it in
+        + ((r.t||0) > FAST_MS ? Math.min(2, (r.t - FAST_MS) / 2000) : 0); // slow answers pull it in
+  if ((r.fs||0) >= 3) w = .35 + Math.min(1.2, (now - (r.last||0)) / (7*864e5)); // memorized: returns as days pass
+  if (r.last && now - r.last < 10*60e3) w *= .3;                          // just seen: rest it
+  return w;
+}
+function buildDaily(){
+  const tabs = new Set(poolTables()), facts = [];
+  for (let a=1;a<=12;a++) for (let b=a;b<=12;b++) if (tabs.has(a) || tabs.has(b)) facts.push([a,b]);
+  const pick = [];
+  let pool = facts.map(f => ({f, w:factWeight(factKey(f))}));
+  while (pick.length < DAILY_N){
+    if (!pool.length) pool = facts.map(f => ({f, w:1}));
+    let r = Math.random() * pool.reduce((s,p) => s + p.w, 0), i = 0;
+    while (i < pool.length-1 && r > pool[i].w){ r -= pool[i].w; i++; }
+    pick.push(pool.splice(i,1)[0].f);
+  }
+  return pick.map((f,i) => { const [x,y] = Math.random()<.5 ? f : [f[1],f[0]]; return finalize(fact(x, y, pickOp(.6)), i%5===4 ? 'missing' : 'type'); });
+}
+function factStatus(k){
+  const r = S.facts[k];
+  if (!r || (r.c||0) + (r.w||0) === 0) return 'new';
+  if ((r.fs||0) >= 3) return 'ok';
+  if (r.w > (r.c||0)/3 || (r.t||0) > 7000) return 'bad';
+  return 'mid';
+}
+const masteredCount = () => { let n = 0; for (let a=1;a<=12;a++) for (let b=a;b<=12;b++) if (factStatus(a+' × '+b)==='ok') n++; return n; };
+function factMapText(){
+  const E = {ok:'🟩', mid:'🟨', bad:'🟥', new:'⬜'}, rows = [];
+  for (let a=1;a<=12;a++){ let line = ''; for (let b=1;b<=12;b++) line += E[factStatus(factKey([a,b]))]; rows.push(String(a).padStart(2,' ') + ' ' + line); }
+  return rows.join('\n');
+}
+function factMapHTML(){
+  let h = '<table aria-label="Fact map, 1 to 12"><tr><th></th>' + [...Array(12)].map((_,i)=>`<th>${i+1}</th>`).join('') + '</tr>';
+  for (let a=1;a<=12;a++){
+    h += `<tr><th>${a}</th>`;
+    for (let b=1;b<=12;b++){ const st = factStatus(factKey([a,b])); h += `<td class="${st}" title="${a} × ${b}"></td>`; }
+    h += '</tr>';
+  }
+  return h + '</table>';
+}
 function makeGenerator(L){
+  if (L.kind==='daily'){ const list = buildDaily(); let j = 0; return () => list[Math.min(j++, list.length-1)]; }
   if (L.kind==='exam'){ const list = buildExam(); let j = 0; return () => list[Math.min(j++, list.length-1)]; }
   let i = 0, bag = [];
   const draw = () => { if (!bag.length) bag = shuffle([...Array(12)].map((_,k)=>k+1)); return bag.pop(); };
@@ -635,6 +703,7 @@ const I = {
   star:'<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2l2.95 6.1 6.7.95-4.85 4.7 1.15 6.65L12 17.45 6.05 20.6l1.15-6.65L2.35 9.25l6.7-.95z" fill="#FFF6C8" stroke="#9C6A12" stroke-width="1.1" stroke-linejoin="round"/></svg>',
   house:'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 32L30 12l22 20" fill="none" stroke="#1C0F38" stroke-width="5" stroke-linejoin="round"/><path d="M12 60V32l18-16 18 16v28z" fill="#1C0F38"/><path d="M42 60V22h12v38z" fill="#1C0F38"/><path d="M40 24l8-20 8 20z" fill="#1C0F38"/><rect x="18" y="36" width="7" height="8" fill="#FFD447"/><rect x="31" y="36" width="7" height="8" fill="#FFD447"/><rect x="45" y="28" width="6" height="7" rx="3" fill="#FFB347"/><path d="M24 60v-8a4 4 0 0 1 8 0v8z" fill="#FFB347"/></svg>',
   gift:'<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="9" y="28" width="46" height="30" rx="4" fill="#FFFFFF"/><rect x="6" y="20" width="52" height="12" rx="3" fill="#FFE3E5"/><rect x="28" y="20" width="8" height="38" fill="#FFD166"/><path d="M32 20c-6-11-19-10-16-2 2 4 10 3 16 2zm0 0c6-11 19-10 16-2-2 4-10 3-16 2z" fill="#FFD166"/></svg>',
+  mix:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3.5c2.5 0 4 1.5 5.5 5s3 5 5.5 5H21M3 17h3.5c1.4 0 2.5-.5 3.4-1.5M14.1 8.5C15 7.5 16.1 7 17.5 7H21M18 4l3 3-3 3M18 14l3 3-3 3"/></svg>',
   target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".8" fill="currentColor"/></svg>'
 };
 function pip(mood='happy', size){
@@ -738,9 +807,40 @@ function click(kind){
   else if (kind === 'big'){ noise(0,.06,1000,.42); sweep(420,200,0,.05,.12); }
   else { noise(0,.03,3400,.24); }
 }
+/* number-pad sounds that match the theme; each digit is its own note */
+const KEY_NOTES = {
+  halloween:[293.7,349.2,392,440,523.3,587.3,698.5,784,880,1046.5],  // D minor pentatonic
+  christmas:[1046.5,1174.7,1318.5,1568,1760,2093,2349.3,2637,3136,3520] // C major pentatonic, glockenspiel range
+};
+function wood(f){
+  try {
+    const a = actx(), b = out(), t = a.currentTime;
+    [[1,.3,'triangle'],[2.01,.1,'sine'],[3.9,.05,'sine']].forEach(([r,v,ty]) => {
+      const o = a.createOscillator(), g = a.createGain(), sg = a.createGain();
+      o.type = ty; o.frequency.setValueAtTime(f*r*1.05,t); o.frequency.exponentialRampToValueAtTime(f*r,t+.03);
+      g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(v,t+.004); g.gain.exponentialRampToValueAtTime(.0001,t+.2/Math.pow(r,.3));
+      sg.gain.value = .4; o.connect(g); g.connect(b.dry); g.connect(sg); sg.connect(b.send);
+      o.start(t); o.stop(t+.32);
+    });
+    noise(0,.02,1800,.16);
+  } catch(e){}
+}
+function keySound(k){
+  if (!enh()) return;
+  const n = seasonName(), del = (k==='⌫' || k==='C'), d = del ? -1 : Math.max(0, Math.min(9, Number(k)||0));
+  if (n==='halloween'){
+    if (del){ sweep(170,95,0,.14,.24); noise(0,.06,600,.22); return; }
+    wood(KEY_NOTES.halloween[d]);
+  } else if (n==='christmas'){
+    if (del){ noise(0,.16,5000,.1,'highpass',true); sweep(1500,700,0,.12,.05); return; }
+    bell(KEY_NOTES.christmas[d], 0, .45, .075, .4); noise(0,.07,9500,.07,'highpass',true);
+  } else click(del ? 'small' : 'key');
+}
 document.addEventListener('pointerdown', e => {
   const b = e.target.closest('button, a.btn');
   if (!b || b.disabled) return;
+  if (b.classList.contains('key')) return keySound(b.dataset.k);
+  if (b.classList.contains('choice')) return keySound(String(ri(1,9)));
   click(b.classList.contains('key') || b.classList.contains('choice') ? 'key'
       : (b.classList.contains('btn') || b.classList.contains('node')) ? 'big' : 'small');
 }, {passive:true});
@@ -1026,8 +1126,9 @@ function renderHome(scrollToCurrent=true){
       <section class="goal">${ring(txp/S.goal)}
         <div><h3>${S.name ? esc(S.name)+'’s daily goal' : 'Daily goal'}</h3><p class="num">${Math.min(txp,S.goal)} / ${S.goal} XP today${txp>=S.goal?' · done!':''}</p></div>
       </section>
+      <button class="daily" id="daily"><span class="di">${I.mix}</span><span class="dt"><b>Daily Mix</b><small>${S.dailyLast && dayKey(new Date(S.dailyLast))===dayKey() ? 'Done today · go again anytime' : DAILY_N + ' questions picked for you'}</small></span><span class="dm"><b class="num">${masteredCount()}</b><small>of 78 memorized</small></span></button>
       <div class="quick">
-        <button id="weak" ${weakCount?'':'disabled'}><span class="qi" style="background:var(--bad-soft);color:var(--bad)">${I.target}</span><span><b>Fix mistakes</b><small>${weakCount?weakCount+' facts':'None yet'}</small></span></button>
+        <button id="weak" ${weakCount?'':'disabled'}><span class="qi" style="background:var(--bad-soft);color:var(--bad)">${I.target}</span><span><b>Fix mistakes</b><small>${weakCount ? weakCount + (weakCount===1 ? ' fact' : ' facts') : 'None yet'}</small></span></button>
         <button id="all"><span class="qi" style="background:var(--accent-soft);color:var(--accent)">${I.bolt}</span><span><b>Review</b><small>Tables so far</small></span></button>
         <button id="dad"><span class="qi" style="background:var(--good-soft);color:var(--good)">${I.send}</span><span><b>Send to Parent</b><small>Progress report</small></span></button>
       </div>
@@ -1084,6 +1185,7 @@ function renderHome(scrollToCurrent=true){
     showExamIntro();
   };
   scr.querySelector('#exam').appendChild(ex);
+  scr.querySelector('#daily').onclick = () => startLesson({id:'daily', kind:'daily', name:'Daily Mix'});
   scr.querySelector('#weak').onclick = () => startLesson({id:'weak',kind:'weak',name:'Fix mistakes'});
   scr.querySelector('#all').onclick = () => startLesson({id:'review',kind:'review',name:'Review'});
   scr.querySelector('#dad').onclick = openReport;
@@ -1119,6 +1221,8 @@ function buildReport(){
     ``,
     `Last 7 days: ${week.length} lesson${week.length===1?'':'s'} on ${days} day${days===1?'':'s'}, about ${mins} min`,
     `First-try accuracy: ${acc===null ? '—' : acc+'%'}`,
+    `Facts memorized: ${masteredCount()} of 78 (fast and correct on 3 different days)`,
+    `Daily Mix: ${S.dailyLast ? (dayKey(new Date(S.dailyLast))===dayKey() ? 'done today' : 'last done ' + new Date(S.dailyLast).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})) : 'not started yet'}`,
     `Needs practice: ${weak.length ? weak.map(w=>`${w.k} (missed ${w.w})`).join(', ') : 'nothing right now'}`,
     `Last practiced: ${last ? last.toLocaleString(undefined,{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'not yet'}`
   ];
@@ -1126,6 +1230,7 @@ function buildReport(){
     lines.push('', 'Recent lessons:');
     S.log.slice(-5).reverse().forEach(e => lines.push(`• ${new Date(e.t).toLocaleDateString(undefined,{weekday:'short'})} ${e.label} — ${e.acc}%, ${e.wrong} wrong`));
   }
+  lines.push('', 'Fact map (row × column):', '🟩 memorized  🟨 learning  🟥 needs work  ⬜ not yet', factMapText());
   return lines.join('\n');
 }
 /* ---------- backup codes ---------- */
@@ -1173,6 +1278,8 @@ function openReport(){
   const o = $(`<div class="overlay"><div class="sheet" role="dialog" aria-label="Send progress to a parent">
     <h3>Send to Parent</h3>
     <p>Copy this and text it to your parent. The backup code at the bottom keeps your progress safe.</p>
+    <div class="fmap">${factMapHTML()}</div>
+    <div class="fmap-key"><span><i style="background:var(--good)"></i>Memorized</span><span><i style="background:var(--sun)"></i>Learning</span><span><i style="background:var(--bad)"></i>Needs work</span><span><i style="background:var(--line)"></i>Not yet</span></div>
     <div class="both" id="both"><pre class="report" id="rep">${esc(text)}</pre><pre class="report code" id="code">Making backup code…</pre></div>
     <button class="btn" id="copy">Copy report</button>
     <a class="btn ghost" id="sms" href="sms:?&body=${encodeURIComponent(text)}">Text it</a>
@@ -1338,13 +1445,14 @@ function startLesson(L){
   if (L.kind==='weak' && !weakFacts().length){ toast('No missed facts to fix yet.'); return; }
   applySeason('lesson');
   const gen = makeGenerator(L);
-  const exam = L.kind==='exam', TOTAL = exam ? EXAM_N : GOAL;
+  const exam = L.kind==='exam', daily = L.kind==='daily', fixed = exam || daily, TOTAL = exam ? EXAM_N : daily ? DAILY_N : GOAL;
+  const newlyMastered = new Set();
   const byTable = {};
   let progress = 0, answered = 0, firstTryRight = 0, wrongs = 0, combo = 0;
   const retries = [];           // [{q, due}] missed facts come back soon
   const missed = new Map();
   const t0 = Date.now();
-  let q, input, phase;
+  let q, input, phase, qStart = 0;
 
   const scr = $(`<div class="screen lesson">
     <div class="lesson-top">
@@ -1360,13 +1468,13 @@ function startLesson(L){
 
   let quitArmed = false;
   scr.querySelector('#quit').onclick = () => {
-    if ((exam ? answered : progress)===0 || quitArmed){ renderHome(false); return; }
+    if ((fixed ? answered : progress)===0 || quitArmed){ renderHome(false); return; }
     quitArmed = true; toast(`Tap × again to quit. This ${exam?'exam':'lesson'} won’t be saved.`);
     setTimeout(()=>quitArmed=false, 2500);
   };
 
   function setBar(dropped){
-    const v = exam ? answered : progress;
+    const v = fixed ? answered : progress;
     barI.style.width = (v/TOTAL*100)+'%';
     sc.textContent = v+'/'+TOTAL;
     bar.setAttribute('aria-valuenow', v);
@@ -1377,10 +1485,10 @@ function startLesson(L){
   const tok = (part) => q.blank===part ? blankHTML() : `<span>${q[part]}</span>`;
 
   function next(){
-    if (exam ? answered >= TOTAL : progress >= GOAL) return finish();
+    if (fixed ? answered >= TOTAL : progress >= GOAL) return finish();
     const due = retries.findIndex(r => r.due <= answered);
     if (due > -1){ q = retries.splice(due,1)[0].q; } else q = gen();
-    input = ''; phase = 'answer';
+    input = ''; phase = 'answer'; qStart = performance.now();
     let title, body, extra = '';
     if (q.kind==='skip'){
       title = `Count by ${q.n}s. What comes next?`;
@@ -1393,7 +1501,7 @@ function startLesson(L){
       if (q.help) extra = `<div class="helper"><b>Tip</b><span>${esc(TIPS[q.f[0]] || '')}</span></div>`;
       if (q.retry) extra = `<div class="helper"><b>Remember</b><span>${esc(explain(q))}</span></div>`;
     }
-    stage.innerHTML = `<div><div class="combo">${exam ? `Question ${answered+1} of ${TOTAL}` : (combo>=3?combo+' in a row':'')}</div><h2 class="kicker">${title}</h2></div>
+    stage.innerHTML = `<div><div class="combo">${fixed ? `Question ${answered+1} of ${TOTAL}` : (combo>=3?combo+' in a row':'')}</div><h2 class="kicker">${title}</h2></div>
       <div class="prompt-row">${pip(combo>=3?'wow':'happy')}${body}</div>${extra}<div id="ans"></div>`;
     const ans = stage.querySelector('#ans');
     if (q.type==='choice'){
@@ -1405,7 +1513,7 @@ function startLesson(L){
     } else {
       ans.className = 'keypad';
       [1,2,3,4,5,6,7,8,9,'C',0,'⌫'].forEach(k => {
-        const b = $(`<button class="key num" aria-label="${k==='⌫'?'Delete':k==='C'?'Clear':k}">${k==='⌫'?I.back:k}</button>`);
+        const b = $(`<button class="key num" data-k="${k}" aria-label="${k==='⌫'?'Delete':k==='C'?'Clear':k}">${k==='⌫'?I.back:k}</button>`);
         b.onclick = () => press(k); ans.appendChild(b);
       });
     }
@@ -1440,6 +1548,16 @@ function startLesson(L){
     phase = 'feedback';
     const ok = Number(input)===q.ans;
     const k = factKey(q.f), rec = S.facts[k] || {c:0,w:0};
+    if (q.kind==='fact'){
+      const ms = performance.now() - qStart, today = dayKey();
+      if (q.type==='type' && !q.retry){
+        if (ok){
+          rec.t = rec.t ? Math.round(rec.t*.6 + ms*.4) : Math.round(ms);
+          if (ms <= FAST_MS && rec.fd !== today){ rec.fs = (rec.fs||0) + 1; rec.fd = today; if (rec.fs === 3) newlyMastered.add(k); }
+        } else rec.fs = 0;
+      }
+      rec.last = Date.now();
+    }
     answered++;
     if (exam){ const t = byTable[q.table] || (byTable[q.table] = {c:0,t:0}); t.t++; if (ok) t.c++; }
     const full = q.kind==='skip' ? `${q.seq.join(', ')}, ${q.ans}` : `${q.x} ${q.op} ${q.y} = ${q.r}`;
@@ -1457,7 +1575,7 @@ function startLesson(L){
       setBar(false);
     } else {
       rec.w++; wrongs++; combo = 0;
-      const lost = exam ? 0 : Math.min(DROP, progress);
+      const lost = fixed ? 0 : Math.min(DROP, progress);
       progress -= lost;
       missed.set(k, (missed.get(k)||0)+1);
       if (!exam){
@@ -1472,7 +1590,7 @@ function startLesson(L){
       const how = q.kind==='skip' ? `Add ${q.n} each time: ${q.seq[2]} + ${q.n} = ${q.ans}.` : explain(q);
       foot.className = 'lesson-foot bad';
       foot.innerHTML = `<div class="fb"><div class="badge">${I.x}</div><div><h4>${TH() ? TH().wrong : 'Not quite'}${lost?` · −${lost}`:''}</h4><p class="num">Answer: ${full}</p><p class="how">${esc(how)}</p></div></div><button class="btn bad" id="go">Got it</button>`;
-      setBar(!exam);
+      setBar(!fixed);
     }
     S.facts[k] = rec; save();
     const go = foot.querySelector('#go');
@@ -1483,9 +1601,9 @@ function startLesson(L){
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key==='Enter'){ e.preventDefault(); if (phase==='answer') check(); else foot.querySelector('#go')?.click(); return; }
     if (phase!=='answer') return;
-    if (q.type==='choice'){ const n = Number(e.key); if (n>=1 && n<=4) pick(n-1); return; }
-    if (/^[0-9]$/.test(e.key)) press(Number(e.key));
-    else if (e.key==='Backspace') press('⌫');
+    if (q.type==='choice'){ const n = Number(e.key); if (n>=1 && n<=4){ keySound(e.key); pick(n-1); } return; }
+    if (/^[0-9]$/.test(e.key)){ keySound(e.key); press(Number(e.key)); }
+    else if (e.key==='Backspace'){ keySound('⌫'); press('⌫'); }
     else if (e.key==='Escape') press('C');
   }
 
@@ -1494,7 +1612,8 @@ function startLesson(L){
     const secs = Math.round((Date.now()-t0)/1000);
     const accuracy = Math.min(100, Math.round((answered - wrongs)/answered*100));
     const passed = exam && accuracy >= EXAM_PASS;
-    const gained = exam ? 30 + (passed ? 20 : 0) : 10 + (wrongs===0 ? 5 : 0);
+    const gained = exam ? 30 + (passed ? 20 : 0) : daily ? 15 + (wrongs===0 ? 5 : 0) : 10 + (wrongs===0 ? 5 : 0);
+    if (daily) S.dailyLast = Date.now();
     if (exam){
       S.exam.last = {pct:accuracy, t:Date.now()};
       if (S.exam.best===null || accuracy > S.exam.best) S.exam.best = accuracy;
@@ -1524,6 +1643,8 @@ function startLesson(L){
           <div class="tile" style="--t:var(--good)"><div class="h">${exam?'Score':'Accuracy'}</div><div class="v num">${accuracy}%</div></div>
           <div class="tile" style="--t:var(--accent)"><div class="h">Time</div><div class="v num">${mm}:${ss}</div></div>
         </div>
+        ${daily ? `<p class="sub num">${masteredCount()} of 78 facts memorized</p>` : ''}
+        ${newlyMastered.size ? `<div class="missed win"><b>Newly memorized</b><div class="num">${[...newlyMastered].map(s=>`<span>${s}</span>`).join('')}</div></div>` : ''}
         ${exam ? `<div class="exam-grid num">${ORDER.slice().sort((a,b)=>a-b).map(n => { const t = byTable[n] || {c:0,t:0}; return `<span class="${t.c===t.t?'ok':t.c===t.t-1?'meh':'no'}">${n}s ${t.c}/${t.t}</span>`; }).join('')}</div>` : ''}
         ${missed.size ? `<div class="missed"><b>Practice these</b><div class="num">${[...missed.keys()].map(s=>`<span>${s}</span>`).join('')}</div></div>` : ''}
       </div>
