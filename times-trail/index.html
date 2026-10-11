@@ -100,6 +100,17 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 .node-wrap.current .node{outline:6px solid color-mix(in srgb, var(--c) 28%, transparent);outline-offset:4px}
 @keyframes bob{50%{transform:translateY(-5px)}}
 .finale{margin-top:30px;text-align:center;color:var(--muted);font-size:.9rem}
+.unit.exam{margin-top:40px}
+.banner .big svg{width:44px;height:44px}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;text-align:left;width:100%;max-width:26em}
+.rules li{background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:10px 14px;font-weight:700}
+.rules b{color:var(--accent)}
+.exam-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:400px}
+.exam-grid span{border-radius:10px;padding:6px 0;font-weight:800;font-size:.85rem}
+.exam-grid .ok{background:var(--good-soft);color:var(--fb-good)}
+.exam-grid .meh{background:var(--sun-soft);color:var(--sun-deep)}
+.exam-grid .no{background:var(--bad-soft);color:var(--fb-bad)}
+.results h1.miss{color:var(--accent)}
 
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;font-size:.92rem;max-width:calc(100% - 32px);z-index:30}
 
@@ -200,7 +211,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 (function(){
 /* ---------- storage (this device only) ---------- */
 const KEY = 'timesTrail.v2';
-const defaults = () => ({done:{}, xp:0, streak:{count:0,last:null}, daily:{date:null,xp:0}, facts:{}, log:[], sound:true, unlockAll:false, goal:30, name:''});
+const defaults = () => ({done:{}, xp:0, streak:{count:0,last:null}, daily:{date:null,xp:0}, facts:{}, log:[], exam:{best:null, passed:null, last:null}, sound:true, unlockAll:false, goal:30, name:''});
 let S = defaults();
 try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(defaults(), JSON.parse(raw)); } catch(e){}
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
@@ -221,6 +232,8 @@ const liveStreak = () => (S.streak.last===dayKey() || S.streak.last===yesterday(
 const ORDER = [1,2,10,5,11,3,4,9,6,8,7,12];
 const GOAL = 10;      // correct answers to finish a lesson
 const DROP = 3;       // progress lost on a wrong answer
+const EXAM_N = 36;    // final exam: 3 questions from each of the 12 tables
+const EXAM_PASS = 90; // percent needed to pass
 const TIPS = {
   1:'Anything times 1 stays the same number.',
   2:'Times 2 means double it.',
@@ -296,7 +309,18 @@ function options(ans, f){
   return shuffle([ans, ...set]);
 }
 
+function buildExam(){
+  const list = [];
+  ORDER.forEach(n => {
+    const bs = shuffle([...Array(12)].map((_,k)=>k+1)).slice(0,3);
+    const a = fact(n, bs[0], '×'); a.table = n; list.push(finalize(a, 'type'));
+    const d = fact(n, bs[1], '÷'); d.table = n; list.push(finalize(d, 'type'));
+    const m = fact(n, bs[2], Math.random()<.5 ? '×' : '÷'); m.table = n; list.push(finalize(m, 'missing'));
+  });
+  return shuffle(list);
+}
 function makeGenerator(L){
+  if (L.kind==='exam'){ const list = buildExam(); let j = 0; return () => list[Math.min(j++, list.length-1)]; }
   let i = 0, bag = [];
   const draw = () => { if (!bag.length) bag = shuffle([...Array(12)].map((_,k)=>k+1)); return bag.pop(); };
   const unlockedTables = () => {
@@ -360,6 +384,7 @@ const I = {
   lock:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10V8a5 5 0 0 1 10 0v2h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm2 0h6V8a3 3 0 0 0-6 0z"/></svg>',
   bulb:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2zM9 19h6v1.5a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 20.5z"/></svg>',
   send:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 11.5 21 3l-6.5 18-3-7.5zM11.5 13.5 21 3"/></svg>',
+  trophy:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V18h3v3H8v-3h3v-3.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zm0 4H6v1a2 2 0 0 0 1 1.7zm10 0v2.7A2 2 0 0 0 18 8V7z"/></svg>',
   target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".8" fill="currentColor"/></svg>'
 };
 function pip(mood='happy', size){
@@ -441,7 +466,8 @@ function renderHome(scrollToCurrent=true){
         <button id="dad"><span class="qi" style="background:var(--good-soft);color:var(--good)">${I.send}</span><span><b>Send to Dad</b><small>Progress report</small></span></button>
       </div>
       <div id="units"></div>
-      ${cur===-1 ? '<p class="finale">Every table is done. Keep the streak going with Review.</p>' : ''}
+      <div id="exam"></div>
+      ${S.exam.passed ? '<p class="finale">Final Exam passed. Keep sharp with Review and Fix mistakes.</p>' : ''}
     </main></div>`);
   const units = scr.querySelector('#units');
   ORDER.forEach((n, u) => {
@@ -472,12 +498,30 @@ function renderHome(scrollToCurrent=true){
     });
     units.appendChild(sec);
   });
+  const examUnlocked = S.unlockAll || ORDER.every(n => S.done[n+'mix']);
+  const examCurrent = cur===-1 && !S.exam.passed;
+  const examLine = S.exam.best===null ? (examUnlocked ? 'All 12 tables mixed together.' : 'Unlocks after every Master lesson.')
+    : `Best score ${S.exam.best}%${S.exam.passed ? ' · Passed' : ` · Need ${EXAM_PASS}% to pass`}`;
+  const ex = $(`<section class="unit exam" style="--c:var(--accent-deep);--deep:var(--ink)">
+    <div class="banner ${examUnlocked?'':'locked'}" style="background:var(--accent-deep)">
+      <div><div class="eyebrow">Final exam · ${EXAM_N} questions</div><h2>All 12 tables</h2><p class="tipline">${examLine}</p></div>
+      <div class="big">${I.trophy}</div>
+    </div>
+    <div class="trail"><div class="node-wrap ${examCurrent?'current':''}">
+      ${examCurrent?'<div class="start-tag">START</div>':''}
+      <button class="node ${examUnlocked?'':'locked'} ${S.exam.passed?'done':''}" aria-label="Final exam${S.exam.passed?', passed':''}${examUnlocked?'':', locked'}">${examUnlocked ? I.trophy : I.lock}</button>
+      <div class="node-label">FINAL EXAM</div></div></div></section>`);
+  ex.querySelector('.node').onclick = () => {
+    if (!examUnlocked){ sfx.tap(); toast('Finish every Master lesson to unlock the Final Exam.'); return; }
+    showExamIntro();
+  };
+  scr.querySelector('#exam').appendChild(ex);
   scr.querySelector('#weak').onclick = () => startLesson({id:'weak',kind:'weak',name:'Fix mistakes'});
   scr.querySelector('#all').onclick = () => startLesson({id:'review',kind:'review',name:'Review'});
   scr.querySelector('#dad').onclick = openReport;
   scr.querySelector('#settings').onclick = openSettings;
   app.replaceChildren(scr);
-  if (scrollToCurrent && cur>0){
+  if (scrollToCurrent && (cur>0 || examCurrent)){
     const el = scr.querySelector('.current');
     if (el) requestAnimationFrame(()=> el.scrollIntoView({block:'center'}));
   }
@@ -501,6 +545,7 @@ function buildReport(){
     ``,
     `Streak: ${liveStreak()} day${liveStreak()===1?'':'s'} · Total XP: ${S.xp}`,
     `Tables mastered: ${finished.length ? finished.map(n=>n+'s').join(', ') : 'none yet'}`,
+    `Final exam: ${S.exam.best===null ? 'not taken yet' : `best ${S.exam.best}%, last ${S.exam.last.pct}%${S.exam.passed ? ` — PASSED ${new Date(S.exam.passed).toLocaleDateString(undefined,{month:'short',day:'numeric'})}` : ` (needs ${EXAM_PASS}%)`}`}`,
     `Working on: ${started.length ? started.map(n=>`${n}s (${KINDS.filter(K=>S.done[n+K.k]).length}/4)`).join(', ') : '—'}`,
     ``,
     `Last 7 days: ${week.length} lesson${week.length===1?'':'s'} on ${days} day${days===1?'':'s'}, about ${mins} min`,
@@ -584,10 +629,35 @@ function showIntro(L){
   setKeys(e => { if (e.key==='Enter'){ e.preventDefault(); startLesson(L); } });
 }
 
+/* ---------- FINAL EXAM intro ---------- */
+function showExamIntro(){
+  const start = () => startLesson({id:'exam', kind:'exam', name:'Final Exam'});
+  const scr = $(`<div class="screen">
+    <div class="lesson-top"><button class="iconbtn" id="quit" aria-label="Back">${I.x}</button></div>
+    <div class="intro">
+      ${pip('wow')}
+      <h1>Final Exam</h1>
+      <ul class="rules">
+        <li><b>${EXAM_N} questions</b> from all 12 tables, mixed up</li>
+        <li>Multiply, divide and missing numbers. <b>Type every answer.</b></li>
+        <li>Each question counts once. No do-overs and no points taken away.</li>
+        <li>Get <b>${EXAM_PASS}%</b> (${Math.ceil(EXAM_N*EXAM_PASS/100)} right) to pass.</li>
+      </ul>
+      ${S.exam.best!==null ? `<p class="flip">Your best so far: ${S.exam.best}%</p>` : ''}
+    </div>
+    <div class="res-foot"><button class="btn" id="go">Start the exam</button></div></div>`);
+  scr.querySelector('#quit').onclick = () => renderHome(false);
+  scr.querySelector('#go').onclick = start;
+  app.replaceChildren(scr);
+  setKeys(e => { if (e.key==='Enter'){ e.preventDefault(); start(); } });
+}
+
 /* ---------- LESSON (IXL-style: wrong answers push progress back) ---------- */
 function startLesson(L){
   if (L.kind==='weak' && !weakFacts().length){ toast('No missed facts to fix yet.'); return; }
   const gen = makeGenerator(L);
+  const exam = L.kind==='exam', TOTAL = exam ? EXAM_N : GOAL;
+  const byTable = {};
   let progress = 0, answered = 0, firstTryRight = 0, wrongs = 0, combo = 0;
   const retries = [];           // [{q, due}] missed facts come back soon
   const missed = new Map();
@@ -597,8 +667,8 @@ function startLesson(L){
   const scr = $(`<div class="screen">
     <div class="lesson-top">
       <button class="iconbtn" id="quit" aria-label="Quit lesson">${I.x}</button>
-      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${GOAL}" aria-valuenow="0"><i></i></div>
-      <div class="score num" id="sc">0/${GOAL}</div>
+      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${TOTAL}" aria-valuenow="0"><i></i></div>
+      <div class="score num" id="sc">0/${TOTAL}</div>
     </div>
     <div class="stage" id="stage"></div>
     <div class="lesson-foot" id="foot"></div></div>`);
@@ -608,15 +678,16 @@ function startLesson(L){
 
   let quitArmed = false;
   scr.querySelector('#quit').onclick = () => {
-    if (progress===0 || quitArmed){ renderHome(false); return; }
-    quitArmed = true; toast('Tap × again to quit. This lesson won’t be saved.');
+    if ((exam ? answered : progress)===0 || quitArmed){ renderHome(false); return; }
+    quitArmed = true; toast(`Tap × again to quit. This ${exam?'exam':'lesson'} won’t be saved.`);
     setTimeout(()=>quitArmed=false, 2500);
   };
 
   function setBar(dropped){
-    barI.style.width = (progress/GOAL*100)+'%';
-    sc.textContent = progress+'/'+GOAL;
-    bar.setAttribute('aria-valuenow', progress);
+    const v = exam ? answered : progress;
+    barI.style.width = (v/TOTAL*100)+'%';
+    sc.textContent = v+'/'+TOTAL;
+    bar.setAttribute('aria-valuenow', v);
     bar.classList.toggle('drop', !!dropped); sc.classList.toggle('drop', !!dropped);
   }
 
@@ -624,7 +695,7 @@ function startLesson(L){
   const tok = (part) => q.blank===part ? blankHTML() : `<span>${q[part]}</span>`;
 
   function next(){
-    if (progress >= GOAL) return finish();
+    if (exam ? answered >= TOTAL : progress >= GOAL) return finish();
     const due = retries.findIndex(r => r.due <= answered);
     if (due > -1){ q = retries.splice(due,1)[0].q; } else q = gen();
     input = ''; phase = 'answer';
@@ -640,7 +711,7 @@ function startLesson(L){
       if (q.help) extra = `<div class="helper"><b>Tip</b><span>${esc(TIPS[q.f[0]] || '')}</span></div>`;
       if (q.retry) extra = `<div class="helper"><b>Remember</b><span>${esc(explain(q))}</span></div>`;
     }
-    stage.innerHTML = `<div><div class="combo">${combo>=3?combo+' in a row':''}</div><h2 class="kicker">${title}</h2></div>
+    stage.innerHTML = `<div><div class="combo">${exam ? `Question ${answered+1} of ${TOTAL}` : (combo>=3?combo+' in a row':'')}</div><h2 class="kicker">${title}</h2></div>
       <div class="prompt-row">${pip(combo>=3?'wow':'happy')}${body}</div>${extra}<div id="ans"></div>`;
     const ans = stage.querySelector('#ans');
     if (q.type==='choice'){
@@ -688,6 +759,7 @@ function startLesson(L){
     const ok = Number(input)===q.ans;
     const k = factKey(q.f), rec = S.facts[k] || {c:0,w:0};
     answered++;
+    if (exam){ const t = byTable[q.table] || (byTable[q.table] = {c:0,t:0}); t.t++; if (ok) t.c++; }
     const full = q.kind==='skip' ? `${q.seq.join(', ')}, ${q.ans}` : `${q.x} ${q.op} ${q.y} = ${q.r}`;
     if (ok){
       rec.c++; if (rec.w>0 && !q.retry) rec.w--;
@@ -701,20 +773,22 @@ function startLesson(L){
       setBar(false);
     } else {
       rec.w++; wrongs++; combo = 0;
-      const lost = Math.min(DROP, progress);
+      const lost = exam ? 0 : Math.min(DROP, progress);
       progress -= lost;
       missed.set(k, (missed.get(k)||0)+1);
-      const again = Object.assign({}, q, {retry:true, type:'type', blank: q.kind==='skip' ? q.blank : 'r'});
-      if (again.kind==='fact') again.ans = again.r;
-      delete again.opts;
-      retries.push({q:again, due: answered + 2});
+      if (!exam){
+        const again = Object.assign({}, q, {retry:true, type:'type', blank: q.kind==='skip' ? q.blank : 'r'});
+        if (again.kind==='fact') again.ans = again.r;
+        delete again.opts;
+        retries.push({q:again, due: answered + 2});
+      }
       sfx.bad();
       stage.querySelector('#bubble').classList.add('shake');
       const m = stage.querySelector('.mascot'); if (m) m.outerHTML = pip('sad');
       const how = q.kind==='skip' ? `Add ${q.n} each time: ${q.seq[2]} + ${q.n} = ${q.ans}.` : explain(q);
       foot.className = 'lesson-foot bad';
       foot.innerHTML = `<div class="fb"><div class="badge">${I.x}</div><div><h4>Not quite${lost?` · −${lost}`:''}</h4><p class="num">Answer: ${full}</p><p class="how">${esc(how)}</p></div></div><button class="btn bad" id="go">Got it</button>`;
-      setBar(true);
+      setBar(!exam);
     }
     S.facts[k] = rec; save();
     const go = foot.querySelector('#go');
@@ -735,7 +809,13 @@ function startLesson(L){
     setKeys(null);
     const secs = Math.round((Date.now()-t0)/1000);
     const accuracy = Math.min(100, Math.round((answered - wrongs)/answered*100));
-    const gained = 10 + (wrongs===0 ? 5 : 0);
+    const passed = exam && accuracy >= EXAM_PASS;
+    const gained = exam ? 30 + (passed ? 20 : 0) : 10 + (wrongs===0 ? 5 : 0);
+    if (exam){
+      S.exam.last = {pct:accuracy, t:Date.now()};
+      if (S.exam.best===null || accuracy > S.exam.best) S.exam.best = accuracy;
+      if (passed && !S.exam.passed) S.exam.passed = Date.now();
+    }
     S.xp += gained;
     const today = dayKey();
     if (S.daily.date!==today) S.daily = {date:today, xp:0};
@@ -753,13 +833,14 @@ function startLesson(L){
     const res = $(`<div class="screen">
       <div class="results">
         ${pip('wow')}
-        <h1>${wrongs===0 ? 'Perfect lesson!' : 'Lesson complete!'}</h1>
-        <p class="sub">${esc(L.unit ? `The ${L.unit}s · ${L.name}` : L.name)}</p>
+        <h1 class="${exam && !passed ? 'miss' : ''}">${exam ? (accuracy===100 ? 'Perfect Final Exam!' : passed ? 'You passed the Final Exam!' : 'Almost there!') : (wrongs===0 ? 'Perfect lesson!' : 'Lesson complete!')}</h1>
+        <p class="sub">${exam ? `${answered - wrongs} of ${TOTAL} right · ${passed ? 'Passed' : `need ${EXAM_PASS}% to pass. Practice the red tables and try again.`}` : esc(L.unit ? `The ${L.unit}s · ${L.name}` : L.name)}</p>
         <div class="tiles">
           <div class="tile" style="--t:var(--sun)"><div class="h">XP</div><div class="v num">+${gained}</div></div>
-          <div class="tile" style="--t:var(--good)"><div class="h">Accuracy</div><div class="v num">${accuracy}%</div></div>
+          <div class="tile" style="--t:var(--good)"><div class="h">${exam?'Score':'Accuracy'}</div><div class="v num">${accuracy}%</div></div>
           <div class="tile" style="--t:var(--accent)"><div class="h">Time</div><div class="v num">${mm}:${ss}</div></div>
         </div>
+        ${exam ? `<div class="exam-grid num">${ORDER.slice().sort((a,b)=>a-b).map(n => { const t = byTable[n] || {c:0,t:0}; return `<span class="${t.c===t.t?'ok':t.c===t.t-1?'meh':'no'}">${n}s ${t.c}/${t.t}</span>`; }).join('')}</div>` : ''}
         ${missed.size ? `<div class="missed"><b>Practice these</b><div class="num">${[...missed.keys()].map(s=>`<span>${s}</span>`).join('')}</div></div>` : ''}
       </div>
       <div class="res-foot"><button class="btn" id="cont">Continue</button></div></div>`);
