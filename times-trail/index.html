@@ -940,7 +940,7 @@ function renderHome(scrollToCurrent=true){
       <div class="quick">
         <button id="weak" ${weakCount?'':'disabled'}><span class="qi" style="background:var(--bad-soft);color:var(--bad)">${I.target}</span><span><b>Fix mistakes</b><small>${weakCount?weakCount+' facts':'None yet'}</small></span></button>
         <button id="all"><span class="qi" style="background:var(--accent-soft);color:var(--accent)">${I.bolt}</span><span><b>Review</b><small>Tables so far</small></span></button>
-        <button id="dad"><span class="qi" style="background:var(--good-soft);color:var(--good)">${I.send}</span><span><b>Send to Dad</b><small>Progress report</small></span></button>
+        <button id="dad"><span class="qi" style="background:var(--good-soft);color:var(--good)">${I.send}</span><span><b>Send to Parent</b><small>Progress report</small></span></button>
       </div>
       <div id="units"></div>
       <div id="exam"></div>
@@ -1081,9 +1081,9 @@ const hasUndo = () => { try { return localStorage.getItem(KEY+'.undo') !== null;
 function openReport(){
   const text = buildReport();
   let full = text;
-  const o = $(`<div class="overlay"><div class="sheet" role="dialog" aria-label="Send progress to Dad">
-    <h3>Send to Dad</h3>
-    <p>Copy this and text it to Dad. The backup code at the bottom keeps your progress safe.</p>
+  const o = $(`<div class="overlay"><div class="sheet" role="dialog" aria-label="Send progress to a parent">
+    <h3>Send to Parent</h3>
+    <p>Copy this and text it to your parent. The backup code at the bottom keeps your progress safe.</p>
     <div class="both" id="both"><pre class="report" id="rep">${esc(text)}</pre><pre class="report code" id="code">Making backup code…</pre></div>
     <button class="btn" id="copy">Copy report</button>
     <a class="btn ghost" id="sms" href="sms:?&body=${encodeURIComponent(text)}">Text it</a>
@@ -1105,11 +1105,11 @@ function openBackup(){
   let code = '', found = null, armed = false, token = 0;
   const o = $(`<div class="overlay"><div class="sheet" role="dialog" aria-label="Backup and restore">
     <h3>Backup</h3>
-    <p>All the progress on this device, saved as one code. Text it to Dad to keep it safe.</p>
+    <p>All the progress on this device, saved as one code. Text it to a parent to keep it safe.</p>
     <pre class="report code" id="code">Making backup code…</pre>
     <button class="btn" id="copyb">Copy backup code</button>
     <h3 class="gap">Restore</h3>
-    <p>Paste a backup code, or a whole Send to Dad message, to load that progress here. It replaces the progress on this device.</p>
+    <p>Paste a backup code, or a whole Send to Parent message, to load that progress here. It replaces the progress on this device.</p>
     <label class="sr" for="rcode">Backup code</label>
     <textarea id="rcode" rows="3" placeholder="Paste a code that starts with TT2" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
     <p class="rmsg" id="rmsg" aria-live="polite"></p>
