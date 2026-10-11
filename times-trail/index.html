@@ -358,7 +358,13 @@ function makeGenerator(L){
       return finalize(q, step%5===0 ? 'choice' : (step%4===2 ? 'missing' : 'type'));
     }
     if (L.kind==='mix'){
-      const q = fact(n,b, Math.random()<.5 ? '×' : '÷');
+      // about 1 in 4 questions come from the 2 tables learned just before this one
+      const pos = ORDER.indexOf(n);
+      const earlier = ORDER.slice(Math.max(0, pos-2), pos);
+      const useEarlier = earlier.length && step%4===2;
+      const t = useEarlier ? earlier[ri(0, earlier.length-1)] : n;
+      const q = fact(t, useEarlier ? ri(1,12) : b, Math.random()<.5 ? '×' : '÷');
+      if (useEarlier) q.earlier = t;
       return finalize(q, step%3===1 ? 'missing' : 'type');
     }
     if (L.kind==='weak'){
@@ -709,7 +715,7 @@ function startLesson(L){
       title = `Count by ${q.n}s. What comes next?`;
       body = `<div class="bubble seq num" id="bubble">${q.seq.map(v=>`<span>${v},</span>`).join('')}${blankHTML()}</div>`;
     } else {
-      title = q.retry ? 'Try this one again' : q.array ? `${q.x} rows of ${q.y}. How many dots?` : q.type==='choice' ? 'Pick the right answer' : (q.blank==='r' ? 'Type the answer' : 'Find the missing number');
+      title = q.retry ? 'Try this one again' : q.earlier ? `Review: the ${q.earlier}s` : q.array ? `${q.x} rows of ${q.y}. How many dots?` : q.type==='choice' ? 'Pick the right answer' : (q.blank==='r' ? 'Type the answer' : 'Find the missing number');
       body = `<div class="bubble num" id="bubble">${tok('x')}<span class="op">${q.op}</span>${tok('y')}<span class="op">=</span>${tok('r')}</div>`;
       if (q.array) extra = `<div class="array-box">${arraySVG(q.x, q.y)}</div>`;
       if (q.family) extra = `<div class="helper"><b>Fact family</b><span>Think: ${q.y} × what = ${q.x}?</span></div>`;
