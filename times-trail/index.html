@@ -311,12 +311,17 @@ function options(ans, f){
 
 function buildExam(){
   const list = [];
+  const prev = new Set(S.exam.lastFacts || []);   // facts from her last attempt
   ORDER.forEach(n => {
-    const bs = shuffle([...Array(12)].map((_,k)=>k+1)).slice(0,3);
+    const all = [...Array(12)].map((_,k)=>k+1);
+    const fresh = shuffle(all.filter(b => !prev.has(factKey([n,b]))));
+    const stale = shuffle(all.filter(b => prev.has(factKey([n,b]))));
+    const bs = fresh.concat(stale).slice(0,3);
     const a = fact(n, bs[0], '×'); a.table = n; list.push(finalize(a, 'type'));
     const d = fact(n, bs[1], '÷'); d.table = n; list.push(finalize(d, 'type'));
     const m = fact(n, bs[2], Math.random()<.5 ? '×' : '÷'); m.table = n; list.push(finalize(m, 'missing'));
   });
+  S.exam.lastFacts = list.map(q => factKey(q.f)); save();
   return shuffle(list);
 }
 function makeGenerator(L){
