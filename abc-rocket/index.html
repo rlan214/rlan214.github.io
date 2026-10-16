@@ -618,7 +618,8 @@ function say(parts, rateMul=1){
   }catch(e){}
 }
 function setTalking(on){ const b = $('#speakBtn'); if (b) b.classList.toggle('talking', on); }
-const sayL = L => NAME[L];
+// iPad voices mispronounce spelled-out names ("ay" sounds like "I"), so always say "the letter X".
+const LN = L => `the letter ${L}`;
 function praise(){ return pick(TH().praise).replace(/!$/,''); }
 
 /* ---------- tracing paths (0–100 box, y down) ---------- */
@@ -726,7 +727,7 @@ function vAbc(){
   return `<div class="screen">${topBar('Letters', starPill())}
     <div class="scroll"><div class="board">${AZ.map(L => `<button class="ltile" style="--c:${colorOf(L)}" data-act="letter" data-l="${L}">${fl.includes(L)?'<span class="st">⭐</span>':''}<span>${showL(L)}</span><small>${ABC[L][1]}</small></button>`).join('')}</div></div></div>`;
 }
-function speakLetter(L){ say([`${NAME[L]}.`, `${NAME[L]} is for ${ABC[L][0]}.`]); }
+function speakLetter(L){ say([`${LN(L)}.`, `The letter ${L} is for ${ABC[L][0]}.`]); }
 function vLetter(){
   const L = cur.L, [word, em] = ABC[L], i = AZ.indexOf(L);
   return `<div class="screen" style="--c:${colorOf(L)}">${topBar('', `<button class="iconbtn sm" data-act="abc" aria-label="All letters"><span style="font-family:var(--f-display);font-weight:800;font-size:1rem">ABC</span></button>`)}
@@ -753,7 +754,7 @@ function startSpell(i){
   const ws = parseWords(); const x = ws[i]; if (!x) return;
   const letters = x.w.split('');
   go('spell', {i, w:x.w, e:x.e, pos:0, misses:0, tiles: shuffle(letters.map((c,k)=>({c, k, used:false}))), done:false});
-  setTimeout(() => say([`Let's spell ${x.w.toLowerCase()}.`, `Find ${NAME[letters[0]]}.`]), 250);
+  setTimeout(() => say([`Let's spell ${x.w.toLowerCase()}.`, `Find ${LN(letters[0])}.`]), 250);
 }
 function vSpell(){
   const c = cur, letters = c.w.split('');
@@ -779,12 +780,12 @@ function tapTile(idx, el){
     if (c.pos >= c.w.length){
       c.done = true; S.spelled[c.w] = (S.spelled[c.w]||0) + 1; addStar(); logPush('spelled', c.w); save();
       render(); sfxDone(); setTimeout(burst, 150);
-      say([c.w.split('').map(L => NAME[L]).join(', ') + '.', c.w.toLowerCase() + '!', praise() + '!']); mixAfter('spell');
-    } else { render(); say([NAME[t.c] + '.', `Find ${NAME[c.w[c.pos]]}.`]); }
+      say([c.w.split('').join(', ') + '.', c.w.toLowerCase() + '!', praise() + '!']); mixAfter('spell');
+    } else { render(); say([`${LN(t.c)}.`, `Now find ${LN(c.w[c.pos])}.`]); }
   } else {
     c.misses++; el.classList.remove('wiggle'); void el.offsetWidth; el.classList.add('wiggle');
     tone(300,0,.18,'triangle',.1);
-    say([`That's ${NAME[t.c]}.`, `Find ${NAME[need]}.`]);
+    say([`That's ${LN(t.c)}.`, `Find ${LN(need)}.`]);
     if (c.misses === 2) setTimeout(render, 420);
   }
 }
@@ -796,7 +797,7 @@ function startTrace(L){
   L = L || order.find(x => !S.traced[x]) || order[0];
   const strokes = STROKES[L].map(s => resample(s));
   go('trace', {L, strokes, si:0, idx:0, done:false});
-  setTimeout(() => say([`Let's trace ${NAME[L]}.`, 'Start at the green dot.']), 250);
+  setTimeout(() => say([`Let's trace ${LN(L)}.`, 'Start at the green dot.']), 250);
 }
 function vTrace(){
   const c = cur, col = colorOf(c.L);
@@ -870,13 +871,13 @@ function finishTrace(){
   const c = cur; c.done = true;
   S.traced[c.L] = (S.traced[c.L]||0) + 1; addStar(); logPush('traced', c.L); save();
   render(); sfxDone(); setTimeout(burst, 120);
-  say([`${praise()}!`, `You traced ${NAME[c.L]}!`]); mixAfter('trace');
+  say([`${praise()}!`, `You traced ${LN(c.L)}!`]); mixAfter('trace');
 }
 let demoTimer = null;
 function demo(){
   const c = cur, g = $('#demo'); if (!g) return;
   clearTimeout(demoTimer); g.innerHTML = '';
-  say([`Watch. ${NAME[c.L]}.`]);
+  say([`Watch. ${LN(c.L)}.`]);
   const col = colorOf(c.L);
   c.strokes.forEach((p,k) => {
     demoTimer = setTimeout(() => {
@@ -900,7 +901,7 @@ function newRound(){
   const others = shuffle(AZ.filter(L => L !== target)).slice(0, 2);
   c.target = target; c.opts = shuffle([target, ...others]).map(L => ({L, low: S.set.lower && Math.random() < .5, wrong:false}));
   c.busy = false; render();
-  setTimeout(() => say([`Find ${NAME[target]}.`]), 200);
+  setTimeout(() => say([`Find ${LN(target)}.`]), 200);
 }
 function vFind(){
   const c = cur;
@@ -917,12 +918,12 @@ function tapBub(i, el){
   if (o.L === c.target){
     c.busy = true; el.classList.add('right'); sfxGood();
     S.found[o.L] = (S.found[o.L]||0) + 1; today().found++; c.round++; c.got++; save();
-    say([`Yes! ${NAME[o.L]}!`]);
+    say([`Yes! That's ${LN(o.L)}!`]);
     setTimeout(() => { if (view !== 'find') return; if (c.round >= rounds()){ addStar(2); today().finds++; save(); go('findDone'); sfxDone(); setTimeout(burst, 150); say([`${praise()}!`, 'You found them all!']); mixAfter('findDone'); } else newRound(); }, 1100);
   } else {
     o.wrong = true; c.misses++; tone(300,0,.18,'triangle',.1);
     el.classList.add('wrong');
-    say([`That's ${NAME[o.L]}.`, `Find ${NAME[c.target]}.`]);
+    say([`That's ${LN(o.L)}.`, `Find ${LN(c.target)}.`]);
   }
 }
 function vFindDone(){
@@ -1030,16 +1031,16 @@ app.addEventListener('click', e => {
     case 'sayLetter': speakLetter(cur.L); break;
     case 'words': go('words'); say(['Pick a word to spell!']); break;
     case 'spell': startSpell(+b.dataset.i); break;
-    case 'sayWord': say([cur.w.toLowerCase() + '.', cur.done ? '' : `Find ${NAME[cur.w[cur.pos]]}.`]); break;
+    case 'sayWord': say([cur.w.toLowerCase() + '.', cur.done ? '' : `Find ${LN(cur.w[cur.pos])}.`]); break;
     case 'tile': tapTile(+b.dataset.idx, b); break;
     case 'trace': startTrace(b.dataset.l); break;
     case 'traceL': startTrace(b.dataset.l); break;
-    case 'sayTrace': say([`${NAME[cur.L]}.`, 'Start at the green dot.']); break;
+    case 'sayTrace': say([`${LN(cur.L)}.`, 'Start at the green dot.']); break;
     case 'demo': demo(); break;
     case 'traceAgain': startTrace(cur.L); break;
     case 'traceNext': { const o = traceOrder(); startTrace(o[(o.indexOf(cur.L)+1) % o.length]); } break;
     case 'find': startFind(); break;
-    case 'sayFind': say([`Find ${NAME[cur.target]}.`]); break;
+    case 'sayFind': say([`Find ${LN(cur.target)}.`]); break;
     case 'bub': tapBub(+b.dataset.i, b); break;
     case 'parent': pinBuf = ''; go('pin'); break;
     case 'pin': pinPress(b.dataset.k); break;
@@ -1047,7 +1048,7 @@ app.addEventListener('click', e => {
     case 'saveWords': { S.set.words = $('#words').value; const n = parseWords().length; if (!n){ toast('Add at least one word'); return; } save(); render(); toast(`Saved · ${n} word${n===1?'':'s'}`); } break;
     case 'loadSet': { const w = WORD_SETS[+b.dataset.i]; S.set.words = w[2]; save(); render(); toast(`${w[0]} loaded · ${parseWords().length} words`); } break;
     case 'lower': S.set.lower = b.dataset.v === '1'; save(); render(); break;
-    case 'testVoice': say(['ess. ess is for sun.', 'Find tee!']); break;
+    case 'testVoice': say(['The letter A is for Apple.', 'Find the letter I.']); break;
   }
 });
 document.addEventListener('keydown', e => {
