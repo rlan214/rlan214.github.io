@@ -115,6 +115,13 @@ body.has-lights .screen{padding-top:calc(var(--safe-t) + 22px)}
 .ptext h3{margin:0;font-family:var(--f-display);font-weight:800;font-size:1.3rem}
 .ptext p{margin:2px 0 0;color:var(--muted)}
 .sendbtn{font-size:1.15rem;padding:12px 18px}
+.pbtns{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
+.playbtn{font-size:1.5rem;padding:14px 26px;animation:nudge 2.4s ease-in-out infinite}
+.playbtn svg{width:28px;height:28px}
+@keyframes nudge{0%,80%,100%{transform:none}88%{transform:scale(1.07)}94%{transform:scale(.97)}}
+.pring.dice::before{background:color-mix(in srgb,var(--ink) 14%,transparent)}
+.pring.dice div{font-size:2.6rem}
+.mixpill{background:var(--good);color:#fff;border-color:transparent}
 .mine h3{margin:0 0 10px;font-family:var(--f-display);font-weight:800;font-size:1.25rem;display:flex;align-items:center;gap:8px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .lchip{position:relative;width:54px;height:60px;border-radius:16px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:1.9rem;color:#fff;background:var(--c);box-shadow:0 4px 0 color-mix(in srgb,var(--c) 62%,#000)}
@@ -340,6 +347,25 @@ function goalReached(){
   sfxDone(); setTimeout(burst, 150);
   say([`Time's up! ${praise()}!`, `You played ${S.set.goal} minutes. Tap send to parents.`]);
 }
+
+/* ---------- mix mode: random games back to back ---------- */
+let mix = false, lastMix = null, mixTimer = null, mixCount = 0;
+function startMix(){ mix = true; lastMix = null; mixCount = 0; say(["Let's play! Mix it up!"]); setTimeout(mixNext, 900); }
+function mixNext(){
+  clearTimeout(mixTimer); if (!mix) return;
+  const ws = parseWords(), fl = focusLetters();
+  const opts = ['spell','trace','find'].filter(a => a !== lastMix && (a !== 'spell' || ws.length));
+  const a = pick(opts); lastMix = a; mixCount++;
+  if (a === 'spell') startSpell(Math.floor(Math.random()*ws.length));
+  else if (a === 'trace') startTrace(fl.length ? pick(fl) : pick(AZ));
+  else startFind();
+}
+function mixAfter(doneView){
+  if (!mix) return;
+  clearTimeout(mixTimer);
+  mixTimer = setTimeout(() => { if (mix && view === doneView && (view !== 'spell' && view !== 'trace' || cur.done)) mixNext(); }, 4200);
+}
+const nextGameBtn = () => `<button class="btn good" data-act="mixNext">Next game${IC.right}</button>`;
 
 /* ---------- letters ---------- */
 const AZ = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
@@ -642,15 +668,16 @@ function render(){
   if (view === 'parent') bindParent();
 }
 const topBar = (title, extra='') => `<div class="topbar"><button class="iconbtn" data-act="home" aria-label="Home">${IC.home}</button><div class="title">${title}</div>${extra}</div>`;
-const starPill = () => `<div class="starcount">⭐ <span>${S.stars}</span></div>`;
+const starPill = () => (mix ? `<div class="starcount mixpill">🎲 Mix</div>` : '') + `<div class="starcount">⭐ <span>${S.stars}</span></div>`;
 
 function playCard(){
-  const g = +S.set.goal || 0, d = today(); if (!g) return '';
-  const pct = Math.min(100, d.sec/(g*60)*100);
-  return `<div class="card play">
-    <div class="pring" id="playRing" style="--p:${pct}"><div><b id="playMin">${mins(d.sec)}</b><small>of ${g} min</small></div></div>
-    <div class="ptext">${d.sec >= g*60 ? `<h3>✅ ${g} minutes done!</h3><p>Great job! Show your parents.</p>` : `<h3>Play ${g} minutes</h3><p>Learn letters to earn more game time!</p>`}</div>
-    ${d.sec >= g*60 ? `<button class="btn honey sendbtn" data-act="send">📤 Send to Parents</button>` : ''}
+  const g = +S.set.goal || 0, d = today();
+  const done = g && d.sec >= g*60, pct = g ? Math.min(100, d.sec/(g*60)*100) : 0;
+  const ring = g ? `<div class="pring" id="playRing" style="--p:${pct}"><div><b id="playMin">${mins(d.sec)}</b><small>of ${g} min</small></div></div>` : `<div class="pring dice"><div>🎲</div></div>`;
+  const text = done ? `<h3>✅ ${g} minutes done!</h3><p>Great job! Show your parents.</p>`
+    : g ? `<h3>Play ${g} minutes</h3><p>Tap play for random games!</p>` : `<h3>Mix it up!</h3><p>Tap play for random games!</p>`;
+  return `<div class="card play">${ring}<div class="ptext">${text}</div>
+    <div class="pbtns">${done ? `<button class="btn honey sendbtn" data-act="send">📤 Send to Parents</button>` : ''}<button class="btn good playbtn" data-act="mix"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>Play</button></div>
   </div>`;
 }
 function vGoal(){
@@ -727,7 +754,7 @@ function vSpell(){
       <div class="hero"><div class="pic" data-act="sayWord">${esc(c.e)}</div><button class="speakbtn" id="speakBtn" data-act="sayWord" aria-label="Hear the word">${IC.speaker}</button></div>
       <div class="slots">${slots}</div>
       ${c.done
-        ? `<div class="done-row"><button class="btn ghost" data-act="spell" data-i="${c.i}">${IC.redo}Again</button>${ws.length>1?`<button class="btn good" data-act="spell" data-i="${(c.i+1)%ws.length}">Next word${IC.right}</button>`:''}</div>`
+        ? (mix ? `<div class="done-row">${nextGameBtn()}</div>` : `<div class="done-row"><button class="btn ghost" data-act="spell" data-i="${c.i}">${IC.redo}Again</button>${ws.length>1?`<button class="btn good" data-act="spell" data-i="${(c.i+1)%ws.length}">Next word${IC.right}</button>`:''}</div>`)
         : `<div class="tiles">${tiles}</div>`}
     </div></div>`;
 }
@@ -740,7 +767,7 @@ function tapTile(idx, el){
     if (c.pos >= c.w.length){
       c.done = true; S.spelled[c.w] = (S.spelled[c.w]||0) + 1; addStar(); logPush('spelled', c.w); save();
       render(); sfxDone(); setTimeout(burst, 150);
-      say([c.w.split('').map(L => NAME[L]).join(', ') + '.', c.w.toLowerCase() + '!', praise() + '!']);
+      say([c.w.split('').map(L => NAME[L]).join(', ') + '.', c.w.toLowerCase() + '!', praise() + '!']); mixAfter('spell');
     } else { render(); say([NAME[t.c] + '.', `Find ${NAME[c.w[c.pos]]}.`]); }
   } else {
     c.misses++; el.classList.remove('wiggle'); void el.offsetWidth; el.classList.add('wiggle');
@@ -768,7 +795,7 @@ function vTrace(){
       <div class="board-tr" id="trboard"><svg id="trsvg" viewBox="-8 -6 116 112" aria-label="Trace the letter ${c.L}"></svg></div>
       <div class="trbtns">
         ${c.done
-          ? `<button class="btn ghost" data-act="traceAgain">${IC.redo}Again</button><button class="btn good" data-act="traceNext">Next letter${IC.right}</button>`
+          ? (mix ? nextGameBtn() : `<button class="btn ghost" data-act="traceAgain">${IC.redo}Again</button><button class="btn good" data-act="traceNext">Next letter${IC.right}</button>`)
           : `<button class="speakbtn" id="speakBtn" data-act="sayTrace" aria-label="Hear it" style="width:64px;height:64px;border-radius:22px">${IC.speaker}</button>
              <button class="btn ghost" data-act="demo">${IC.eye}Show me</button>
              <button class="btn ghost" data-act="traceAgain">${IC.redo}Clear</button>`}
@@ -831,7 +858,7 @@ function finishTrace(){
   const c = cur; c.done = true;
   S.traced[c.L] = (S.traced[c.L]||0) + 1; addStar(); logPush('traced', c.L); save();
   render(); sfxDone(); setTimeout(burst, 120);
-  say([`${praise()}!`, `You traced ${NAME[c.L]}!`]);
+  say([`${praise()}!`, `You traced ${NAME[c.L]}!`]); mixAfter('trace');
 }
 let demoTimer = null;
 function demo(){
@@ -853,7 +880,7 @@ function demo(){
 }
 
 /* ----- find ----- */
-const ROUNDS = 8;
+const rounds = () => mix ? 5 : 8;
 function startFind(){ if (HAS_TTS) speechSynthesis.cancel(); view = 'find'; cur = {round:0, got:0, misses:0}; newRound(); }
 function newRound(){
   const c = cur, fl = focusLetters();
@@ -867,7 +894,7 @@ function vFind(){
   const c = cur;
   return `<div class="screen">${topBar('Find it', starPill())}
     <div class="find">
-      <div class="dots">${Array.from({length:ROUNDS},(_,i)=>`<i class="${i<c.round?'on':''}"></i>`).join('')}</div>
+      <div class="dots">${Array.from({length:rounds()},(_,i)=>`<i class="${i<c.round?'on':''}"></i>`).join('')}</div>
       <div class="prompt">Find the letter <button class="speakbtn" id="speakBtn" data-act="sayFind" aria-label="Hear it again">${IC.speaker}</button></div>
       <div class="bubbles">${c.opts.map((o,i) => `<button class="bub ${o.wrong?'wrong':''}" style="--c:${colorOf(o.L)}" data-act="bub" data-i="${i}">${o.low ? o.L.toLowerCase() : o.L}</button>`).join('')}</div>
     </div></div>`;
@@ -879,7 +906,7 @@ function tapBub(i, el){
     c.busy = true; el.classList.add('right'); sfxGood();
     S.found[o.L] = (S.found[o.L]||0) + 1; today().found++; c.round++; c.got++; save();
     say([`Yes! ${NAME[o.L]}!`]);
-    setTimeout(() => { if (view !== 'find') return; if (c.round >= ROUNDS){ addStar(2); today().finds++; save(); go('findDone'); sfxDone(); setTimeout(burst, 150); say([`${praise()}!`, 'You found them all!']); } else newRound(); }, 1100);
+    setTimeout(() => { if (view !== 'find') return; if (c.round >= rounds()){ addStar(2); today().finds++; save(); go('findDone'); sfxDone(); setTimeout(burst, 150); say([`${praise()}!`, 'You found them all!']); mixAfter('findDone'); } else newRound(); }, 1100);
   } else {
     o.wrong = true; c.misses++; tone(300,0,.18,'triangle',.1);
     el.classList.add('wrong');
@@ -888,8 +915,8 @@ function tapBub(i, el){
 }
 function vFindDone(){
   return `<div class="screen">${topBar('Find it')}
-    <div class="center"><div class="bigstars">⭐⭐⭐</div><h1>${esc(praise())}!</h1><p style="color:var(--sky-ink);font-size:1.2rem;margin:0">You found all ${ROUNDS} letters!</p>
-      <div class="done-row"><button class="btn ghost" data-act="home">${IC.home}Home</button><button class="btn good" data-act="find">${IC.redo}Play again</button></div></div></div>`;
+    <div class="center"><div class="bigstars">⭐⭐⭐</div><h1>${esc(praise())}!</h1><p style="color:var(--sky-ink);font-size:1.2rem;margin:0">You found all ${rounds()} letters!</p>
+      <div class="done-row">${mix ? nextGameBtn() : `<button class="btn ghost" data-act="home">${IC.home}Home</button><button class="btn good" data-act="find">${IC.redo}Play again</button>`}</div></div></div>`;
 }
 
 /* ----- PIN + parent ----- */
@@ -979,9 +1006,11 @@ app.addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (!b) return;
   const a = b.dataset.act;
   switch(a){
-    case 'home': go('home'); break;
+    case 'home': mix = false; clearTimeout(mixTimer); go('home'); break;
+    case 'mix': startMix(); break;
+    case 'mixNext': mixNext(); break;
     case 'send': share(reportText()); break;
-    case 'keepPlaying': { const bk = cur._back; if (bk && bk.view !== 'goal'){ view = bk.view; cur = bk.cur; if (view === 'find' && (cur.busy || cur.round >= ROUNDS)){ if (cur.round >= ROUNDS) go('findDone'); else newRound(); } else render(); } else go('home'); } break;
+    case 'keepPlaying': { const bk = cur._back; if (bk && bk.view !== 'goal'){ view = bk.view; cur = bk.cur; if (view === 'find' && (cur.busy || cur.round >= rounds())){ if (cur.round >= rounds()) go('findDone'); else newRound(); } else render(); } else go('home'); } break;
     case 'goal': S.set.goal = +b.dataset.v; save(); render(); break;
     case 'sendParent': share(reportText()); break;
     case 'abc': go('abc'); say(['Letters!']); break;
