@@ -589,7 +589,7 @@ function vHome(){
   const hello = `<div class="hello"><h1>${S.set.name ? 'Hi, ' + esc(S.set.name) + '!' : t.greet}</h1><p>${S.set.name ? t.greet : "Let's practice this week's words."}</p></div>`;
   let body;
   if (!wk){
-    body = `<div class="card empty-state"><h3>No words yet</h3><p>Ask Dad to add this week's spelling words.</p><button class="btn ghost sm" data-act="parent">${''}Parent setup</button></div>`;
+    body = `<div class="card empty-state"><h3>No words yet</h3><p>Ask your parents to add this week's spelling words.</p><button class="btn ghost sm" data-act="parent">${''}Parent setup</button></div>`;
   } else {
     const d = wk.days[today];
     const firstMap = d && d.first ? new Set(d.first.missed.map(norm)) : null;
@@ -602,7 +602,7 @@ function vHome(){
       const lab = dt.toLocaleDateString('en-US',{weekday:'short'}).slice(0, i===3?2:i===5?2:i===6?2:1);
       return `<div class="day ${k===today?'today':''} ${r&&r.first?'done':''}"><div class="d">${lab}</div><div class="s num ${r&&r.first?'':'none'}">${r&&r.first ? r.first.score : '–'}</div></div>`;
     }).join('');
-    const stale = mondayOf().getTime() > mon.getTime() ? `<p class="note">This list is from the week of ${fmtShort(mon)}. Dad can add new words in Parent setup.</p>` : '';
+    const stale = mondayOf().getTime() > mon.getTime() ? `<p class="note">This list is from the week of ${fmtShort(mon)}. Your parents can add new words in Parent setup.</p>` : '';
     body = `
       <div class="card">
         <div class="hero">
@@ -788,7 +788,7 @@ function vResults(){
     <p class="sub">${sub}</p>
     ${r.missed.length ? `<div class="card missed"><div class="eyebrow">Words to practice</div><ul>${r.missed.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></div>` : ''}
     <div class="actions">
-      <button class="btn honey" data-act="sendKid">${'Send to Dad'}</button>
+      <button class="btn honey" data-act="sendKid">${'Send to Parents'}</button>
       <button class="btn ghost" data-act="home">Done</button>
     </div>
   </div></div>`;
@@ -859,7 +859,7 @@ function vParent(){
         <h3>${IC.chart}Progress</h3>
         ${progress}
         <div class="btns"><button class="btn honey sm" data-act="sendReport" ${wk?'':'disabled'}>${'Send report'}</button><button class="btn ghost sm" data-act="copyReport" ${wk?'':'disabled'}>Copy report</button></div>
-        <div class="help">"Send report" opens the iPad share sheet (Messages, Mail…). Reports aren't sent automatically. She can also tap "Send to Dad" after a test.</div>
+        <div class="help">"Send report" opens the iPad share sheet (Messages, Mail…). Reports aren't sent automatically. She can also tap "Send to Parents" after a test.</div>
       </div>
 
       <div class="card">
