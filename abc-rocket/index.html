@@ -223,6 +223,13 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .stats span{min-width:44px;padding:6px 8px;border-radius:12px;background:var(--accent-soft);text-align:center;font-family:var(--f-display);font-weight:800;font-size:1.05rem}
 .stats span small{display:block;font-family:var(--f-body);font-size:.7rem;color:var(--muted)}
 .btns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.sets{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.sets button{text-align:left;padding:12px 14px;border-radius:16px;background:var(--surface);border:2px solid var(--line);box-shadow:0 3px 0 var(--line);display:flex;flex-direction:column;gap:2px}
+.sets button b{font-family:var(--f-display);font-size:1.15rem}
+.sets button small{color:var(--muted);font-size:.85rem}
+.sets button span{font-size:.85rem;letter-spacing:.02em;margin-top:4px}
+.sets button.on{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent)}
+.sets button:active{transform:translateY(2px)}
 .btns .btn{font-size:1.05rem;padding:12px 16px;border-radius:16px}
 .toast{position:fixed;left:50%;bottom:calc(24px + var(--safe-b));transform:translateX(-50%);background:#1d1730;color:#fff;padding:12px 20px;border-radius:14px;z-index:20;font-weight:800}
 .burst{position:fixed;left:50%;top:38%;width:var(--s);z-index:5;pointer-events:none;animation:burst 1.5s cubic-bezier(.2,.8,.3,1) forwards}
@@ -255,6 +262,14 @@ body.glass select{color-scheme:dark}
 const PIN = '2013';
 const KEY = 'abcrocket.v1';
 const DEFAULT_WORDS = 'RICO | 😀\nSONIC | 💨\nTAILS | 🦊\nPEACH | 🍑\nTOAD | 🍄';
+const WORD_SETS = [
+  ['Set 1', 'Easy wins', 'GO | 🏁\nNO | 🚫\nUP | ⬆️\nCAT | 🐱\nDOG | 🐶\nSUN | ☀️\nBOO | 👻\nSTAR | ⭐'],
+  ['Set 2', 'Short + game words', 'RUN | 🏃\nBIG | 🐘\nHAT | 🎩\nBUG | 🐛\nMOM | 👩\nDAD | 👨\nRING | 💍\nCOIN | 🪙'],
+  ['Set 3', 'More letters', 'PIG | 🐷\nBED | 🛏️\nCUP | 🥤\nFOX | 🦊\nRED | 🔴\nWIN | 🏆\nTOAD | 🍄\nJUMP | 🦘'],
+  ['Set 4', 'Sight words', 'I | 🙋\nA | 🅰️\nTHE | 📖\nAND | ➕\nSEE | 👀\nCAN | 🥫\nYOU | 👉\nLIKE | 👍'],
+  ['Set 5', 'Big game words', 'FAST | ⚡\nKART | 🏎️\nSONIC | 💨\nTAILS | 🦊\nPEACH | 🍑\nCREAM | 🍦\nDAISY | 🌼\nSHADOW | 🌑'],
+  ['Starter', 'His name + favorites', DEFAULT_WORDS]
+];
 
 function blank(){ return {v:1, stars:0, traced:{}, found:{}, spelled:{}, set:{name:'Rico', words:DEFAULT_WORDS, lower:false, rate:0.85, sound:true, theme:'auto', voice:''}}; }
 function load(){
@@ -291,6 +306,7 @@ function parseWords(){
   });
   return out;
 }
+const norm = t => String(t||'').split(/\r?\n/).map(l => l.split('|')[0].trim().toUpperCase()).filter(Boolean).join(',');
 function focusLetters(){ const s = []; parseWords().forEach(x => x.w.split('').forEach(c => { if (!s.includes(c)) s.push(c); })); return s; }
 
 /* ---------- icons ---------- */
@@ -824,11 +840,15 @@ function vParent(){
   const stat = obj => AZ.filter(L => obj[L]).map(L => `<span>${L}<small>×${obj[L]}</small></span>`).join('') || '<p class="hint" style="margin:0">Nothing yet.</p>';
   return `<div class="screen parent"><div class="topbar"><button class="iconbtn" data-act="home" aria-label="Back">${IC.back}</button><div class="title">Parent setup</div></div>
     <div class="scroll">
+      <div class="card"><h3>Word sets</h3>
+        <p class="hint">Tap a set to load it. Move to the next one when he's got these. You can still edit the list below.</p>
+        <div class="sets">${WORD_SETS.map((w,i) => `<button class="${norm(S.set.words)===norm(w[2])?'on':''}" data-act="loadSet" data-i="${i}"><b>${w[0]}</b><small>${w[1]}</small><span>${w[2].split('\n').map(l=>l.split('|')[0].trim()).join(' · ')}</span></button>`).join('')}</div>
+      </div>
       <div class="card"><h3>His words</h3>
         <p class="hint">One word per line, up to 8 letters, with a picture after a <b>|</b>. These words decide his focus letters, which get a ⭐ on the ABC board and come up most in Trace and Find it.</p>
         <textarea id="words" spellcheck="false" autocapitalize="characters" autocorrect="off">${esc(S.set.words)}</textarea>
         <p class="hint" style="margin-top:8px">Focus letters now: <b>${fl.join(' ') || '—'}</b></p>
-        <div class="btns"><button class="btn" data-act="saveWords">Save words</button><button class="btn ghost" data-act="resetWords">Use starter words</button></div>
+        <div class="btns"><button class="btn" data-act="saveWords">Save words</button></div>
       </div>
       <div class="card"><h3>Letters</h3>
         <label>Show letters as</label>
@@ -893,7 +913,7 @@ app.addEventListener('click', e => {
     case 'pin': pinPress(b.dataset.k); break;
     case 'pinDel': pinBuf = pinBuf.slice(0,-1); document.querySelectorAll('#dots i').forEach((el,i)=>el.classList.toggle('on', i < pinBuf.length)); break;
     case 'saveWords': { S.set.words = $('#words').value; const n = parseWords().length; if (!n){ toast('Add at least one word'); return; } save(); render(); toast(`Saved · ${n} word${n===1?'':'s'}`); } break;
-    case 'resetWords': S.set.words = DEFAULT_WORDS; save(); render(); toast('Starter words back'); break;
+    case 'loadSet': { const w = WORD_SETS[+b.dataset.i]; S.set.words = w[2]; save(); render(); toast(`${w[0]} loaded · ${parseWords().length} words`); } break;
     case 'lower': S.set.lower = b.dataset.v === '1'; save(); render(); break;
     case 'testVoice': say(['ess. ess is for sun.', 'Find tee!']); break;
   }
