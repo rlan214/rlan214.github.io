@@ -234,6 +234,8 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .chip{background:var(--honey-soft);color:var(--ink);padding:4px 10px;border-radius:10px;font-size:.9rem}
 .chip b{opacity:.6;margin-left:3px}
 .btns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.credit{margin:30px 4px 6px;padding:14px 16px;border-radius:18px;background:color-mix(in srgb,var(--surface) 70%,transparent);border:1.5px solid var(--line);color:var(--ink);font-size:.88rem;line-height:1.5;text-align:center}
+.credit span{display:block;margin-top:4px;color:var(--muted);font-size:.8rem;letter-spacing:.04em}
 .toast{position:fixed;left:50%;bottom:calc(24px + var(--safe-b));transform:translateX(-50%);background:#1d1730;color:#fff;padding:12px 20px;border-radius:14px;z-index:20;font-weight:800}
 .burst{position:fixed;left:50%;top:38%;width:var(--s);z-index:5;pointer-events:none;animation:burst 1.5s cubic-bezier(.2,.8,.3,1) forwards}
 .burst svg{width:100%;height:auto;display:block}
@@ -269,7 +271,7 @@ const PIN = '2013';
 const KEY = 'moretime.v1';
 const LEVELS = {
   '4-6': {label:'Grades 4–6', note:'Everything. Reads on their own.'},
-  '2-3': {label:'Grades 2–3', note:'Buster Bear + short reads. Tap-to-hear help.'},
+  '2-3': {label:'Grades 2–3', note:'Short reads, Buster Bear and Oz. Tap-to-hear help.'},
   'pre': {label:'Pre-reader', note:'Read to me: the app reads aloud and highlights.'}
 };
 function blank(){ return {v:1, reads:{}, days:{}, set:{name:'Kryslana', level:'4-6', goal:15, rate:0.95, sound:true, theme:'auto', voice:'', size:1}}; }
@@ -640,6 +642,7 @@ function vHome(){
       <div class="hello"><h1>Hi, ${esc(S.set.name||'reader')}!</h1><p>${esc(t.greet)} Read to earn more time.</p></div>
       ${playCard()}
       ${sh}
+      <footer class="credit">📚 The classic books here (<i>Alice's Adventures in Wonderland</i>, <i>The Adventures of Buster Bear</i> and <i>The Wonderful Wizard of Oz</i>) come from <b>Project Gutenberg</b>, a volunteer library of free public-domain ebooks. Thank you! <span>gutenberg.org</span></footer>
     </div></div>`;
 }
 
