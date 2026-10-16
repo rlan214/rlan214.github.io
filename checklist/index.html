@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Checklist">
+<meta name="theme-color" content="#fff7ec">
+<title>Daily Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Daily Checklist: kid side (pick kid → today's list) + parent side behind a PIN. */
+:root{
+  --bg:#fff7ec; --card:#ffffff; --ink:#2b2340; --soft:#6d6585; --line:#efe4d4;
+  --good:#22b07d; --good-soft:#dcf5ea; --warn:#ff7a59;
+  --chore:#4f8cff; --workout:#ff8a3d; --homework:#9b6bff;
+  --f-display:'Baloo 2',system-ui,sans-serif; --f-body:'Nunito',system-ui,sans-serif;
+  --r:22px; --shadow:0 6px 0 rgba(43,35,64,.08),0 12px 28px rgba(43,35,64,.06);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-weight:700}
+body{min-height:100dvh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:
+  radial-gradient(circle at 10% 0%,#ffe2c2 0,transparent 35%),radial-gradient(circle at 100% 30%,#e6ddff 0,transparent 35%),var(--bg);background-attachment:fixed}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,select{font:inherit;color:inherit}
+#app{max-width:860px;margin:0 auto;padding:18px 16px 40px}
+h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1.1}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.top h1{font-size:clamp(1.8rem,5vw,2.6rem);flex:1}
+.date{color:var(--soft);font-size:1.05rem}
+.iconbtn{width:48px;height:48px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;font-size:1.4rem;flex:none}
+.iconbtn:active{transform:translateY(3px)}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 22px;border-radius:18px;background:var(--ink);color:#fff;font-family:var(--f-display);font-size:1.2rem;box-shadow:0 5px 0 #000a}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #000a}
+.btn.ghost{background:var(--card);color:var(--ink);box-shadow:0 4px 0 var(--line)}
+.btn.sm{padding:9px 14px;font-size:1rem;border-radius:14px}
+.btn.good{background:var(--good);box-shadow:0 5px 0 #168a61}
+.link{color:var(--soft);text-decoration:underline;font-size:1rem;padding:10px}
+.sync{font-size:.85rem;color:var(--soft);text-align:center;margin-top:18px}
+.sync b{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+
+/* ---------- home ---------- */
+.kids{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.kidcard{position:relative;text-align:left;padding:22px;border-radius:28px;background:var(--card);box-shadow:var(--shadow);display:flex;gap:16px;align-items:center;min-height:150px;overflow:hidden}
+.kidcard:active{transform:translateY(4px)}
+.kidcard::before{content:"";position:absolute;inset:auto -30px -60px auto;width:170px;height:170px;border-radius:50%;background:var(--kc);opacity:.13}
+.ring{--p:0;width:92px;height:92px;border-radius:50%;flex:none;display:grid;place-items:center;background:conic-gradient(var(--kc) calc(var(--p)*1%),#f1ebe2 0)}
+.ring>div{width:72px;height:72px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-family:var(--f-display);font-size:1.5rem;line-height:1}
+.ring small{display:block;font-size:.75rem;color:var(--soft);font-family:var(--f-body)}
+.kidcard h2{font-size:2rem}
+.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;color:var(--soft);font-size:1rem}
+.pill{display:inline-flex;align-items:center;gap:4px;background:#f6f0e6;border-radius:999px;padding:3px 10px}
+.done-badge{color:var(--good)}
+
+/* ---------- kid: text list ---------- */
+.bar{height:16px;border-radius:999px;background:#f1ebe2;overflow:hidden;margin:4px 0 18px}
+.bar>i{display:block;height:100%;border-radius:inherit;background:var(--kc);transition:width .4s}
+.group{margin-bottom:18px}
+.group h3{font-size:1.25rem;margin:0 0 8px 4px;display:flex;align-items:center;gap:8px}
+.group h3 .dot{width:12px;height:12px;border-radius:4px;background:var(--gc)}
+.item{width:100%;display:flex;align-items:center;gap:14px;padding:16px 16px;margin-bottom:10px;border-radius:20px;background:var(--card);box-shadow:var(--shadow);text-align:left;font-size:1.25rem;transition:background .2s}
+.item:active{transform:translateY(3px)}
+.item .em{font-size:1.8rem;width:40px;text-align:center;flex:none}
+.item .tx{flex:1}
+.item .tag{font-size:.8rem;color:var(--soft);display:block}
+.box{width:40px;height:40px;border-radius:13px;border:3px solid #ddd2c2;flex:none;display:grid;place-items:center;color:#fff;font-size:1.4rem}
+.item.on{background:var(--good-soft)}
+.item.on .tx{color:#3a7c63;text-decoration:line-through;text-decoration-thickness:2px}
+.item.on .box{background:var(--good);border-color:var(--good)}
+.empty{text-align:center;color:var(--soft);padding:30px 10px}
+.empty .big{font-size:3rem}
+.alldone{text-align:center;padding:16px;margin-bottom:16px;border-radius:22px;background:var(--good);color:#fff;font-family:var(--f-display);font-size:1.6rem;box-shadow:0 6px 0 #168a61}
+.foot{display:flex;justify-content:center;margin-top:10px}
+
+/* ---------- kid: pictures ---------- */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.tile{position:relative;aspect-ratio:1;border-radius:28px;background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px}
+.tile:active{transform:translateY(4px)}
+.tile .em{font-size:clamp(3.4rem,10vw,4.6rem);line-height:1}
+.tile .lb{font-family:var(--f-display);font-size:1.25rem;text-align:center;line-height:1.1}
+.tile.on{background:var(--good-soft)}
+.tile.on .em{opacity:.45}
+.tile .chk{position:absolute;inset:0;display:none;place-items:center;font-size:5.5rem;color:var(--good);text-shadow:0 3px 0 #fff}
+.tile.on .chk{display:grid}
+.tile .hear{position:absolute;top:8px;right:8px;width:44px;height:44px;border-radius:14px;background:#f6f0e6;font-size:1.3rem;display:grid;place-items:center}
+
+/* ---------- PIN ---------- */
+.pinwrap{display:flex;flex-direction:column;align-items:center;gap:20px;padding-top:30px}
+.dots{display:flex;gap:14px}
+.dots i{width:20px;height:20px;border-radius:50%;background:#e8dfd2}
+.dots i.on{background:var(--ink)}
+.dots.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.pad{display:grid;grid-template-columns:repeat(3,78px);gap:12px}
+.pad button{height:78px;border-radius:22px;background:var(--card);box-shadow:var(--shadow);font-family:var(--f-display);font-size:1.9rem}
+.pad button:active{transform:translateY(3px)}
+.pad .blank{visibility:hidden}
+
+/* ---------- parent ---------- */
+.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tabs button{padding:10px 18px;border-radius:14px;background:var(--card);box-shadow:0 3px 0 var(--line);font-family:var(--f-display);font-size:1.15rem}
+.tabs button.on{background:var(--kc);color:#fff;box-shadow:0 3px 0 #0003}
+.sec{margin-bottom:16px}
+.sec h3{font-size:1.3rem;margin-bottom:4px}
+.sec p.hint{margin:0 0 12px;color:var(--soft);font-size:.95rem}
+.row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row .em{font-size:1.5rem;width:34px;text-align:center}
+.row .tx{flex:1;min-width:0}
+.row .tx small{display:block;color:var(--soft);font-size:.8rem}
+.row .del{width:40px;height:40px;border-radius:12px;background:#fff0ec;color:var(--warn);font-size:1.2rem;flex:none}
+.form{display:grid;gap:10px;margin-top:12px;padding-top:12px;border-top:2px dashed var(--line)}
+.form input[type=text],.form input[type=date],.form select{width:100%;padding:12px 14px;border-radius:14px;border:2px solid var(--line);background:#fffdf9;font-size:1.05rem}
+.form input:focus,.form select:focus{outline:none;border-color:var(--kc)}
+.emojis{display:flex;flex-wrap:wrap;gap:6px}
+.emojis button{width:44px;height:44px;border-radius:12px;background:#f6f0e6;font-size:1.4rem}
+.emojis button.on{background:var(--kc);box-shadow:0 0 0 3px #fff inset}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{padding:8px 12px;border-radius:12px;background:#f6f0e6;font-size:.95rem}
+.chips button.on{background:var(--ink);color:#fff}
+.lbl{font-size:.9rem;color:var(--soft);margin-bottom:-4px}
+table.week{width:100%;border-collapse:collapse;font-size:.95rem}
+table.week th,table.week td{padding:8px 4px;text-align:center;border-top:1px solid var(--line)}
+table.week th{color:var(--soft);font-weight:700;border-top:0}
+table.week td:first-child,table.week th:first-child{text-align:left}
+.full{color:var(--good)}
+.partial{color:#c98a1c}
+.none{color:#c9bfb1}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:16px;z-index:50;font-size:1rem;animation:tin .25s}
+@keyframes tin{from{opacity:0;transform:translate(-50%,10px)}}
+.fx{position:fixed;pointer-events:none;z-index:40;font-size:2rem;animation:fly 1.1s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(var(--rot));opacity:0}}
+@media (max-width:420px){.pad{grid-template-columns:repeat(3,70px)}.pad button{height:70px}.tiles{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+/* =========================================================
+   Daily Checklist
+   - Parent PIN and Firebase config are below.
+   - With FIREBASE_CONFIG = null the app saves on this device only.
+     Paste the config object from Firebase to sync every device.
+   ========================================================= */
+const PIN = '2013';
+const FIREBASE_CONFIG = null;
+const KEY = 'checklist.v1';
+const FB_VER = '10.12.2';
+
+const CATS = {
+  chore:    {label:'Chores',   color:'var(--chore)',    emoji:'🧹'},
+  workout:  {label:'Workout',  color:'var(--workout)',  emoji:'⚽'},
+  homework: {label:'Homework', color:'var(--homework)', emoji:'📚'},
+};
+const EMOJIS = ['🛏️','🦷','🚿','👕','🧺','🧹','🍽️','🗑️','🐶','🐱','🌱','🧸','🎒','👟','📚','✏️','📖','🧮','🎹','⚽','🏀','🏐','🏃','🤸','💪','🧘','💧','🥦','🙏','⭐'];
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function blank(){
+  return {v:1,
+    kids:[
+      {id:'kryslana', name:'Kryslana', mode:'text',     color:'#7c5cff', items:[]},
+      {id:'rico',     name:'Rico',     mode:'pictures', color:'#ff8a3d', items:[]},
+    ],
+    days:{}};
+}
+function normalize(r){
+  const b = blank();
+  if (!r || r.v !== 1) return b;
+  r.kids = Array.isArray(r.kids) && r.kids.length ? r.kids : b.kids;
+  r.kids.forEach(k => { k.items = k.items || []; });
+  r.days = r.days || {};
+  return r;
+}
+
+/* ---------- storage: local now, Firebase when configured ---------- */
+let S = normalize((() => { try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } })());
+let remote = null, syncState = FIREBASE_CONFIG ? 'connecting' : 'local';
+function saveLocal(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+
+async function initRemote(){
+  if (!FIREBASE_CONFIG) return;
+  try{
+    const {initializeApp} = await import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-app.js`);
+    const fs = await import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-firestore.js`);
+    const db = fs.getFirestore(initializeApp(FIREBASE_CONFIG));
+    const ref = fs.doc(db, 'checklist', 'family');
+    remote = {fs, ref};
+    fs.onSnapshot(ref, snap => {
+      if (!snap.exists()){ fs.setDoc(ref, S); return; }
+      S = normalize(snap.data()); saveLocal();
+      syncState = 'synced'; safeRender();
+    }, () => { syncState = 'offline'; safeRender(); });
+  }catch(e){ syncState = 'offline'; safeRender(); }
+}
+/* Write one field so two iPads checking at once don't overwrite each other. */
+function setPath(path, value){
+  let o = S;
+  for (let i = 0; i < path.length - 1; i++){ if (typeof o[path[i]] !== 'object' || o[path[i]] === null) o[path[i]] = {}; o = o[path[i]]; }
+  if (value === undefined) delete o[path[path.length-1]]; else o[path[path.length-1]] = value;
+  saveLocal();
+  if (remote){
+    const {fs, ref} = remote;
+    fs.updateDoc(ref, new fs.FieldPath(...path), value === undefined ? fs.deleteField() : value)
+      .catch(() => { syncState = 'offline'; safeRender(); });
+  }
+}
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad2 = n => String(n).padStart(2,'0');
+const dayKey = (d=new Date()) => d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+const fromKey = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y, m-1, d); };
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+const fmtLong = d => d.toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
+const fmtShort = d => d.toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'});
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const kidById = id => S.kids.find(k => k.id === id);
+function toast(msg){ const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); }
+
+function rec(kid, dk){ return (S.days[dk] && S.days[dk][kid.id]) || {}; }
+function itemsFor(kid, dk){
+  const wd = fromKey(dk).getDay();
+  const daily = kid.items.filter(it => !it.dow || !it.dow.length || it.dow.includes(wd));
+  return daily.concat(rec(kid, dk).extra || []);
+}
+function progress(kid, dk){
+  const items = itemsFor(kid, dk), done = rec(kid, dk).done || {};
+  const n = items.filter(it => done[it.id]).length;
+  return {items, done, n, total: items.length};
+}
+/* Past days use the total saved that day, so editing the list later doesn't rewrite history. */
+function dayResult(kid, dk){
+  const r = rec(kid, dk);
+  if (dk === dayKey()){ const p = progress(kid, dk); return {n:p.n, total:p.total}; }
+  if (!r.done && !r.total) return null;
+  const n = Object.keys(r.done || {}).length;
+  return {n, total: r.total || n};
+}
+function streak(kid){
+  let s = 0, d = new Date();
+  const today = dayResult(kid, dayKey(d));
+  if (today && today.total && today.n >= today.total) s++;
+  for (let i = 1; i < 400; i++){
+    const r = dayResult(kid, dayKey(addDays(d, -i)));
+    if (!r || !r.total || r.n < r.total) break;
+    s++;
+  }
+  return s;
+}
+function stars(kid){
+  let n = 0;
+  for (const dk in S.days){ const r = S.days[dk][kid.id]; if (r && r.done) n += Object.keys(r.done).length; }
+  return n;
+}
+
+/* ---------- speech + fx ---------- */
+const HAS_TTS = 'speechSynthesis' in window;
+function say(text){
+  if (!HAS_TTS) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = .9; u.pitch = 1.05;
+  const v = speechSynthesis.getVoices().find(v => /^en[-_]US/i.test(v.lang) && /Samantha|Enhanced|Premium/i.test(v.name)) || speechSynthesis.getVoices().find(v => /^en/i.test(v.lang));
+  if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+function burst(x, y, set = ['⭐','✨','🌟','🎉']){
+  for (let i = 0; i < 12; i++){
+    const e = document.createElement('div'); e.className = 'fx';
+    e.textContent = set[i % set.length];
+    const a = Math.random()*Math.PI*2, r = 80 + Math.random()*120;
+    e.style.left = x + 'px'; e.style.top = y + 'px';
+    e.style.setProperty('--dx', Math.cos(a)*r + 'px'); e.style.setProperty('--dy', Math.sin(a)*r - 60 + 'px');
+    e.style.setProperty('--rot', (Math.random()*360|0) + 'deg');
+    document.body.appendChild(e); setTimeout(() => e.remove(), 1200);
+  }
+}
+
+/* ---------- views ---------- */
+let view = 'home', curKid = null, pinBuf = '', ptab = null;
+let draft = {t:'', e:'🧹', c:'chore', dow:[], when:'daily', date:dayKey()};
+
+function render(){
+  const app = $('#app');
+  if (view === 'home') app.innerHTML = vHome();
+  else if (view === 'kid') app.innerHTML = vKid();
+  else if (view === 'pin') app.innerHTML = vPin();
+  else if (view === 'parent') app.innerHTML = vParent();
+}
+let pending = false;
+function safeRender(){
+  const a = document.activeElement;
+  if (view === 'parent' && a && /INPUT|SELECT/.test(a.tagName)){ pending = true; return; }
+  render();
+}
+document.addEventListener('focusout', () => { if (pending){ pending = false; setTimeout(render, 50); } });
+
+function syncLine(){
+  const m = {local:['#c9bfb1','Saved on this iPad only'], connecting:['#f2b84b','Connecting…'], synced:['#22b07d','Synced'], offline:['#ff7a59','Offline — will sync when back online']}[syncState];
+  return `<div class="sync"><b style="background:${m[0]}"></b>${m[1]}</div>`;
+}
+
+function vHome(){
+  const dk = dayKey();
+  const cards = S.kids.map(k => {
+    const p = progress(k, dk), pct = p.total ? Math.round(p.n/p.total*100) : 0, st = streak(k);
+    const all = p.total && p.n >= p.total;
+    return `<button class="kidcard" style="--kc:${k.color}" data-act="kid" data-id="${k.id}">
+      <div class="ring" style="--p:${pct}"><div>${p.total ? `${p.n}/${p.total}` : '–'}<small>${all ? 'done!' : 'today'}</small></div></div>
+      <div><h2>${esc(k.name)}</h2>
+        <div class="meta">${all ? '<span class="pill done-badge">✅ All done</span>' : ''}<span class="pill">🔥 ${st} day${st===1?'':'s'}</span><span class="pill">⭐ ${stars(k)}</span></div>
+      </div></button>`;
+  }).join('');
+  return `<div class="top"><div style="flex:1"><h1>Today</h1><div class="date">${fmtLong(new Date())}</div></div>
+      <button class="iconbtn" data-act="parent" aria-label="Parent setup">⚙️</button></div>
+    <div class="kids">${cards}</div>${syncLine()}`;
+}
+
+function vKid(){
+  const k = kidById(curKid), dk = dayKey(), p = progress(k, dk);
+  const all = p.total && p.n >= p.total, pct = p.total ? p.n/p.total*100 : 0;
+  const head = `<div class="top" style="--kc:${k.color}">
+      <button class="iconbtn" data-act="home" aria-label="Back">←</button>
+      <div style="flex:1"><h1>${esc(k.name)}</h1><div class="date">${fmtLong(new Date())}</div></div>
+      <span class="pill">🔥 ${streak(k)}</span></div>
+    <div class="bar" style="--kc:${k.color}"><i style="width:${pct}%"></i></div>
+    ${all ? `<div class="alldone">🎉 All done! Great job, ${esc(k.name)}!</div>` : ''}`;
+  if (!p.total) return head + `<div class="card empty"><div class="big">🗒️</div><p>Nothing on the list today.<br>Ask your parents to add some things.</p></div>` + syncLine();
+  let body;
+  if (k.mode === 'pictures'){
+    body = `<div class="tiles">${p.items.map(it => `
+      <div class="tile ${p.done[it.id]?'on':''}" data-act="tick" data-id="${it.id}" role="button">
+        <span class="em">${esc(it.e || CATS[it.c].emoji)}</span><span class="lb">${esc(it.t)}</span>
+        <span class="chk">✔</span>
+        <button class="hear" data-act="hear" data-id="${it.id}" aria-label="Hear it">🔊</button>
+      </div>`).join('')}</div>`;
+  } else {
+    body = Object.keys(CATS).map(c => {
+      const list = p.items.filter(it => it.c === c);
+      if (!list.length) return '';
+      return `<div class="group" style="--gc:${CATS[c].color}"><h3><span class="dot"></span>${CATS[c].label}</h3>
+        ${list.map(it => `<button class="item ${p.done[it.id]?'on':''}" data-act="tick" data-id="${it.id}">
+          <span class="em">${esc(it.e || CATS[c].emoji)}</span><span class="tx">${esc(it.t)}</span><span class="box">${p.done[it.id]?'✔':''}</span></button>`).join('')}
+      </div>`;
+    }).join('');
+  }
+  return head + body + `<div class="foot"><button class="btn ghost" data-act="report">📤 Send to Parents</button></div>` + syncLine();
+}
+
+function vPin(){
+  return `<div class="top"><button class="iconbtn" data-act="home" aria-label="Back">←</button><h1>Parents</h1></div>
+    <div class="pinwrap"><div class="date">Enter the parent PIN</div>
+      <div class="dots" id="dots">${[0,1,2,3].map(i => `<i class="${i<pinBuf.length?'on':''}"></i>`).join('')}</div>
+      <div class="pad">${[1,2,3,4,5,6,7,8,9].map(n => `<button data-act="pin" data-k="${n}">${n}</button>`).join('')}<button class="blank"></button><button data-act="pin" data-k="0">0</button><button data-act="pinDel" aria-label="Delete">⌫</button></div>
+    </div>`;
+}
+
+function vParent(){
+  const k = kidById(ptab) || S.kids[0]; ptab = k.id;
+  const tabs = `<div class="tabs">${S.kids.map(x => `<button class="${x.id===k.id?'on':''}" style="--kc:${x.color}" data-act="ptab" data-id="${x.id}">${esc(x.name)}</button>`).join('')}</div>`;
+  const dowTxt = it => !it.dow || !it.dow.length || it.dow.length === 7 ? 'Every day' : it.dow.slice().sort().map(d => DOW[d]).join(', ');
+  const daily = k.items.length ? k.items.map(it => `<div class="row"><span class="em">${esc(it.e)}</span>
+      <div class="tx">${esc(it.t)}<small>${CATS[it.c].label} · ${dowTxt(it)}</small></div>
+      <button class="del" data-act="delDaily" data-id="${it.id}" aria-label="Remove">✕</button></div>`).join('')
+    : `<p class="hint">Nothing yet. Add things that repeat, like "Make bed" or "20 push-ups".</p>`;
+
+  // one-day items from today forward
+  const extras = [];
+  for (let i = 0; i < 14; i++){
+    const dk = dayKey(addDays(new Date(), i));
+    (rec(k, dk).extra || []).forEach(it => extras.push({dk, it}));
+  }
+  const extraHtml = extras.length ? extras.map(({dk, it}) => `<div class="row"><span class="em">${esc(it.e)}</span>
+      <div class="tx">${esc(it.t)}<small>${CATS[it.c].label} · ${dk === dayKey() ? 'Today' : fmtShort(fromKey(dk))}</small></div>
+      <button class="del" data-act="delExtra" data-dk="${dk}" data-id="${it.id}" aria-label="Remove">✕</button></div>`).join('')
+    : `<p class="hint">Homework and one-time tasks show up here.</p>`;
+
+  const form = `<div class="form">
+      <div class="chips">
+        <button class="${draft.when==='daily'?'on':''}" data-act="when" data-v="daily">Repeats</button>
+        <button class="${draft.when==='once'?'on':''}" data-act="when" data-v="once">One day only</button>
+      </div>
+      <input type="text" id="ft" placeholder="${draft.c==='homework' ? 'Math worksheet p. 42' : k.mode==='pictures' ? 'Brush teeth' : 'Make bed'}" value="${esc(draft.t)}" maxlength="60" autocomplete="off">
+      <div class="lbl">Type</div>
+      <div class="chips">${Object.keys(CATS).map(c => `<button class="${draft.c===c?'on':''}" data-act="cat" data-v="${c}">${CATS[c].label}</button>`).join('')}</div>
+      <div class="lbl">Picture</div>
+      <div class="emojis">${EMOJIS.map(e => `<button class="${draft.e===e?'on':''}" data-act="emoji" data-v="${e}">${e}</button>`).join('')}</div>
+      ${draft.when === 'daily'
+        ? `<div class="lbl">Days (none picked = every day)</div><div class="chips">${DOW.map((d,i) => `<button class="${draft.dow.includes(i)?'on':''}" data-act="dow" data-v="${i}">${d}</button>`).join('')}</div>`
+        : `<div class="lbl">Day</div><input type="date" id="fdate" value="${draft.date}" min="${dayKey()}">`}
+      <button class="btn good" data-act="add">＋ Add for ${esc(k.name)}</button>
+    </div>`;
+
+  // last 7 days
+  const days = [...Array(7)].map((_, i) => addDays(new Date(), -6 + i));
+  const week = `<table class="week"><tr><th></th>${days.map(d => `<th>${DOW[d.getDay()]}</th>`).join('')}</tr>
+    ${S.kids.map(x => `<tr><td>${esc(x.name)}</td>${days.map(d => { const r = dayResult(x, dayKey(d));
+      if (!r || !r.total) return '<td class="none">–</td>';
+      const cls = r.n >= r.total ? 'full' : r.n ? 'partial' : 'none';
+      return `<td class="${cls}">${r.n >= r.total ? '✔' : r.n + '/' + r.total}</td>`; }).join('')}</tr>`).join('')}</table>`;
+
+  return `<div class="top" style="--kc:${k.color}"><button class="iconbtn" data-act="home" aria-label="Back">←</button><h1>Parent setup</h1></div>
+    <div style="--kc:${k.color}">${tabs}
+      <div class="card sec"><h3>Every day</h3><p class="hint">${k.mode==='pictures' ? `${esc(k.name)} sees big pictures and hears each one read out loud.` : 'Chores and workouts that come back each morning.'}</p>${daily}</div>
+      <div class="card sec"><h3>One day only</h3>${extraHtml}</div>
+      <div class="card sec"><h3>Add something</h3>${form}</div>
+      <div class="card sec"><h3>This week</h3>${week}</div>
+      <div class="card sec"><h3>Picture mode</h3><p class="hint">Picture mode is for kids who aren't reading yet.</p>
+        <div class="chips"><button class="${k.mode==='text'?'on':''}" data-act="mode" data-v="text">Words</button><button class="${k.mode==='pictures'?'on':''}" data-act="mode" data-v="pictures">Pictures + read aloud</button></div></div>
+    </div>${syncLine()}`;
+}
+
+/* ---------- actions ---------- */
+function tick(id, el){
+  const k = kidById(curKid), dk = dayKey(), p = progress(k, dk);
+  const it = p.items.find(x => x.id === id); if (!it) return;
+  const on = !p.done[id];
+  setPath(['days', dk, k.id, 'done', id], on ? Date.now() : undefined);
+  setPath(['days', dk, k.id, 'total'], p.total);
+  if (on){
+    const r = el.getBoundingClientRect(); burst(r.left + r.width/2, r.top + r.height/2);
+    if (k.mode === 'pictures') say(`${it.t}. Done! Great job!`);
+    if (p.n + 1 >= p.total){ setTimeout(() => { burst(innerWidth/2, innerHeight/3, ['🎉','🌟','🏆','⭐']); say(`All done! Great job, ${k.name}!`); }, 300); }
+  } else if (k.mode === 'pictures') say(it.t);
+  render();
+}
+function reportText(k){
+  const dk = dayKey(), p = progress(k, dk), st = streak(k);
+  const left = p.items.filter(it => !p.done[it.id]);
+  const L = [`✅ ${k.name} — ${fmtShort(new Date())}`, `${p.n} of ${p.total} done${p.total && p.n >= p.total ? ' 🎉' : ''}`];
+  const doneList = p.items.filter(it => p.done[it.id]);
+  if (doneList.length) L.push('', 'Done: ' + doneList.map(it => it.t).join(', '));
+  if (left.length) L.push('Still to do: ' + left.map(it => it.t).join(', '));
+  L.push('', `🔥 ${st}-day streak · ⭐ ${stars(k)} stars`);
+  return L.join('\n');
+}
+async function share(text){
+  try{ if (navigator.share){ await navigator.share({text}); return; } }catch(e){ if (e.name === 'AbortError') return; }
+  try{ await navigator.clipboard.writeText(text); toast('Copied — paste it in a message'); }catch(e){ toast('Could not share'); }
+}
+function addItem(){
+  const k = kidById(ptab), t = ($('#ft').value || '').trim();
+  if (!t){ toast('Type what to do first'); $('#ft').focus(); return; }
+  const it = {id: uid(), t, e: draft.e, c: draft.c};
+  if (draft.when === 'daily'){
+    if (draft.dow.length && draft.dow.length < 7) it.dow = draft.dow.slice().sort();
+    setPath(['kids'], S.kids.map(x => x.id === k.id ? {...x, items: [...x.items, it]} : x));
+  } else {
+    const dk = ($('#fdate') && $('#fdate').value) || dayKey();
+    setPath(['days', dk, k.id, 'extra'], [...(rec(k, dk).extra || []), it]);
+  }
+  toast(`Added for ${k.name}`);
+  draft.t = ''; render();
+}
+function pinPress(d){
+  if (pinBuf.length >= 4) return;
+  pinBuf += d; render();
+  if (pinBuf.length === 4) setTimeout(() => {
+    if (pinBuf === PIN){ pinBuf = ''; view = 'parent'; render(); }
+    else { pinBuf = ''; const el = $('#dots'); el.classList.add('shake'); setTimeout(render, 380); }
+  }, 120);
+}
+
+document.addEventListener('input', e => { if (e.target.id === 'ft') draft.t = e.target.value; if (e.target.id === 'fdate') draft.date = e.target.value; });
+document.addEventListener('keydown', e => {
+  if (view === 'parent' && e.key === 'Enter' && e.target.id === 'ft'){ e.preventDefault(); addItem(); }
+  if (view === 'pin'){ if (/^[0-9]$/.test(e.key)) pinPress(e.key); else if (e.key === 'Backspace'){ pinBuf = pinBuf.slice(0,-1); render(); } }
+});
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act, id = b.dataset.id, v = b.dataset.v;
+  switch (a){
+    case 'home': view = 'home'; render(); break;
+    case 'kid': curKid = id; view = 'kid'; render(); scrollTo(0,0); break;
+    case 'tick': tick(id, b); break;
+    case 'hear': e.stopPropagation(); { const it = itemsFor(kidById(curKid), dayKey()).find(x => x.id === id); if (it) say(it.t); } break;
+    case 'report': share(reportText(kidById(curKid))); break;
+    case 'parent': pinBuf = ''; view = 'pin'; render(); break;
+    case 'pin': pinPress(b.dataset.k); break;
+    case 'pinDel': pinBuf = pinBuf.slice(0,-1); render(); break;
+    case 'ptab': ptab = id; render(); break;
+    case 'when': draft.when = v; render(); break;
+    case 'cat': draft.c = v; if (!EMOJIS.includes(draft.e) || Object.values(CATS).some(c => c.emoji === draft.e)) draft.e = CATS[v].emoji; render(); break;
+    case 'emoji': draft.e = v; render(); break;
+    case 'dow': { const n = +v; draft.dow = draft.dow.includes(n) ? draft.dow.filter(x => x !== n) : [...draft.dow, n]; render(); } break;
+    case 'add': addItem(); break;
+    case 'delDaily': { const k = kidById(ptab), it = k.items.find(x => x.id === id);
+      if (it && confirm(`Remove "${it.t}" from ${k.name}'s daily list?`)) setPath(['kids'], S.kids.map(x => x.id === k.id ? {...x, items: x.items.filter(y => y.id !== id)} : x));
+      render(); } break;
+    case 'delExtra': { const k = kidById(ptab), dk = b.dataset.dk;
+      setPath(['days', dk, k.id, 'extra'], (rec(k, dk).extra || []).filter(y => y.id !== id)); render(); } break;
+    case 'mode': setPath(['kids'], S.kids.map(x => x.id === ptab ? {...x, mode: v} : x)); render(); break;
+  }
+});
+/* New day at midnight, and fresh data when the iPad wakes up. */
+let lastDay = dayKey();
+setInterval(() => { if (dayKey() !== lastDay){ lastDay = dayKey(); safeRender(); } }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) safeRender(); });
+if (HAS_TTS) speechSynthesis.onvoiceschanged = () => {};
+
+render();
+initRemote();
+</script>
+</body>
+</html>
