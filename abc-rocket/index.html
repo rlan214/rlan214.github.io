@@ -105,6 +105,16 @@ body.has-lights .screen{padding-top:calc(var(--safe-t) + 22px)}
 .act .abc{font-family:var(--f-display);font-weight:800;font-size:clamp(3.2rem,12vw,5.6rem);line-height:.9;letter-spacing:.02em;text-shadow:0 4px 0 rgba(0,0,0,.15)}
 .act .lb{font-family:var(--f-display);font-weight:800;font-size:clamp(1.4rem,4.2vw,2rem);text-shadow:0 2px 0 rgba(0,0,0,.15)}
 .mine{margin-top:18px}
+.play{display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.pring{--p:0;position:relative;width:88px;height:88px;border-radius:50%;flex:none;display:grid;place-items:center}
+.pring::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--good) calc(var(--p)*1%),color-mix(in srgb,var(--ink) 14%,transparent) 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 11px),#000 calc(100% - 10px));mask:radial-gradient(farthest-side,transparent calc(100% - 11px),#000 calc(100% - 10px));transition:background .4s}
+.pring>div{position:relative;text-align:center;line-height:1}
+.pring b{display:block;font-family:var(--f-display);font-weight:800;font-size:1.9rem}
+.pring small{font-size:.72rem;color:var(--muted)}
+.ptext{flex:1;min-width:160px}
+.ptext h3{margin:0;font-family:var(--f-display);font-weight:800;font-size:1.3rem}
+.ptext p{margin:2px 0 0;color:var(--muted)}
+.sendbtn{font-size:1.15rem;padding:12px 18px}
 .mine h3{margin:0 0 10px;font-family:var(--f-display);font-weight:800;font-size:1.25rem;display:flex;align-items:center;gap:8px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .lchip{position:relative;width:54px;height:60px;border-radius:16px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:1.9rem;color:#fff;background:var(--c);box-shadow:0 4px 0 color-mix(in srgb,var(--c) 62%,#000)}
@@ -271,9 +281,9 @@ const WORD_SETS = [
   ['Starter', 'His name + favorites', DEFAULT_WORDS]
 ];
 
-function blank(){ return {v:1, stars:0, traced:{}, found:{}, spelled:{}, set:{name:'Rico', words:DEFAULT_WORDS, lower:false, rate:0.85, sound:true, theme:'auto', voice:''}}; }
+function blank(){ return {v:1, stars:0, traced:{}, found:{}, spelled:{}, days:{}, set:{name:'Rico', words:DEFAULT_WORDS, lower:false, rate:0.85, sound:true, theme:'auto', voice:'', goal:15}}; }
 function load(){
-  try{ const r = JSON.parse(localStorage.getItem(KEY)); if (r && r.v === 1){ const b = blank(); r.set = Object.assign(b.set, r.set||{}); ['traced','found','spelled'].forEach(k => r[k] = r[k] || {}); return r; } }catch(e){}
+  try{ const r = JSON.parse(localStorage.getItem(KEY)); if (r && r.v === 1){ const b = blank(); r.set = Object.assign(b.set, r.set||{}); ['traced','found','spelled','days'].forEach(k => r[k] = r[k] || {}); return r; } }catch(e){}
   return blank();
 }
 let S = load();
@@ -286,6 +296,50 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>'
 const pick = a => a[Math.floor(Math.random()*a.length)];
 function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; }
 function toast(msg){ const t = document.createElement('div'); t.className='toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 2200); }
+
+/* ---------- today's log + play timer ---------- */
+const pad2 = n => String(n).padStart(2,'0');
+const dayKey = (d=new Date()) => d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+function today(){ const k = dayKey(); return S.days[k] || (S.days[k] = {sec:0, traced:[], spelled:[], finds:0, found:0, stars:0, goalHit:false}); }
+function addStar(n=1){ S.stars += n; today().stars += n; }
+function logPush(key, v){ today()[key].push(v); }
+const mins = sec => Math.floor(sec/60);
+let lastAct = Date.now();
+['pointerdown','keydown'].forEach(t => document.addEventListener(t, () => { lastAct = Date.now(); }, true));
+const TICK = 5;
+setInterval(() => {
+  if (document.hidden || Date.now() - lastAct > 60000) return;
+  const d = today(); d.sec += TICK; save();
+  const g = +S.set.goal || 0;
+  if (g && d.goalHit !== g && d.sec >= g*60){ d.goalHit = g; save(); goalReached(); }
+  else if (view === 'home'){ const el = $('#playMin'); if (el) el.textContent = mins(d.sec); const r = $('#playRing'); if (r && g) r.style.setProperty('--p', Math.min(100, d.sec/(g*60)*100)); }
+}, TICK*1000);
+// prune logs older than 60 days
+(() => { const cut = Date.now() - 60*864e5; Object.keys(S.days).forEach(k => { const [y,m,d] = k.split('-').map(Number); if (new Date(y,m-1,d).getTime() < cut) delete S.days[k]; }); })();
+
+function reportText(){
+  const d = today(), name = S.set.name || 'Rico', g = +S.set.goal || 0;
+  const date = new Date().toLocaleDateString('en-US',{weekday:'short', month:'numeric', day:'numeric'});
+  const uniq = a => [...new Set(a)];
+  const L = [`🚀 ${name} — ABC Rocket, ${date}`, `Played ${mins(d.sec)} min${g ? (d.sec >= g*60 ? ` ✅ (goal ${g} min)` : ` (goal ${g} min)`) : ''}`, ''];
+  L.push('Traced: ' + (d.traced.length ? uniq(d.traced).join(', ') + (d.traced.length > uniq(d.traced).length ? ` (${d.traced.length} times)` : '') : '—'));
+  L.push('Spelled: ' + (d.spelled.length ? uniq(d.spelled).join(', ') : '—'));
+  L.push(`Find it: ${d.finds} game${d.finds===1?'':'s'}, ${d.found} letters found`);
+  L.push(`⭐ ${d.stars} stars today`);
+  return L.join('\n');
+}
+async function share(text){
+  try{ if (navigator.share){ await navigator.share({title:'ABC Rocket report', text}); return; } }catch(e){ if (e && e.name === 'AbortError') return; }
+  try{ await navigator.clipboard.writeText(text); toast('Report copied — paste it in a message'); }catch(e){ toast("Couldn't share"); }
+}
+function goalReached(){
+  if (view === 'pin' || view === 'parent') return;
+  if (HAS_TTS) speechSynthesis.cancel();
+  const back = {view, cur};
+  view = 'goal'; cur = Object.assign({}, cur, {_back: back}); render();
+  sfxDone(); setTimeout(burst, 150);
+  say([`Time's up! ${praise()}!`, `You played ${S.set.goal} minutes. Tap send to parents.`]);
+}
 
 /* ---------- letters ---------- */
 const AZ = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
@@ -582,7 +636,7 @@ let cur = {};   // per-view state
 function go(v, state){ view = v; if (state) cur = state; if (HAS_TTS) speechSynthesis.cancel(); render(); }
 function render(){
   applyTheme();
-  const f = {home:vHome, abc:vAbc, letter:vLetter, words:vWords, spell:vSpell, trace:vTrace, find:vFind, findDone:vFindDone, pin:vPin, parent:vParent}[view] || vHome;
+  const f = {goal:vGoal, home:vHome, abc:vAbc, letter:vLetter, words:vWords, spell:vSpell, trace:vTrace, find:vFind, findDone:vFindDone, pin:vPin, parent:vParent}[view] || vHome;
   app.innerHTML = f();
   if (view === 'trace') bindTrace();
   if (view === 'parent') bindParent();
@@ -590,6 +644,24 @@ function render(){
 const topBar = (title, extra='') => `<div class="topbar"><button class="iconbtn" data-act="home" aria-label="Home">${IC.home}</button><div class="title">${title}</div>${extra}</div>`;
 const starPill = () => `<div class="starcount">⭐ <span>${S.stars}</span></div>`;
 
+function playCard(){
+  const g = +S.set.goal || 0, d = today(); if (!g) return '';
+  const pct = Math.min(100, d.sec/(g*60)*100);
+  return `<div class="card play">
+    <div class="pring" id="playRing" style="--p:${pct}"><div><b id="playMin">${mins(d.sec)}</b><small>of ${g} min</small></div></div>
+    <div class="ptext">${d.sec >= g*60 ? `<h3>✅ ${g} minutes done!</h3><p>Great job! Show your parents.</p>` : `<h3>Play ${g} minutes</h3><p>Learn letters to earn more game time!</p>`}</div>
+    ${d.sec >= g*60 ? `<button class="btn honey sendbtn" data-act="send">📤 Send to Parents</button>` : ''}
+  </div>`;
+}
+function vGoal(){
+  const g = +S.set.goal || 0, d = today();
+  return `<div class="screen"><div class="center">
+    <div class="bigstars">🏆</div>
+    <h1>Time's up!<br>${esc(praise())}!</h1>
+    <p style="color:var(--sky-ink);font-size:1.25rem;margin:0">You played <b>${mins(d.sec)} minutes</b> and earned <b>⭐ ${d.stars}</b> stars today.</p>
+    <div class="done-row"><button class="btn honey" data-act="send">📤 Send to Parents</button><button class="btn ghost" data-act="keepPlaying">Keep playing</button></div>
+  </div></div>`;
+}
 function vHome(){
   const t = TH(), fl = focusLetters();
   const acts = [
@@ -603,6 +675,7 @@ function vHome(){
     <div class="topbar"><div class="brand"><span class="logo">🚀</span>ABC Rocket</div>${starPill()}<button class="iconbtn sm" data-act="parent" aria-label="Parent setup">${IC.lock}</button></div>
     <div class="scroll">
       <div class="hello"><h1>Hi, ${esc(S.set.name||'friend')}!</h1><p>${esc(t.greet)}</p></div>
+      ${playCard()}
       <div class="acts">${acts}</div>
       ${fl.length ? `<div class="card mine"><h3>My letters</h3><div class="chips">${chips}</div></div>` : ''}
     </div></div>`;
@@ -665,7 +738,7 @@ function tapTile(idx, el){
   if (t.c === need){
     t.used = true; c.pos++; c.misses = 0; tone(660+c.pos*70, 0, .16);
     if (c.pos >= c.w.length){
-      c.done = true; S.spelled[c.w] = (S.spelled[c.w]||0) + 1; S.stars++; save();
+      c.done = true; S.spelled[c.w] = (S.spelled[c.w]||0) + 1; addStar(); logPush('spelled', c.w); save();
       render(); sfxDone(); setTimeout(burst, 150);
       say([c.w.split('').map(L => NAME[L]).join(', ') + '.', c.w.toLowerCase() + '!', praise() + '!']);
     } else { render(); say([NAME[t.c] + '.', `Find ${NAME[c.w[c.pos]]}.`]); }
@@ -756,7 +829,7 @@ function bindTrace(){
 }
 function finishTrace(){
   const c = cur; c.done = true;
-  S.traced[c.L] = (S.traced[c.L]||0) + 1; S.stars++; save();
+  S.traced[c.L] = (S.traced[c.L]||0) + 1; addStar(); logPush('traced', c.L); save();
   render(); sfxDone(); setTimeout(burst, 120);
   say([`${praise()}!`, `You traced ${NAME[c.L]}!`]);
 }
@@ -804,9 +877,9 @@ function tapBub(i, el){
   const o = c.opts[i]; if (!o || o.wrong) return;
   if (o.L === c.target){
     c.busy = true; el.classList.add('right'); sfxGood();
-    S.found[o.L] = (S.found[o.L]||0) + 1; c.round++; c.got++; save();
+    S.found[o.L] = (S.found[o.L]||0) + 1; today().found++; c.round++; c.got++; save();
     say([`Yes! ${NAME[o.L]}!`]);
-    setTimeout(() => { if (view !== 'find') return; if (c.round >= ROUNDS){ S.stars += 2; save(); go('findDone'); sfxDone(); setTimeout(burst, 150); say([`${praise()}!`, 'You found them all!']); } else newRound(); }, 1100);
+    setTimeout(() => { if (view !== 'find') return; if (c.round >= ROUNDS){ addStar(2); today().finds++; save(); go('findDone'); sfxDone(); setTimeout(burst, 150); say([`${praise()}!`, 'You found them all!']); } else newRound(); }, 1100);
   } else {
     o.wrong = true; c.misses++; tone(300,0,.18,'triangle',.1);
     el.classList.add('wrong');
@@ -840,6 +913,17 @@ function vParent(){
   const stat = obj => AZ.filter(L => obj[L]).map(L => `<span>${L}<small>×${obj[L]}</small></span>`).join('') || '<p class="hint" style="margin:0">Nothing yet.</p>';
   return `<div class="screen parent"><div class="topbar"><button class="iconbtn" data-act="home" aria-label="Back">${IC.back}</button><div class="title">Parent setup</div></div>
     <div class="scroll">
+      <div class="card"><h3>Kid</h3>
+        <label for="kname" style="margin-top:4px">Name (shows on the home screen and in reports)</label>
+        <input id="kname" type="text" maxlength="16" autocomplete="off" value="${esc(S.set.name)}">
+      </div>
+      <div class="card"><h3>Play time</h3>
+        <p class="hint">When he hits the goal, a "Time's up!" screen pops up with a <b>Send to Parents</b> button. Only active play counts: the timer pauses when the app is closed or untouched for a minute.</p>
+        <div class="seg">${[0,15,30].map(v => `<button class="${(+S.set.goal||0)===v?'on':''}" data-act="goal" data-v="${v}">${v ? v + ' min' : 'Off'}</button>`).join('')}</div>
+        <p class="hint" style="margin-top:12px">Today: <b>${mins(today().sec)} min</b> · ⭐ ${today().stars} stars${(+S.set.goal && today().sec >= S.set.goal*60) ? ' · goal reached ✅' : ''}</p>
+        <div class="stats">${playWeek()}</div>
+        <div class="btns"><button class="btn honey" data-act="sendParent">📤 Send today's report</button></div>
+      </div>
       <div class="card"><h3>Word sets</h3>
         <p class="hint">Tap a set to load it. Move to the next one when he's got these. You can still edit the list below.</p>
         <div class="sets">${WORD_SETS.map((w,i) => `<button class="${norm(S.set.words)===norm(w[2])?'on':''}" data-act="loadSet" data-i="${i}"><b>${w[0]}</b><small>${w[1]}</small><span>${w[2].split('\n').map(l=>l.split('|')[0].trim()).join(' · ')}</span></button>`).join('')}</div>
@@ -854,8 +938,6 @@ function vParent(){
         <label>Show letters as</label>
         <div class="seg"><button class="${S.set.lower?'':'on'}" data-act="lower" data-v="0">Uppercase A</button><button class="${S.set.lower?'on':''}" data-act="lower" data-v="1">Upper + lower Aa</button></div>
         <p class="hint" style="margin-top:8px">Tracing stays uppercase. Spelling words stay uppercase.</p>
-        <label for="kname">Name on the home screen</label>
-        <input id="kname" type="text" maxlength="16" autocomplete="off" value="${esc(S.set.name)}">
       </div>
       <div class="card"><h3>Sound</h3>
         <label for="voice">Voice</label><select id="voice"></select>
@@ -872,6 +954,11 @@ function vParent(){
       </div>
       <div style="height:20px"></div>
     </div></div>`;
+}
+function playWeek(){
+  const out = [];
+  for (let i = 6; i >= 0; i--){ const dt = new Date(); dt.setDate(dt.getDate()-i); const d = S.days[dayKey(dt)]; out.push(`<span>${mins(d ? d.sec : 0)}<small>${dt.toLocaleDateString('en-US',{weekday:'short'})}${d && d.goalHit ? ' ✅' : ''}</small></span>`); }
+  return out.join('');
 }
 function fillVoiceSelect(){
   const sel = $('#voice'); if (!sel) return;
@@ -893,6 +980,10 @@ app.addEventListener('click', e => {
   const a = b.dataset.act;
   switch(a){
     case 'home': go('home'); break;
+    case 'send': share(reportText()); break;
+    case 'keepPlaying': { const bk = cur._back; if (bk && bk.view !== 'goal'){ view = bk.view; cur = bk.cur; if (view === 'find' && (cur.busy || cur.round >= ROUNDS)){ if (cur.round >= ROUNDS) go('findDone'); else newRound(); } else render(); } else go('home'); } break;
+    case 'goal': S.set.goal = +b.dataset.v; save(); render(); break;
+    case 'sendParent': share(reportText()); break;
     case 'abc': go('abc'); say(['Letters!']); break;
     case 'letter': go('letter', {L:b.dataset.l}); speakLetter(b.dataset.l); break;
     case 'sayLetter': speakLetter(cur.L); break;
