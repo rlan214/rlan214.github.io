@@ -283,7 +283,7 @@ body.glass .page{box-shadow:0 6px 0 rgba(0,0,0,.3),0 24px 60px rgba(0,0,0,.45),0
 const PIN = '2013';
 const KEY = 'moretime.v1';
 const LEVELS = {
-  '4-6': {label:'Grades 4–6', note:'Everything. Reads on their own.'},
+  '4-6': {label:'Grades 4–6', note:'Everything. Reads on their own (no read-aloud).'},
   '2-3': {label:'Grades 2–3', note:'Short reads, Buster Bear and Oz. Tap-to-hear help.'},
   'pre': {label:'Pre-reader', note:'Read to me: the app reads aloud and highlights.'}
 };
@@ -726,7 +726,7 @@ function vReader(){
       <div class="title">${esc(it.short)}</div>
       <button class="iconbtn sm" data-act="size" data-d="-1" aria-label="Smaller text">${IC.aminus}</button>
       <button class="iconbtn sm" data-act="size" data-d="1" aria-label="Bigger text">${IC.aplus}</button>
-      <button class="iconbtn sm ${cur.listening?'on':''}" id="listenBtn" data-act="listen" aria-label="Read to me">${cur.listening ? IC.stop : IC.listen}</button>
+      ${S.set.level === '4-6' ? '' : `<button class="iconbtn sm ${cur.listening?'on':''}" id="listenBtn" data-act="listen" aria-label="Read to me">${cur.listening ? IC.stop : IC.listen}</button>`}
     </div>
     <div class="rprog"><i id="rprog" style="width:${Math.round(r.pos*100)}%"></i></div>
     <div class="rscroll" id="rscroll">
