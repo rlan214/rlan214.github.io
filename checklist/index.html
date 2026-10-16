@@ -7,6 +7,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Checklist">
 <meta name="theme-color" content="#fff7ec">
+<link rel="apple-touch-icon" sizes="180x180" href="/checklist/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/checklist/icon-512.png">
 <title>Daily Checklist</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,14 +21,48 @@
   --chore:#4f8cff; --workout:#ff8a3d; --homework:#9b6bff;
   --f-display:'Baloo 2',system-ui,sans-serif; --f-body:'Nunito',system-ui,sans-serif;
   --r:22px; --shadow:0 6px 0 rgba(43,35,64,.08),0 12px 28px rgba(43,35,64,.06);
+  --sky:radial-gradient(circle at 10% 0%,#ffe2c2 0,transparent 35%),radial-gradient(circle at 100% 30%,#e6ddff 0,transparent 35%),#fff7ec; --sky-ink:#2b2340; --sky-soft:#6d6585;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-weight:700}
-body{min-height:100dvh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:
-  radial-gradient(circle at 10% 0%,#ffe2c2 0,transparent 35%),radial-gradient(circle at 100% 30%,#e6ddff 0,transparent 35%),var(--bg);background-attachment:fixed}
+body{min-height:100dvh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:transparent}
+html{background:var(--bg)}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 input,select{font:inherit;color:inherit}
-#app{max-width:860px;margin:0 auto;padding:18px 16px 40px}
+#app{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:18px 16px 40px}
+body.has-lights #app{padding-top:46px}
+/* sky-facing text follows the season */
+.top h1,.group h3{color:var(--sky-ink)}
+.date,.sync{color:var(--sky-soft)}
+.greet{color:var(--sky-ink);font-family:var(--f-display);font-size:1.15rem;margin-top:2px;opacity:.9}
+
+/* ---------- season scene (shared look with Word Hive) ---------- */
+#scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:var(--sky)}
+#scene .p{position:absolute;top:-12vh;left:var(--x);width:var(--s);animation:fall var(--d) linear var(--dl) infinite;opacity:var(--o,1)}
+#scene .p > svg{display:block;width:100%;height:auto;animation:sway var(--sw) ease-in-out infinite alternate}
+#scene .p.up{top:auto;bottom:-12vh;animation-name:rise}
+#scene .p.fly{top:var(--y);left:-14vw;animation-name:flyx}
+#scene .p.fly > svg{animation:flap .22s ease-in-out infinite alternate}
+#scene .p.still{top:var(--y);animation:twinkle var(--d) ease-in-out var(--dl) infinite alternate}
+#scene .p.still > svg{animation:none}
+@keyframes fall{to{transform:translateY(126vh)}}
+@keyframes rise{to{transform:translateY(-126vh)}}
+@keyframes flyx{0%{transform:translate(0,0)}50%{transform:translate(64vw,-4vh)}100%{transform:translate(128vw,2vh)}}
+@keyframes sway{from{transform:translateX(-26px) rotate(-28deg)}to{transform:translateX(26px) rotate(32deg)}}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(.55)}}
+@keyframes twinkle{from{opacity:.25;transform:scale(.8)}to{opacity:1;transform:scale(1.1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+#scene .sun{position:absolute;right:4vw;top:calc(env(safe-area-inset-top) + 70px);width:clamp(70px,11vw,120px);aspect-ratio:1}
+#scene .sun .rays{animation:spin 40s linear infinite;transform-origin:50% 50%}
+#scene .moon{position:absolute;right:7vw;top:calc(env(safe-area-inset-top) + 80px);width:clamp(70px,11vw,120px);aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 36% 34%,#FFFBE6,#FFE9A8 55%,#F0CC6A);box-shadow:0 0 50px 16px rgba(255,236,170,.35)}
+#scene .moon::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 62% 60%,rgba(200,160,70,.35) 0 9%,transparent 10%),radial-gradient(circle at 40% 70%,rgba(200,160,70,.28) 0 6%,transparent 7%),radial-gradient(circle at 66% 32%,rgba(200,160,70,.25) 0 5%,transparent 6%)}
+#scene .ground{position:absolute;left:0;right:0;bottom:0;height:18vh;min-height:110px}
+#scene .ground svg,#scene .lights svg{width:100%;height:100%;display:block}
+#scene .lights{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top) - 6px);height:36px}
+#scene .lights .bulb{animation:blink 1.6s ease-in-out infinite alternate}
+@keyframes blink{from{opacity:.45}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#scene *{animation:none!important}}
 h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1.1}
 .top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .top h1{font-size:clamp(1.8rem,5vw,2.6rem);flex:1}
@@ -138,6 +174,7 @@ table.week td:first-child,table.week th:first-child{text-align:left}
 </style>
 </head>
 <body>
+<div id="scene" aria-hidden="true"></div>
 <div id="app"></div>
 <script type="module">
 /* =========================================================
@@ -281,11 +318,94 @@ function burst(x, y, set = ['⭐','✨','🌟','🎉']){
   }
 }
 
+
+/* ---------- season themes (same family as Word Hive) ---------- */
+const THEME_KEY = 'checklist.theme';
+let themePref = (() => { try{ return localStorage.getItem(THEME_KEY) || 'auto'; }catch(e){ return 'auto'; } })();
+const LEAF = c => `<svg viewBox="0 0 40 40"><path d="M20 2l4 8 7-3-2 8 8 2-7 5 3 6-8-1-2 9-3-8-3 8-2-9-8 1 3-6-7-5 8-2-2-8 7 3z" fill="${c}"/><path d="M20 12v26" stroke="rgba(0,0,0,.25)" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const OVAL_LEAF = c => `<svg viewBox="0 0 40 40"><path d="M20 3C30 10 34 20 20 37 6 20 10 10 20 3z" fill="${c}"/><path d="M20 8v27" stroke="rgba(0,0,0,.22)" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const FLAKE = `<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M20 3v34M5 11.5l30 17M5 28.5l30-17"/><path d="M15 6l5 4 5-4M15 34l5-4 5 4M6 17l6 1.5-2 5.5M34 23l-6-1.5 2-5.5M6 23l6-1.5-2-5.5M34 17l-6 1.5 2 5.5"/></svg>`;
+const DOT = `<svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.5" fill="#fff"/></svg>`;
+const PETAL = c => `<svg viewBox="0 0 30 30"><path d="M15 2c8 6 9 16 0 26C6 18 7 8 15 2z" fill="${c}"/><path d="M15 6v16" stroke="rgba(255,255,255,.6)" stroke-width="1.4" stroke-linecap="round"/></svg>`;
+const BAT = `<svg viewBox="0 0 64 30"><path d="M32 10c2-4 4-5 4-5l1 4c3-1 7-1 10 2 4-4 11-6 17-4-5 2-7 7-7 12-3-3-7-3-9 0-2-3-6-3-8-1-2 3-5 6-8 7-3-1-6-4-8-7-2-2-6-2-8 1-2-3-6-3-9 0 0-5-2-10-7-12 6-2 13 0 17 4 3-3 7-3 10-2l1-4s2 1 4 5z" fill="#160C26"/></svg>`;
+const SPARK = c => `<svg viewBox="0 0 20 20"><path d="M10 0c1 6 4 9 10 10-6 1-9 4-10 10-1-6-4-9-10-10 6-1 9-4 10-10z" fill="${c}"/></svg>`;
+const BUBBLE = `<svg viewBox="0 0 30 30"><circle cx="15" cy="15" r="13" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.85)" stroke-width="2"/><path d="M8 12a8 8 0 0 1 6-5" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>`;
+const BALLOON = c => `<svg viewBox="0 0 30 44"><ellipse cx="15" cy="15" rx="12" ry="14" fill="${c}"/><ellipse cx="11" cy="10" rx="3" ry="5" fill="#fff" opacity=".45"/><path d="M15 29l-2 3h4z" fill="${c}"/><path d="M15 32c-2 4 2 6 0 11" stroke="#9a8fb0" stroke-width="1.2" fill="none"/></svg>`;
+const SUN = `<svg viewBox="0 0 100 100"><g class="rays" stroke="#FFD25A" stroke-width="5" stroke-linecap="round"><path d="M50 4v12M50 84v12M4 50h12M84 50h12M17 17l8.5 8.5M74.5 74.5L83 83M17 83l8.5-8.5M74.5 25.5L83 17"/></g><circle cx="50" cy="50" r="24" fill="#FFC93C"/></svg>`;
+const hills = (c1, c2, extra='') => `<svg viewBox="0 0 1200 200" preserveAspectRatio="none"><path d="M0 110 C 180 40 360 60 520 100 S 860 40 1200 90 V200 H0z" fill="${c2}"/><path d="M0 150 C 220 100 420 120 620 145 S 980 110 1200 140 V200 H0z" fill="${c1}"/>${extra}</svg>`;
+const PUMPKINS = `<g><ellipse cx="160" cy="168" rx="34" ry="24" fill="#FF8A1F"/><path d="M140 168c0-16 8-22 20-22s20 6 20 22" fill="none" stroke="#C25E05" stroke-width="3"/><rect x="157" y="136" width="6" height="12" rx="2" fill="#4E6B22"/><ellipse cx="1040" cy="172" rx="26" ry="18" fill="#FF9A2E"/><rect x="1037" y="148" width="5" height="10" rx="2" fill="#4E6B22"/></g>`;
+const JACK = `<g><ellipse cx="180" cy="166" rx="38" ry="27" fill="#FF8A1F"/><path d="M164 158l8-8 4 9zM196 158l-8-8-4 9zM164 172q16 12 32 0l-6 3-4-4-6 5-6-5-4 4z" fill="#FFD447"/><rect x="176" y="132" width="7" height="13" rx="2" fill="#3D5E1C"/><ellipse cx="1030" cy="172" rx="28" ry="20" fill="#E9761A"/><rect x="1027" y="146" width="6" height="11" rx="2" fill="#3D5E1C"/></g>`;
+const TREES = `<g fill="#1E7A45"><path d="M150 60l38 70h-18l26 44h-92l26-44h-18z"/><path d="M1050 80l32 60h-15l22 38h-78l22-38h-15z"/></g><g fill="#5B3A1C"><rect x="143" y="172" width="14" height="20"/><rect x="1043" y="176" width="14" height="18"/></g><circle cx="150" cy="58" r="7" fill="#FFD166"/>`;
+const FLOWERS = [180,330,520,760,930,1090].map((x,i)=>`<g transform="translate(${x} ${150+(i%2)*12})"><path d="M0 0v30" stroke="#4E9A3A" stroke-width="3"/><g fill="${['#FF8FB8','#FFD25A','#B98CFF','#FF8FB8','#FFB0C9','#FFD25A'][i]}"><circle cx="0" cy="-8" r="6"/><circle cx="8" cy="0" r="6"/><circle cx="0" cy="8" r="6"/><circle cx="-8" cy="0" r="6"/></g><circle r="4.5" fill="#FFF3B0"/></g>`).join('');
+const WAVES = `<path d="M0 175 q 30 -12 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 V200 H0z" fill="#5CC8F0" opacity=".9"/>`;
+
+const THEMES = {
+  classic:{label:'Plain (no season)', months:[], greet:'', fx:'balloons', vars:{}, ground:hills('#F3E2C8','#EBD3B0'), burst:['⭐','✨','🌟','🎉'], cheer:'Great job'},
+  autumn:{label:'Fall leaves', months:[8,10], greet:'Happy fall! 🍂', fx:'leaves',
+    vars:{'--sky':'linear-gradient(180deg,#FFE9C9 0%,#FFCE94 55%,#F6A25A 100%)','--sky-ink':'#4A2410','--sky-soft':'#7A4A2A','--bg':'#F6A25A','--line':'#F1DEC6'},
+    ground:hills('#B65A22','#D98A3D',PUMPKINS), burst:['🍂','🍁','⭐','✨'], cheer:'Fall-tastic'},
+  halloween:{label:'Halloween', months:[9], greet:'Happy Halloween! 🎃', fx:'bats', moon:true,
+    vars:{'--sky':'linear-gradient(180deg,#160C2E 0%,#2E1850 55%,#55296B 100%)','--sky-ink':'#F6EEFF','--sky-soft':'#C9B8E8','--bg':'#160C2E'},
+    ground:hills('#120A22','#2A1846',JACK), burst:['🎃','🦇','👻','⭐','✨'], cheer:'Spook-tacular'},
+  christmas:{label:'Christmas', months:[11], greet:'Merry Christmas! 🎄', fx:'snow', lights:true,
+    vars:{'--sky':'linear-gradient(180deg,#0D1F3D 0%,#1B3961 60%,#2C5482 100%)','--sky-ink':'#FFFFFF','--sky-soft':'#C7D6EE','--bg':'#0D1F3D'},
+    ground:hills('#F4F8FF','#D6E4F7',TREES), burst:['🎄','⭐','❄️','🎁','✨'], cheer:'Ho ho ho'},
+  winter:{label:'Winter snow', months:[0,1], greet:'Stay cozy! ❄️', fx:'snow',
+    vars:{'--sky':'linear-gradient(180deg,#3E6FB8 0%,#6F9EDB 55%,#A9CDF2 100%)','--sky-ink':'#FFFFFF','--sky-soft':'#E3EEFC','--bg':'#3E6FB8'},
+    ground:hills('#F6FAFF','#DCE8F7'), burst:['❄️','⛄','⭐','✨'], cheer:'Snow-tastic'},
+  spring:{label:'Spring blossoms', months:[2,3,4], greet:'Happy spring! 🌸', fx:'petals', sun:true,
+    vars:{'--sky':'linear-gradient(180deg,#DDF4FF 0%,#EAF8EE 55%,#FFE6F0 100%)','--sky-ink':'#244233','--sky-soft':'#55705F','--bg':'#EAF8EE'},
+    ground:hills('#7CC46A','#A5D98F',FLOWERS), burst:['🌸','🌷','🐝','⭐'], cheer:'Blooming great'},
+  summer:{label:'Summer sun', months:[5,6,7], greet:'Happy summer! ☀️', fx:'bubbles', sun:true,
+    vars:{'--sky':'linear-gradient(180deg,#4FC3F7 0%,#8FDBFF 55%,#D3F3FF 100%)','--sky-ink':'#0E3550','--sky-soft':'#2F5A78','--bg':'#4FC3F7'},
+    ground:hills('#F5D99A','#EBC678',WAVES), burst:['☀️','🌊','🐚','⭐'], cheer:'Sun-sational'},
+};
+const THEME_ORDER = ['auto','autumn','halloween','christmas','winter','spring','summer','classic'];
+const autoTheme = () => { const m = new Date().getMonth(); return Object.keys(THEMES).find(k => THEMES[k].months.includes(m)) || 'classic'; };
+const themeName = () => THEMES[themePref] ? themePref : autoTheme();
+const TH = () => THEMES[themeName()];
+const rnd = (a,b) => a + Math.random()*(b-a);
+const pickOne = a => a[Math.floor(Math.random()*a.length)];
+function particle(svg, cls, o){ return `<div class="p ${cls}" style="${Object.entries(o).map(([k,v])=>`--${k}:${v}`).join(';')}">${svg}</div>`; }
+function sceneFx(kind){
+  const out = [];
+  const fallers = (n, svgs, smin, smax, dmin, dmax) => { for (let i=0;i<n;i++) out.push(particle(pickOne(svgs), '', {x:rnd(-4,98).toFixed(1)+'vw', s:rnd(smin,smax).toFixed(0)+'px', d:rnd(dmin,dmax).toFixed(1)+'s', dl:(-rnd(0,dmax)).toFixed(1)+'s', sw:rnd(1.6,3.4).toFixed(1)+'s', o:rnd(.75,1).toFixed(2)})); };
+  if (kind==='leaves') fallers(14, ['#D2542A','#F4A93A','#B83A1B','#E8C547','#9C4A2A','#E07A2E'].map((c,i)=>i%2?OVAL_LEAF(c):LEAF(c)), 22, 42, 11, 20);
+  else if (kind==='snow'){ for (let i=0;i<30;i++) out.push(particle(DOT, '', {x:rnd(0,100).toFixed(1)+'vw', s:rnd(4,10).toFixed(0)+'px', d:rnd(9,18).toFixed(1)+'s', dl:(-rnd(0,18)).toFixed(1)+'s', sw:rnd(2,4).toFixed(1)+'s', o:rnd(.5,.95).toFixed(2)})); fallers(8, [FLAKE], 16, 28, 12, 22); }
+  else if (kind==='petals') fallers(16, ['#FF9EC4','#FFC2D9','#FFFFFF','#F7B3CF'].map(PETAL), 14, 24, 12, 20);
+  else if (kind==='bubbles'){ for (let i=0;i<12;i++) out.push(particle(BUBBLE, 'up', {x:rnd(0,96).toFixed(1)+'vw', s:rnd(18,44).toFixed(0)+'px', d:rnd(14,26).toFixed(1)+'s', dl:(-rnd(0,26)).toFixed(1)+'s', sw:rnd(2.5,4.5).toFixed(1)+'s', o:rnd(.7,1).toFixed(2)})); }
+  else if (kind==='bats'){
+    for (let i=0;i<24;i++) out.push(particle(SPARK('#FFF4C9'), 'still', {x:rnd(0,100).toFixed(1)+'vw', y:rnd(2,60).toFixed(1)+'vh', s:rnd(5,12).toFixed(0)+'px', d:rnd(1.4,3.4).toFixed(1)+'s', dl:(-rnd(0,3)).toFixed(1)+'s', sw:'1s'}));
+    for (let i=0;i<4;i++) out.push(particle(BAT, 'fly', {x:'0', y:rnd(10,38).toFixed(1)+'vh', s:rnd(34,62).toFixed(0)+'px', d:rnd(16,28).toFixed(1)+'s', dl:(-rnd(0,24)).toFixed(1)+'s', sw:'1s'}));
+  }
+  else if (kind==='balloons'){ for (let i=0;i<6;i++) out.push(particle(BALLOON(pickOne(['#FF8A8A','#7C5CFF','#4F8CFF','#FFC93C','#22B07D'])), 'up', {x:rnd(0,94).toFixed(1)+'vw', s:rnd(26,40).toFixed(0)+'px', d:rnd(22,34).toFixed(1)+'s', dl:(-rnd(0,34)).toFixed(1)+'s', sw:rnd(3,5).toFixed(1)+'s', o:'.85'})); }
+  return out.join('');
+}
+function lightsSvg(){
+  const cs = ['#FF4D5E','#FFD166','#3DD68C','#6EC3FF','#FF8FD8']; let b = '';
+  for (let i=0;i<24;i++){ const x = 25 + i*50, y = 12 + 9*Math.sin((i%6)/6*Math.PI); b += `<rect x="${x-3}" y="${y-4}" width="6" height="6" rx="1" fill="#2B3A2B"/><ellipse class="bulb" style="animation-delay:${(-Math.random()*1.6).toFixed(2)}s" cx="${x}" cy="${y+9}" rx="6" ry="9" fill="${cs[i%5]}"/>`; }
+  return `<svg viewBox="0 0 1200 40" preserveAspectRatio="none"><path d="M0 10 Q 25 26 50 12 T 100 12 T 150 12 T 200 12 T 250 12 T 300 12 T 350 12 T 400 12 T 450 12 T 500 12 T 550 12 T 600 12 T 650 12 T 700 12 T 750 12 T 800 12 T 850 12 T 900 12 T 950 12 T 1000 12 T 1050 12 T 1100 12 T 1150 12 T 1200 12" stroke="#2B3A2B" stroke-width="2" fill="none"/>${b}</svg>`;
+}
+let appliedTheme = null;
+function applyTheme(force){
+  const name = themeName();
+  if (name === appliedTheme && !force) return;
+  appliedTheme = name;
+  const t = THEMES[name], root = document.documentElement;
+  new Set(Object.values(THEMES).flatMap(x => Object.keys(x.vars))).forEach(k => root.style.removeProperty(k));
+  Object.entries(t.vars).forEach(([k,v]) => root.style.setProperty(k, v));
+  $('#scene').innerHTML = (t.sun ? `<div class="sun">${SUN}</div>` : '') + (t.moon ? '<div class="moon"></div>' : '') +
+    (t.lights ? `<div class="lights">${lightsSvg()}</div>` : '') + sceneFx(t.fx) + `<div class="ground">${t.ground}</div>`;
+  document.body.classList.toggle('has-lights', !!t.lights);
+  const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = getComputedStyle(root).getPropertyValue('--bg').trim() || '#fff7ec';
+}
+
 /* ---------- views ---------- */
 let view = 'home', curKid = null, pinBuf = '', ptab = null;
 let draft = {t:'', e:'🧹', c:'chore', dow:[], when:'daily', date:dayKey()};
 
 function render(){
+  applyTheme();
   const app = $('#app');
   if (view === 'home') app.innerHTML = vHome();
   else if (view === 'kid') app.innerHTML = vKid();
@@ -316,7 +436,7 @@ function vHome(){
         <div class="meta">${all ? '<span class="pill done-badge">✅ All done</span>' : ''}<span class="pill">🔥 ${st} day${st===1?'':'s'}</span><span class="pill">⭐ ${stars(k)}</span></div>
       </div></button>`;
   }).join('');
-  return `<div class="top"><div style="flex:1"><h1>Today</h1><div class="date">${fmtLong(new Date())}</div></div>
+  return `<div class="top"><div style="flex:1"><h1>Today</h1><div class="date">${fmtLong(new Date())}</div>${TH().greet ? `<div class="greet">${TH().greet}</div>` : ''}</div>
       <button class="iconbtn" data-act="parent" aria-label="Parent setup">⚙️</button></div>
     <div class="kids">${cards}</div>${syncLine()}`;
 }
@@ -329,7 +449,7 @@ function vKid(){
       <div style="flex:1"><h1>${esc(k.name)}</h1><div class="date">${fmtLong(new Date())}</div></div>
       <span class="pill">🔥 ${streak(k)}</span></div>
     <div class="bar" style="--kc:${k.color}"><i style="width:${pct}%"></i></div>
-    ${all ? `<div class="alldone">🎉 All done! Great job, ${esc(k.name)}!</div>` : ''}`;
+    ${all ? `<div class="alldone">🎉 All done! ${esc(TH().cheer)}, ${esc(k.name)}!</div>` : ''}`;
   if (!p.total) return head + `<div class="card empty"><div class="big">🗒️</div><p>Nothing on the list today.<br>Ask your parents to add some things.</p></div>` + syncLine();
   let body;
   if (k.mode === 'pictures'){
@@ -412,6 +532,8 @@ function vParent(){
       <div class="card sec"><h3>This week</h3>${week}</div>
       <div class="card sec"><h3>Picture mode</h3><p class="hint">Picture mode is for kids who aren't reading yet.</p>
         <div class="chips"><button class="${k.mode==='text'?'on':''}" data-act="mode" data-v="text">Words</button><button class="${k.mode==='pictures'?'on':''}" data-act="mode" data-v="pictures">Pictures + read aloud</button></div></div>
+      <div class="card sec"><h3>Look</h3><p class="hint">The background changes with the season by itself. Pick one to lock it. This setting is per iPad.</p>
+        <div class="chips">${THEME_ORDER.map(n => `<button class="${themePref===n?'on':''}" data-act="theme" data-v="${n}">${n==='auto' ? 'Auto · ' + THEMES[autoTheme()].label : THEMES[n].label}</button>`).join('')}</div></div>
     </div>${syncLine()}`;
 }
 
@@ -423,9 +545,9 @@ function tick(id, el){
   setPath(['days', dk, k.id, 'done', id], on ? Date.now() : undefined);
   setPath(['days', dk, k.id, 'total'], p.total);
   if (on){
-    const r = el.getBoundingClientRect(); burst(r.left + r.width/2, r.top + r.height/2);
+    const r = el.getBoundingClientRect(); burst(r.left + r.width/2, r.top + r.height/2, TH().burst);
     if (k.mode === 'pictures') say(`${it.t}. Done! Great job!`);
-    if (p.n + 1 >= p.total){ setTimeout(() => { burst(innerWidth/2, innerHeight/3, ['🎉','🌟','🏆','⭐']); say(`All done! Great job, ${k.name}!`); }, 300); }
+    if (p.n + 1 >= p.total){ setTimeout(() => { burst(innerWidth/2, innerHeight/3, ['🎉','🏆', ...TH().burst]); say(`All done! Great job, ${k.name}!`); }, 300); }
   } else if (k.mode === 'pictures') say(it.t);
   render();
 }
@@ -494,13 +616,14 @@ document.addEventListener('click', e => {
       render(); } break;
     case 'delExtra': { const k = kidById(ptab), dk = b.dataset.dk;
       setPath(['days', dk, k.id, 'extra'], (rec(k, dk).extra || []).filter(y => y.id !== id)); render(); } break;
+    case 'theme': themePref = v; try{ localStorage.setItem(THEME_KEY, v); }catch(err){} applyTheme(true); render(); break;
     case 'mode': setPath(['kids'], S.kids.map(x => x.id === ptab ? {...x, mode: v} : x)); render(); break;
   }
 });
 /* New day at midnight, and fresh data when the iPad wakes up. */
 let lastDay = dayKey();
 setInterval(() => { if (dayKey() !== lastDay){ lastDay = dayKey(); safeRender(); } }, 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) safeRender(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden){ appliedTheme = null; safeRender(); } });
 if (HAS_TTS) speechSynthesis.onvoiceschanged = () => {};
 
 render();
