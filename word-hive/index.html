@@ -123,7 +123,7 @@ body.has-lights .screen{padding-top:calc(var(--safe-t) + 22px)}
 .day .s.none{color:var(--muted);opacity:.5}
 .day.today{border-color:var(--accent)}
 .day.done{background:var(--honey-soft)}
-.day.done .s{color:var(--honey-deep)}
+.day.done .s{color:var(--honey-ink,var(--honey-deep))}
 .note{margin-top:12px;font-size:.9rem;color:var(--muted);font-weight:700}
 
 /* ---------- test ---------- */
@@ -147,7 +147,7 @@ body.has-lights .screen{padding-top:calc(var(--safe-t) + 22px)}
 .pill svg{width:18px;height:18px}
 .pill:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
 .answer{min-height:64px;width:100%;max-width:640px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px;padding:8px;background:var(--surface);border:3px solid var(--line);border-radius:20px;box-shadow:0 4px 0 var(--line)}
-.answer .ch{min-width:38px;height:48px;padding:0 4px;border-radius:10px;background:var(--accent-soft);color:var(--accent-deep);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:1.8rem;line-height:1}
+.answer .ch{min-width:38px;height:48px;padding:0 4px;border-radius:10px;background:var(--accent-soft);color:var(--accent-ink,var(--accent-deep));display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:1.8rem;line-height:1}
 .answer .ch.sp{background:transparent;min-width:18px}
 .answer .caret{width:3px;height:40px;background:var(--accent);border-radius:2px;animation:caret 1s steps(1) infinite}
 .answer .hint{color:var(--muted);font-weight:700}
@@ -166,12 +166,12 @@ body.has-lights .screen{padding-top:calc(var(--safe-t) + 22px)}
 .fb{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
 .fb h2{margin:0;font-family:var(--f-display);font-weight:800;font-size:1.7rem;display:flex;align-items:center;gap:10px}
 .fb h2 svg{width:34px;height:34px;flex:none}
-.fb.good h2{color:var(--good-deep)}
-.fb.bad h2{color:var(--bad-deep)}
+.fb.good h2{color:var(--good-ink,var(--good-deep))}
+.fb.bad h2{color:var(--bad-ink,var(--bad-deep))}
 .fb .lbl{font-size:.8rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .fb .word{font-family:var(--f-display);font-weight:700;font-size:2.2rem;letter-spacing:.06em;line-height:1.1;word-break:break-word}
 .fb .word .x{color:var(--bad);text-decoration:line-through;text-decoration-thickness:3px}
-.fb .word .add{color:var(--good-deep);background:var(--good-soft);border-radius:6px;padding:0 2px}
+.fb .word .add{color:var(--good-ink,var(--good-deep));background:var(--good-soft);border-radius:6px;padding:0 2px}
 .fb .word.mine{font-size:1.5rem;color:var(--muted)}
 .dock.good{background:var(--good-soft);border-color:color-mix(in srgb,var(--good) 30%,transparent)}
 .dock.bad{background:var(--bad-soft);border-color:color-mix(in srgb,var(--bad) 30%,transparent)}
@@ -190,7 +190,7 @@ body.has-lights .screen{padding-top:calc(var(--safe-t) + 22px)}
 .stars .off{opacity:.25}
 .missed{width:100%;max-width:520px;text-align:left}
 .missed ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
-.missed li{background:var(--bad-soft);color:var(--bad-deep);font-weight:800;padding:6px 12px;border-radius:12px;font-size:1.05rem}
+.missed li{background:var(--bad-soft);color:var(--bad-ink,var(--bad-deep));font-weight:800;padding:6px 12px;border-radius:12px;font-size:1.05rem}
 .actions{width:100%;max-width:520px;display:flex;flex-direction:column;gap:12px;margin-top:4px}
 .burst{position:fixed;left:50%;top:38%;width:var(--s);z-index:5;pointer-events:none;animation:burst 1.5s cubic-bezier(.2,.8,.3,1) forwards}
 .burst svg{width:100%;height:auto;display:block}
@@ -216,16 +216,16 @@ body.has-lights .screen{padding-top:calc(var(--safe-t) + 22px)}
 .parent textarea,.parent input[type=text],.parent select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:12px}
 .parent textarea{min-height:230px;resize:vertical;line-height:1.5;font-family:ui-monospace,Menlo,monospace;font-size:15px}
 .parent .help{font-size:.88rem;color:var(--muted);margin-top:6px;line-height:1.45}
-.parent .help code{background:var(--accent-soft);color:var(--accent-deep);padding:1px 6px;border-radius:6px;font-weight:700}
+.parent .help code{background:var(--accent-soft);color:var(--accent-ink,var(--accent-deep));padding:1px 6px;border-radius:6px;font-weight:700}
 .parent .btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
 .parent .btns > *{flex:1;min-width:150px}
 .tbl{width:100%;border-collapse:collapse;margin-top:10px;font-size:.95rem}
 .tbl th{text-align:left;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 6px;border-bottom:2px solid var(--line)}
 .tbl td{padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:top}
 .tbl td.sc{font-family:var(--f-display);font-weight:700;font-size:1.1rem;white-space:nowrap}
-.tbl td.ms{color:var(--bad-deep);font-weight:700;font-size:.9rem}
+.tbl td.ms{color:var(--bad-ink,var(--bad-deep));font-weight:700;font-size:.9rem}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.chip{background:var(--bad-soft);color:var(--bad-deep);padding:4px 10px;border-radius:10px;font-weight:800;font-size:.9rem}
+.chip{background:var(--bad-soft);color:var(--bad-ink,var(--bad-deep));padding:4px 10px;border-radius:10px;font-weight:800;font-size:.9rem}
 .chip b{opacity:.7;margin-left:4px}
 .switch{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;font-weight:800}
 .switch input{width:52px;height:30px;appearance:none;-webkit-appearance:none;background:var(--line);border-radius:999px;position:relative;cursor:pointer;flex:none;transition:background .15s}
@@ -241,13 +241,33 @@ summary::before{content:"";width:8px;height:8px;border-right:3px solid var(--acc
 details[open] summary::before{transform:rotate(45deg)}
 details ol,details ul{margin:10px 0 0;padding-left:22px;color:var(--ink);line-height:1.55}
 details li{margin-bottom:4px}
-details .tag{display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:8px;background:var(--good-soft);color:var(--good-deep);margin-left:6px}
-details .tag.opt{background:var(--honey-soft);color:var(--honey-deep)}
+details .tag{display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:8px;background:var(--good-soft);color:var(--good-ink,var(--good-deep));margin-left:6px}
+details .tag.opt{background:var(--honey-soft);color:var(--honey-ink,var(--honey-deep))}
 .past{margin-top:8px}
 .past div{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.95rem}
 .past span{color:var(--muted);font-weight:700}
-.toast{position:fixed;left:50%;bottom:calc(24px + var(--safe-b));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:12px 20px;border-radius:14px;font-weight:800;z-index:10;animation:pop .25s}
+.toast{position:fixed;left:50%;bottom:calc(24px + var(--safe-b));transform:translateX(-50%);background:#1d1730;color:#fff;padding:12px 20px;border-radius:14px;font-weight:800;z-index:10;animation:pop .25s}
 .empty-state{text-align:center}
+
+/* ---------- frosted glass for the night-sky seasons ---------- */
+body.glass .card,body.glass .dock,body.glass .answer,body.glass .pill,body.glass .iconbtn,body.glass .pad button,body.glass .btn.ghost{
+  -webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4)}
+body.glass .card,body.glass .answer{border:1.5px solid var(--line);box-shadow:0 6px 0 rgba(0,0,0,.22),0 16px 36px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.2)}
+body.glass .dock{border:1.5px solid var(--line);border-bottom:0;box-shadow:0 -12px 34px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.2)}
+body.glass .key{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.16);box-shadow:0 4px 0 rgba(0,0,0,.28)}
+body.glass .key:active{background:var(--accent-soft);box-shadow:0 1px 0 rgba(0,0,0,.28)}
+body.glass .key.wide{color:var(--muted)}
+body.glass .pill,body.glass .btn.ghost{box-shadow:0 3px 0 rgba(0,0,0,.25)}
+body.glass .pill{color:var(--accent-ink,var(--ink))}
+body.glass .pad button{box-shadow:0 4px 0 rgba(0,0,0,.28)}
+body.glass .hero .badge,body.glass .bigscore{filter:drop-shadow(0 5px 0 var(--honey-deep)) drop-shadow(0 0 22px rgba(255,194,61,.45))}
+body.glass .speak{filter:drop-shadow(0 7px 0 var(--accent-deep)) drop-shadow(0 0 26px color-mix(in srgb,var(--accent) 60%,transparent))}
+body.glass .answer .ch{background:rgba(255,255,255,.14)}
+body.glass .day{background:rgba(255,255,255,.08)}
+body.glass .day.done{background:var(--honey-soft)}
+body.glass .comb .cell:not(.ok):not(.miss),body.glass .prog .cell:not(.ok):not(.miss):not(.now){background:rgba(255,255,255,.22)}
+body.glass textarea::placeholder,body.glass input::placeholder{color:var(--muted)}
+body.glass select{color-scheme:dark}
 .empty-state .btn{margin-top:14px}
 </style>
 </head>
@@ -334,6 +354,7 @@ const TREES = `<g fill="#1E7A45"><path d="M150 60l38 70h-18l26 44h-92l26-44h-18z
 const FLOWERS = [180,330,520,760,930,1090].map((x,i)=>`<g transform="translate(${x} ${150+(i%2)*12})"><path d="M0 0v30" stroke="#4E9A3A" stroke-width="3"/><g fill="${['#FF8FB8','#FFD25A','#B98CFF','#FF8FB8','#FFB0C9','#FFD25A'][i]}"><circle cx="0" cy="-8" r="6"/><circle cx="8" cy="0" r="6"/><circle cx="0" cy="8" r="6"/><circle cx="-8" cy="0" r="6"/></g><circle r="4.5" fill="#FFF3B0"/></g>`).join('');
 const WAVES = `<path d="M0 175 q 30 -12 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 V200 H0z" fill="#5CC8F0" opacity=".9"/>`;
 
+const GLASS = {'--surface':'rgba(255,255,255,.11)','--line':'rgba(255,255,255,.17)','--good-soft':'rgba(46,189,109,.28)','--bad-soft':'rgba(240,98,106,.26)','--good-ink':'#9BF2C4','--bad-ink':'#FFB0B4','--honey-ink':'#FFD87A'};
 const THEMES = {
   classic:{ label:'Honey (no season)', months:[], greet:"Let's spell!",
     vars:{}, fx:'bees', ground:hills('#F1D9A8','#E8C987'),
@@ -344,19 +365,19 @@ const THEMES = {
     fx:'leaves', ground:hills('#B65A22','#D98A3D',PUMPKINS),
     praise:['Fall-tastic!','Leaf it to you!','Gourd job!','Nailed it!','Un-be-leaf-able!'] },
   halloween:{ label:'Halloween', months:[9], greet:'Happy Halloween!',
-    vars:{'--sky':'linear-gradient(180deg,#160C2E 0%,#2E1850 55%,#55296B 100%)','--sky-ink':'#F6EEFF','--surface':'#FFFFFF','--ink':'#24173B','--muted':'#7A6A95','--line':'#E7DFF3',
-      '--accent':'#F26B1D','--accent-deep':'#B44A0B','--accent-soft':'#FDE9DC','--honey':'#FFC23D','--honey-deep':'#C08A12','--honey-soft':'#FFF2CF'},
-    fx:'bats', moon:true, ground:hills('#120A22','#2A1846',JACK),
+    vars:{'--sky':'linear-gradient(180deg,#160C2E 0%,#2E1850 55%,#55296B 100%)','--sky-ink':'#F6EEFF',...GLASS,'--ink':'#FFF6FF','--muted':'#D6C6F2',
+      '--accent':'#F26B1D','--accent-deep':'#B44A0B','--accent-soft':'rgba(242,107,29,.3)','--accent-ink':'#FFC59A','--honey':'#FFC23D','--honey-deep':'#C08A12','--honey-soft':'rgba(255,194,61,.2)'},
+    glass:true, fx:'bats', moon:true, ground:hills('#120A22','#2A1846',JACK),
     praise:['Spook-tacular!','Boo-yah!','Fang-tastic!','Spell-binding!','Wicked good!'] },
   christmas:{ label:'Christmas', months:[11], greet:'Merry Christmas!',
-    vars:{'--sky':'linear-gradient(180deg,#0D1F3D 0%,#1B3961 60%,#2C5482 100%)','--sky-ink':'#FFFFFF','--surface':'#FFFFFF','--ink':'#1B2440','--muted':'#6A7390','--line':'#E3E8F2',
-      '--accent':'#D62839','--accent-deep':'#9E1825','--accent-soft':'#FCE3E6','--honey':'#F4BC3F','--honey-deep':'#B9861A','--honey-soft':'#FFF3D6'},
-    fx:'snow', lights:true, ground:hills('#F4F8FF','#D6E4F7',TREES),
+    vars:{'--sky':'linear-gradient(180deg,#0D1F3D 0%,#1B3961 60%,#2C5482 100%)','--sky-ink':'#FFFFFF',...GLASS,'--ink':'#FFFFFF','--muted':'#CFDCF2',
+      '--accent':'#E0303F','--accent-deep':'#9E1825','--accent-soft':'rgba(224,48,63,.32)','--accent-ink':'#FFB3BA','--honey':'#F4BC3F','--honey-deep':'#B9861A','--honey-soft':'rgba(244,188,63,.2)'},
+    glass:true, fx:'snow', lights:true, ground:hills('#F4F8FF','#D6E4F7',TREES),
     praise:['Ho ho ho!','Snow-tastic!','You sleighed it!','Tree-mendous!','Jolly good!'] },
   winter:{ label:'Winter snow', months:[0,1], greet:'Stay cozy!',
-    vars:{'--sky':'linear-gradient(180deg,#3E6FB8 0%,#6F9EDB 55%,#A9CDF2 100%)','--sky-ink':'#FFFFFF','--surface':'#FFFFFF','--ink':'#16294A','--muted':'#62749A','--line':'#DFE8F5',
-      '--accent':'#2F74D6','--accent-deep':'#1E52A0','--accent-soft':'#E2EDFC','--honey':'#7FD3F7','--honey-deep':'#3A9AC6','--honey-soft':'#E3F6FD'},
-    fx:'snow', ground:hills('#F6FAFF','#DCE8F7'),
+    vars:{'--sky':'linear-gradient(180deg,#3E6FB8 0%,#6F9EDB 55%,#A9CDF2 100%)','--sky-ink':'#FFFFFF',...GLASS,'--surface':'rgba(255,255,255,.17)','--ink':'#FFFFFF','--muted':'#E3ECFA',
+      '--accent':'#1E5FC2','--accent-deep':'#123F85','--accent-soft':'rgba(30,95,194,.32)','--accent-ink':'#D6E6FF','--honey':'#7FD3F7','--honey-deep':'#3A9AC6','--honey-soft':'rgba(127,211,247,.22)','--honey-ink':'#BDEBFF'},
+    glass:true, fx:'snow', ground:hills('#F6FAFF','#DCE8F7'),
     praise:['Snow-tastic!','Ice work!','Cool as ice!','Flake-tacular!','Nailed it!'] },
   spring:{ label:'Spring blossoms', months:[2,3,4], greet:'Happy spring!',
     vars:{'--sky':'linear-gradient(180deg,#DDF4FF 0%,#EAF8EE 55%,#FFE6F0 100%)','--sky-ink':'#244233','--surface':'#FFFFFF','--ink':'#22352A','--muted':'#6A8072','--line':'#E2EFE5',
@@ -420,7 +441,7 @@ function applyTheme(force){
   if (key === appliedTheme && !force) return;
   appliedTheme = key;
   const t = THEMES[name], root = document.documentElement;
-  const all = new Set([...Object.values(THEMES).flatMap(x=>Object.keys(x.vars)), ...Object.keys(CLASSIC_DARK)]);
+  const all = new Set([...Object.values(THEMES).flatMap(x=>Object.keys(x.vars)), ...Object.keys(CLASSIC_DARK), '--accent-ink','--honey-ink']);
   all.forEach(k => root.style.removeProperty(k));
   Object.entries(dark ? CLASSIC_DARK : t.vars).forEach(([k,v]) => root.style.setProperty(k,v));
   const ground = dark ? hills('#2A2147','#352A5A') : t.ground;
@@ -430,6 +451,7 @@ function applyTheme(force){
     (t.lights ? `<div class="lights">${lightsSvg()}</div>` : '') +
     sceneFx(t.fx) + `<div class="ground">${ground}</div>`;
   document.body.classList.toggle('has-lights', !!t.lights && !dark);
+  document.body.classList.toggle('glass', !!t.glass && !dark);
   const meta = document.querySelector('meta[name=theme-color]') || Object.assign(document.head.appendChild(document.createElement('meta')),{name:'theme-color'});
   meta.content = getComputedStyle(root).getPropertyValue('--accent').trim();
 }
@@ -830,7 +852,7 @@ function vParent(){
   if (wk){
     const {days, trouble} = weekSummary(wk);
     progress = days.length
-      ? `<table class="tbl"><thead><tr><th>Day</th><th>First try</th><th>Tries</th><th>Missed (first try)</th></tr></thead><tbody>${days.map(x => `<tr><td>${fmtDay(fromKey(x.d))}</td><td class="sc num">${x.first.score}/${x.first.total}</td><td class="num">${x.tries}${x.tries>1?` <span style="color:var(--muted)">(best ${x.best})</span>`:''}</td><td class="ms">${x.first.missed.map(w => `${esc(w)}${x.first.typed&&x.first.typed[w] ? ` <span style="color:var(--muted);font-weight:600">→ ${esc(x.first.typed[w])}</span>` : ''}`).join('<br>') || '<span style="color:var(--good-deep)">none 🎉</span>'}</td></tr>`).join('')}</tbody></table>
+      ? `<table class="tbl"><thead><tr><th>Day</th><th>First try</th><th>Tries</th><th>Missed (first try)</th></tr></thead><tbody>${days.map(x => `<tr><td>${fmtDay(fromKey(x.d))}</td><td class="sc num">${x.first.score}/${x.first.total}</td><td class="num">${x.tries}${x.tries>1?` <span style="color:var(--muted)">(best ${x.best})</span>`:''}</td><td class="ms">${x.first.missed.map(w => `${esc(w)}${x.first.typed&&x.first.typed[w] ? ` <span style="color:var(--muted);font-weight:600">→ ${esc(x.first.typed[w])}</span>` : ''}`).join('<br>') || '<span style="color:var(--good-ink,var(--good-deep))">none 🎉</span>'}</td></tr>`).join('')}</tbody></table>
          ${trouble.length ? `<label>Trouble words this week</label><div class="chips">${trouble.slice(0,10).map(([w,c]) => `<span class="chip">${esc(w)}${c>1?`<b>×${c}</b>`:''}</span>`).join('')}</div>` : ''}`
       : '<p>No tests taken yet this week.</p>';
   }
@@ -864,7 +886,7 @@ function vParent(){
 
       <div class="card">
         <h3>${IC.voice}Voice</h3>
-        ${HAS_TTS ? '' : '<p style="color:var(--bad-deep);font-weight:800">This browser has no text-to-speech. Open the app in Safari on the iPad.</p>'}
+        ${HAS_TTS ? '' : '<p style="color:var(--bad-ink,var(--bad-deep));font-weight:800">This browser has no text-to-speech. Open the app in Safari on the iPad.</p>'}
         <label for="voice">Voice</label>
         <select id="voice"></select>
         <label for="rate">Speed <span id="rateLbl" class="num" style="color:var(--muted)"></span></label>
