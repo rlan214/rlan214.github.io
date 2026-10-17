@@ -207,7 +207,14 @@ table.week td:first-child,table.week th:first-child{text-align:left}
 const PIN = '2013';
 const IC_GEAR = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>`;
 const IC_BACK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>`;
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCmVHfSBVSHiZseVrhADcZVptZF8mU_m2Q",
+  authDomain: "landingin-checklist.firebaseapp.com",
+  projectId: "landingin-checklist",
+  storageBucket: "landingin-checklist.firebasestorage.app",
+  messagingSenderId: "1087028508983",
+  appId: "1:1087028508983:web:c6af5299b886dcc353c2b2"
+};
 const KEY = 'checklist.v1';
 const FB_VER = '10.12.2';
 
@@ -238,23 +245,27 @@ function normalize(r){
 
 /* ---------- storage: local now, Firebase when configured ---------- */
 let S = normalize((() => { try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } })());
-let remote = null, syncState = FIREBASE_CONFIG ? 'connecting' : 'local';
+let remote = null, syncState = FIREBASE_CONFIG ? 'connecting' : 'local', syncErr = '';
 function saveLocal(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 
 async function initRemote(){
   if (!FIREBASE_CONFIG) return;
   try{
     const {initializeApp} = await import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-app.js`);
+    const au = await import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-auth.js`);
     const fs = await import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-firestore.js`);
-    const db = fs.getFirestore(initializeApp(FIREBASE_CONFIG));
+    const fbApp = initializeApp(FIREBASE_CONFIG);
+    // Invisible sign-in: the database rules only allow signed-in devices.
+    await au.signInAnonymously(au.getAuth(fbApp));
+    const db = fs.getFirestore(fbApp);
     const ref = fs.doc(db, 'checklist', 'family');
     remote = {fs, ref};
     fs.onSnapshot(ref, snap => {
       if (!snap.exists()){ fs.setDoc(ref, S); return; }
       S = normalize(snap.data()); saveLocal();
       syncState = 'synced'; safeRender();
-    }, () => { syncState = 'offline'; safeRender(); });
-  }catch(e){ syncState = 'offline'; safeRender(); }
+    }, err => { syncState = 'offline'; syncErr = (err && (err.code || err.message)) || ''; safeRender(); });
+  }catch(e){ syncState = 'offline'; syncErr = (e && (e.code || e.message)) || ''; safeRender(); }
 }
 /* Write one field so two iPads checking at once don't overwrite each other. */
 function setPath(path, value){
@@ -265,7 +276,7 @@ function setPath(path, value){
   if (remote){
     const {fs, ref} = remote;
     fs.updateDoc(ref, new fs.FieldPath(...path), value === undefined ? fs.deleteField() : value)
-      .catch(() => { syncState = 'offline'; safeRender(); });
+      .catch(e => { syncState = 'offline'; syncErr = (e && (e.code || e.message)) || ''; safeRender(); });
   }
 }
 
@@ -446,8 +457,9 @@ function safeRender(){
 document.addEventListener('focusout', () => { if (pending){ pending = false; setTimeout(render, 50); } });
 
 function syncLine(){
-  const m = {local:['#c9bfb1','Saved on this iPad only'], connecting:['#f2b84b','Connecting…'], synced:['#22b07d','Synced'], offline:['#ff7a59','Offline — will sync when back online']}[syncState];
-  return `<div class="sync"><b style="background:${m[0]}"></b>${m[1]}</div>`;
+  const m = {local:['#c9bfb1','Saved on this iPad only'], connecting:['#f2b84b','Connecting…'], synced:['#22b07d','Synced to all devices'], offline:['#ff7a59','Offline — will sync when back online']}[syncState];
+  const det = view === 'parent' && syncState === 'offline' && syncErr ? ` <span style="opacity:.75">(${esc(String(syncErr).slice(0,80))})</span>` : '';
+  return `<div class="sync"><b style="background:${m[0]}"></b>${m[1]}${det}</div>`;
 }
 
 function vHome(){
