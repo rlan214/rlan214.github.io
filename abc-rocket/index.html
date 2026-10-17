@@ -162,8 +162,8 @@ body.has-lights .screen{padding-top:calc(var(--safe-t) + 22px)}
 .speakbtn svg{width:42px;height:42px}
 .speakbtn.talking{animation:pulse .7s ease-in-out infinite alternate}
 @keyframes pulse{to{transform:scale(1.08)}}
-.slots{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.slot{width:clamp(58px,13vw,90px);height:clamp(70px,15vw,104px);border-radius:20px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:clamp(2.4rem,8vw,3.8rem);line-height:1;
+.slots{display:flex;gap:10px;flex-wrap:nowrap;justify-content:center;max-width:100%}
+.slot{width:min(clamp(58px,13vw,90px),calc((100vw - 40px) / var(--n,5) - 10px));height:clamp(64px,15vw,104px);border-radius:min(20px,2.4vw);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:min(clamp(2.4rem,8vw,3.8rem),calc((100vw - 40px) / var(--n,5) * .52));line-height:1;
   background:var(--surface);border:3px dashed color-mix(in srgb,var(--ink) 30%,transparent);color:color-mix(in srgb,var(--ink) 22%,transparent)}
 .slot.next{border-style:solid;border-color:var(--honey);box-shadow:0 0 0 6px color-mix(in srgb,var(--honey) 35%,transparent);animation:glow 1s ease-in-out infinite alternate}
 @keyframes glow{to{box-shadow:0 0 0 12px color-mix(in srgb,var(--honey) 15%,transparent)}}
@@ -260,7 +260,7 @@ body.glass .card,body.glass .wcard,body.glass .board-tr{border-color:var(--line)
 body.glass .iconbtn,body.glass .btn.ghost,body.glass .pad button,body.glass .starcount{box-shadow:0 4px 0 rgba(0,0,0,.28)}
 body.glass .act,body.glass .ltile,body.glass .tile,body.glass .lchip{box-shadow:0 7px 0 color-mix(in srgb,var(--c) 55%,#000),0 0 28px -4px color-mix(in srgb,var(--c) 70%,transparent)}
 body.glass .bigletter{text-shadow:0 8px 0 color-mix(in srgb,var(--c) 55%,#000),0 0 50px color-mix(in srgb,var(--c) 70%,transparent)}
-body.glass .slot{color:rgba(255,255,255,.3);border-color:rgba(255,255,255,.35)}
+body.glass .slot:not(.fill){color:rgba(255,255,255,.3);border-color:rgba(255,255,255,.35)}
 body.glass .parent textarea,body.glass .parent input[type=text],body.glass .parent select{background:rgba(255,255,255,.08)}
 body.glass select{color-scheme:dark}
 @media (max-width:520px){.acts{gap:12px}.act{border-radius:26px}.board{grid-template-columns:repeat(4,1fr);gap:9px}.ltile{border-radius:18px}}
@@ -278,13 +278,14 @@ body.glass select{color-scheme:dark}
    ========================================================= */
 const PIN = '2013';
 const KEY = 'abcrocket.v1';
-const DEFAULT_WORDS = 'RICO | 😀\nSONIC | 💨\nTAILS | 🦊\nPEACH | 🍑\nTOAD | 🍄\nSPEED | 🏎️\nME | 🙋\nUP | ⬆️\nBOX | 📦\nPLAY | 🎮';
+const DEFAULT_WORDS = 'RICO | 😀\nSONIC | 💨\nTAILS | 🦊\nPEACH | 🍑\nTOAD | 🍄\nSPEED | 🏎️\nME | 🙋\nUP | ⬆️\nBOX | 📦\nPLAY | 🎮\nRICARDO | 😀\nLANDINGIN | 🏠';
 const WORD_SETS = [
   ['Set 1', 'Easy wins', 'GO | 🏁\nNO | 🚫\nUP | ⬆️\nCAT | 🐱\nDOG | 🐶\nSUN | ☀️\nBOO | 👻\nSTAR | ⭐'],
   ['Set 2', 'Short + game words', 'RUN | 🏃\nBIG | 🐘\nHAT | 🎩\nBUG | 🐛\nMOM | 👩\nDAD | 👨\nRING | 💍\nCOIN | 🪙'],
   ['Set 3', 'More letters', 'PIG | 🐷\nBED | 🛏️\nCUP | 🥤\nFOX | 🦊\nRED | 🔴\nWIN | 🏆\nTOAD | 🍄\nJUMP | 🦘'],
   ['Set 4', 'Sight words', 'I | 🙋\nA | 🅰️\nTHE | 📖\nAND | ➕\nSEE | 👀\nCAN | 🥫\nYOU | 👉\nLIKE | 👍'],
   ['Set 5', 'Big game words', 'FAST | ⚡\nKART | 🏎️\nSONIC | 💨\nTAILS | 🦊\nPEACH | 🍑\nCREAM | 🍦\nDAISY | 🌼\nSHADOW | 🌑'],
+  ['Song words', 'From his favorite song', 'ME | 🙋\nWE | 👫\nSET | 🎯\nFREE | 🕊️\nFROM | ➡️\nTRUST | 🤝\nCITY | 🏙️\nWILL | 💪\nFOLLOW | 👣\nESCAPE | 🏃'],
   ['Song words', 'From his favorite song', 'ME | 🙋\nWE | 👫\nSET | 🎯\nFREE | 🕊️\nFROM | ➡️\nTRUST | 🤝\nCITY | 🏙️\nWILL | 💪\nFOLLOW | 👣\nESCAPE | 🏃'],
   ['Starter', 'His name + favorites', DEFAULT_WORDS]
 ];
@@ -394,7 +395,7 @@ function parseWords(){
   String(S.set.words||'').split(/\r?\n/).forEach(line => {
     const [w, e] = line.split('|');
     const word = (w||'').toUpperCase().replace(/[^A-Z]/g,'');
-    if (!word || word.length > 8 || seen.has(word)) return;
+    if (!word || word.length > 10 || seen.has(word)) return;
     seen.add(word); out.push({w:word, e:(e||'').trim() || '⭐'});
   });
   return out;
@@ -764,7 +765,7 @@ function vSpell(){
   const tiles = c.tiles.map((t,idx) => `<button class="tile ${t.used?'used':''} ${!c.done && c.misses>=2 && !t.used && t.c===need?'hint':''}" style="--c:${colorOf(t.c)}" data-act="tile" data-idx="${idx}">${t.c}</button>`).join('');
   const ws = parseWords();
   return `<div class="screen">${topBar('', `<button class="iconbtn sm" data-act="words" aria-label="All words">${IC.back}</button>`)}
-    <div class="spell">
+    <div class="spell" style="--n:${letters.length}">
       <div class="hero"><div class="pic" data-act="sayWord">${esc(c.e)}</div><button class="speakbtn" id="speakBtn" data-act="sayWord" aria-label="Hear the word">${IC.speaker}</button></div>
       <div class="slots">${slots}</div>
       ${c.done
@@ -970,7 +971,7 @@ function vParent(){
         <div class="sets">${WORD_SETS.map((w,i) => `<button class="${norm(S.set.words)===norm(w[2])?'on':''}" data-act="loadSet" data-i="${i}"><b>${w[0]}</b><small>${w[1]}</small><span>${(() => { const ws = w[2].split('\n').map(l=>l.split('|')[0].trim()); return ws.length > 10 ? ws.length + ' words: ' + ws.slice(0,6).join(' · ') + ' …' : ws.join(' · '); })()}</span></button>`).join('')}</div>
       </div>
       <div class="card"><h3>His words</h3>
-        <p class="hint">One word per line, up to 8 letters, with a picture after a <b>|</b>. These words decide his focus letters, which get a ⭐ on the ABC board and come up most in Trace and Find it.</p>
+        <p class="hint">One word per line, up to 10 letters, with a picture after a <b>|</b>. These words decide his focus letters, which get a ⭐ on the ABC board and come up most in Trace and Find it.</p>
         <textarea id="words" spellcheck="false" autocapitalize="characters" autocorrect="off">${esc(S.set.words)}</textarea>
         <p class="hint" style="margin-top:8px">Focus letters now: <b>${fl.join(' ') || '—'}</b></p>
         <div class="btns"><button class="btn" data-act="saveWords">Save words</button></div>
