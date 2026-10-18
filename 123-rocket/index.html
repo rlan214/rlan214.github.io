@@ -277,7 +277,8 @@ const PARENT_PIN = '2013';          // same PIN as the other kids' apps
 const KEY = 'rocket123.v1';
 const GOAL = 6;                     // correct answers to finish a lesson
 const MAX_MIN = 30;                 // max play minutes earned per day
-const MIN_PER_LESSON = 5;
+const LESSONS_PER_BLOCK = 3;       // finished lessons needed for one block of play time
+const BLOCK_MIN = 15;              // iOS Screen Time grants 15 min at a time
 const HEROES = ['Sonic','Tails','Peach','Toad',KID];
 const PRAISE = ['Great job!','You got it!','Awesome!','Yes! Nice counting!','Super star!','Way to go!','Rocket power!'];
 const THEMES = [
@@ -764,13 +765,20 @@ function finishLesson(){
   const L = S.lesson; const d = L.def;
   const stars = L.misses <= 1 ? 3 : L.misses <= 3 ? 2 : 1;
   S.data.stars[d.id] = Math.max(S.data.stars[d.id] || 0, stars);
-  const day = ensureDay(); let earned = 0;
-  if (day.minutes < MAX_MIN){ earned = Math.min(MIN_PER_LESSON, MAX_MIN - day.minutes); day.minutes += earned; }
+  const day = ensureDay();
   day.lessons.push({id:d.id, stars, misses:L.misses, at:Date.now()});
+  const before = day.minutes;
+  day.minutes = Math.min(MAX_MIN, Math.floor(day.lessons.length / LESSONS_PER_BLOCK) * BLOCK_MIN);
+  const earned = day.minutes - before;
+  const toGo = LESSONS_PER_BLOCK - (day.lessons.length % LESSONS_PER_BLOCK);
   save();
   const fs = $('#fStars').children; [...fs].forEach(s => s.classList.remove('on'));
   [...fs].forEach((s, i) => { if (i < stars) setTimeout(() => { s.classList.add('on'); tone(700 + i * 200, 0, .3); }, 300 + i * 350); });
-  $('#fEarn').textContent = earned ? `+${earned} minutes of play time!` : 'Play time is full for today!';
+  const full = day.minutes >= MAX_MIN;
+  const earnLine = earned ? `+${earned} minutes of play time!`
+                 : full ? 'Play time is full for today!'
+                 : `${toGo} more planet${toGo === 1 ? '' : 's'} for ${BLOCK_MIN} minutes of play time!`;
+  $('#fEarn').textContent = earnLine;
   const next = L.i + 1 < LESSONS.length ? L.i + 1 : null;
   $('#fNext').style.display = next != null ? '' : 'none';
   $('#fNext').onclick = () => { $('#finish').classList.remove('on'); startLesson(next); };
@@ -778,7 +786,7 @@ function finishLesson(){
   $('#fHome').onclick = () => { $('#finish').classList.remove('on'); goHome(); };
   $('#finish').classList.add('on'); confetti();
   const sw = stars === 3 ? 'three stars' : stars === 2 ? 'two stars' : 'one star';
-  say(`You did it, ${KID}! You got ${sw}!` + (earned ? ` You earned ${earned} more minutes of play time!` : ''));
+  say(`You did it, ${KID}! You got ${sw}!` + (earned ? ` You earned ${earned} minutes of play time!` : full ? '' : ` ${toGo === 1 ? 'One' : 'Two'} more planet${toGo === 1 ? '' : 's'} for play time!`));
 }
 function confetti(){
   for (let i = 0; i < 22; i++){
@@ -986,7 +994,7 @@ function renderParent(){
     <p class="muted">Add to Home Screen: open in Safari → Share → Add to Home Screen. Progress is saved on this device.</p>
   </div>`;
   $('#pSend').onclick = sendReport;
-  $('#pResetMin').onclick = () => { day.minutes = 0; save(); renderParent(); };
+  $('#pResetMin').onclick = () => { if (confirm("Reset today's play time and lesson count?")){ day.minutes = 0; day.lessons = []; save(); renderParent(); } };
   $('#pWarm').onclick = () => { S.data.tested = {}; S.data.placed = false; save(); startWarmup(); };
   $('#pUnlock').onclick = () => { S.data.unlockAll = !S.data.unlockAll; save(); renderParent(); };
   $('#pReset').onclick = () => { if (confirm('Erase all stars and progress?')){ const ai = S.data.ai; S.data = defaults(); S.data.ai = ai; ensureDay(); save(); renderParent(); } };
