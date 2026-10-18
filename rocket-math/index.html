@@ -1,0 +1,1172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="123 Rocket">
+<meta name="theme-color" content="#0b1033">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>123 Rocket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#0b1033;--bg2:#24176b;--ink:#fff;--gold:#ffd23f;--pink:#ff5d8f;--teal:#2ee6c9;--blue:#4cc9f0;--violet:#9c8cff;
+  --card:rgba(255,255,255,.08);--line:rgba(255,255,255,.22);
+  --cell:rgba(255,255,255,.07);--frameline:rgba(255,255,255,.4);--num:#ffd23f;
+  --sky:linear-gradient(160deg,#0b1033,#24176b);
+  --isz:58px;--cs:64px;--chs:120px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{
+  font-family:Fredoka,ui-rounded,system-ui,sans-serif;color:var(--ink);
+  background:#0b1033;
+  -webkit-user-select:none;user-select:none;touch-action:manipulation;
+}
+button{font-family:inherit;color:inherit;cursor:pointer}
+input{-webkit-user-select:text;user-select:text;font-family:inherit}
+
+.screen{position:fixed;inset:0;display:none;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 12px) calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 12px) calc(env(safe-area-inset-left) + 16px)}
+.screen.on{display:flex}
+.screen{z-index:1}
+
+/* ---------- season scene (same engine as ABC Rocket / Word Hive) ---------- */
+#scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:var(--sky)}
+#scene .p{position:absolute;top:-12vh;left:var(--x);width:var(--s);animation:fall var(--d) linear var(--dl) infinite;opacity:var(--o,1)}
+#scene .p > svg{display:block;width:100%;height:auto;animation:sway var(--sw) ease-in-out infinite alternate}
+#scene .p.up{top:auto;bottom:-12vh;animation-name:rise}
+#scene .p.fly{top:var(--y);left:-14vw;animation-name:flyx}
+#scene .p.fly > svg{animation:flap .22s ease-in-out infinite alternate}
+#scene .p.still{top:var(--y);animation:twinkle var(--d) ease-in-out var(--dl) infinite alternate}
+#scene .p.still > svg{animation:none}
+@keyframes fall{to{transform:translateY(126vh)}}
+@keyframes rise{to{transform:translateY(-126vh)}}
+@keyframes flyx{0%{transform:translate(0,0)}50%{transform:translate(64vw,-4vh)}100%{transform:translate(128vw,2vh)}}
+@keyframes sway{from{transform:translateX(-26px) rotate(-28deg)}to{transform:translateX(26px) rotate(32deg)}}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(.55)}}
+@keyframes twinkle{from{opacity:.25;transform:scale(.8)}to{opacity:1;transform:scale(1.1)}}
+#scene .sun{position:absolute;right:4vw;top:calc(env(safe-area-inset-top) + 80px);width:clamp(70px,11vw,120px);aspect-ratio:1;opacity:.9}
+#scene .sun .rays{animation:spin 40s linear infinite;transform-origin:50% 50%}
+#scene .moon{position:absolute;right:7vw;top:calc(env(safe-area-inset-top) + 11vh);width:clamp(80px,12vw,130px);aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 36% 34%,#FFFBE6,#FFE9A8 55%,#F0CC6A);box-shadow:0 0 50px 16px rgba(255,236,170,.35)}
+#scene .moon::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 62% 60%,rgba(200,160,70,.35) 0 9%,transparent 10%),radial-gradient(circle at 40% 70%,rgba(200,160,70,.28) 0 6%,transparent 7%),radial-gradient(circle at 66% 32%,rgba(200,160,70,.25) 0 5%,transparent 6%)}
+@keyframes spin{to{transform:rotate(360deg)}}
+#scene .ground{position:absolute;left:0;right:0;bottom:0;height:16vh;min-height:100px;opacity:.95}
+#scene .ground svg{width:100%;height:100%;display:block}
+#scene .lights{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top) - 6px);height:36px}
+#scene .lights svg{width:100%;height:100%;display:block}
+#scene .lights .bulb{animation:blink 1.6s ease-in-out infinite alternate}
+@keyframes blink{from{opacity:.45}to{opacity:1}}
+body.has-lights .screen{padding-top:calc(env(safe-area-inset-top) + 30px)}
+@media (prefers-reduced-motion:reduce){#scene *{animation:none!important}}
+.buddy svg{overflow:visible}
+
+/* ---------- start ---------- */
+#start{align-items:center;justify-content:center;text-align:center;gap:18px}
+.bigrocket{font-size:140px;animation:float 3s ease-in-out infinite;filter:drop-shadow(0 10px 30px #ff5d8f88)}
+@keyframes float{50%{transform:translateY(-16px) rotate(-6deg)}}
+h1{margin:0;font-size:64px;letter-spacing:.02em}
+h1 b{color:var(--num)}
+.go{border:0;border-radius:999px;padding:22px 56px;font-size:40px;font-weight:700;background:linear-gradient(180deg,#ffe36e,#ffb000);color:#3b1d00;box-shadow:0 10px 0 #b86f00,0 18px 40px #0007}
+.go:active{transform:translateY(6px);box-shadow:0 4px 0 #b86f00}
+
+/* ---------- home ---------- */
+.topbar{display:flex;align-items:center;gap:12px;min-height:64px}
+.topbar .grow{flex:1}
+.pill{background:var(--card);border:2px solid var(--line);border-radius:999px;padding:8px 18px;font-size:26px;font-weight:600;display:flex;align-items:center;gap:8px}
+.icon-btn{width:64px;height:64px;border-radius:20px;border:2px solid var(--line);background:var(--card);font-size:32px;display:grid;place-items:center}
+.icon-btn.small{width:44px;height:44px;font-size:22px;border-radius:14px;opacity:.7}
+#home h2{margin:6px 0 4px;font-size:26px;text-align:center;opacity:.85}
+.mission{display:flex;flex-direction:column;align-items:center;gap:2px;margin:4px auto 8px;border:0;border-radius:28px;padding:16px 40px;
+  background:linear-gradient(180deg,#ffe36e,#ffb000);color:#3b1d00;box-shadow:0 9px 0 #b86f00,0 16px 34px #0006;animation:pulse 1.6s ease-in-out infinite}
+.mission b{font-size:38px;font-weight:700}
+.mission small{font-size:19px;font-weight:600;opacity:.8}
+.mission.done{animation:none;background:linear-gradient(180deg,#b9fff1,#2ee6c9);color:#063d34;box-shadow:0 9px 0 #12a88f,0 16px 34px #0005}
+.mission:active{transform:translateY(6px);box-shadow:0 3px 0 #b86f00}
+#map{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px;align-content:center;max-width:1000px;width:100%;margin:0 auto;overflow:auto;padding:8px}
+.planet{color:#fff;border:0;border-radius:32px;padding:18px 10px 14px;background:radial-gradient(circle at 30% 25%,#ffffff40,transparent 60%),var(--c,#4cc9f0);
+  box-shadow:0 8px 0 #0004,inset 0 -8px 0 #0002;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:190px;justify-content:center}
+.planet:active{transform:translateY(5px);box-shadow:0 3px 0 #0004}
+.planet .pi{font-size:64px;line-height:1}
+.planet .pt{font-size:24px;font-weight:700;text-shadow:0 2px 0 #0003}
+.planet .ps{font-size:26px;color:#fff;letter-spacing:2px}
+.planet .ps .on{color:var(--gold);text-shadow:0 0 8px #ffb000}
+.planet.locked{filter:grayscale(.85) brightness(.6)}
+.planet.next{animation:pulse 1.4s ease-in-out infinite}
+.planet .tag{font-size:15px;background:#0004;border-radius:999px;padding:2px 10px}
+@keyframes pulse{50%{transform:scale(1.05);box-shadow:0 0 0 8px #ffd23f66,0 8px 0 #0004}}
+
+/* ---------- lesson ---------- */
+#track{flex:1;height:30px;border-radius:999px;background:var(--card);border:2px solid var(--line);position:relative;display:flex;align-items:center;justify-content:space-around;padding:0 18px 0 8px}
+#track .slot{width:16px;height:16px;border-radius:50%;background:var(--line);transition:.3s}
+#track .slot.on{background:var(--gold);box-shadow:0 0 10px var(--gold)}
+#track .ship{position:absolute;top:50%;left:0;transform:translate(-30%,-55%) rotate(45deg);font-size:34px;transition:left .6s cubic-bezier(.3,1.5,.5,1)}
+#prompt{text-align:center;font-size:30px;font-weight:600;min-height:40px;margin:6px 0 0;opacity:.9}
+#stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:8px;overflow:auto;min-height:0}
+#answers{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;min-height:calc(var(--chs) + 12px);padding-bottom:6px}
+.choice{min-width:var(--chs);height:var(--chs);padding:0 14px;font-size:calc(var(--chs) * .55);font-weight:700;border:0;border-radius:30px;
+  background:linear-gradient(180deg,#fff,#e6e2ff);color:#2a1d7a;box-shadow:0 9px 0 var(--violet),0 14px 24px #0005;transition:transform .1s}
+.choice:active{transform:translateY(6px);box-shadow:0 3px 0 var(--violet)}
+.choice.rich{height:auto;padding:12px}
+.choice.right{background:linear-gradient(180deg,#a8fff0,var(--teal));box-shadow:0 9px 0 #12a88f}
+.choice.wrong{background:#ffc2d3;opacity:.45;box-shadow:0 4px 0 #c76;transform:translateY(5px)}
+.glow{animation:glow 1s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 0 10px #ffd23f99,0 0 40px #ffd23f}}
+
+.buddy{display:flex;align-items:flex-end;gap:10px;min-height:76px;margin:4px 0}
+.buddy svg{width:72px;height:72px;flex:none;animation:bob 2.4s ease-in-out infinite}
+.buddy.talk svg{animation:talk .35s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-5px)}}
+@keyframes talk{50%{transform:scale(1.06) rotate(-3deg)}}
+#bubble{background:#fff;color:#2a1d7a;border-radius:22px 22px 22px 6px;padding:10px 18px;font-size:24px;font-weight:600;max-width:min(760px,80vw);box-shadow:0 6px 0 #0003;opacity:0;transition:opacity .2s}
+#bubble.on{opacity:1}
+
+/* items */
+.group{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px;max-width:760px}
+.group.tint .item{filter:hue-rotate(160deg) saturate(1.4)}
+.item{font-size:var(--isz);width:1.2em;height:1.2em;display:grid;place-items:center;position:relative;line-height:1;transition:transform .15s,opacity .4s,filter .3s}
+.item.counted{transform:scale(1.1);filter:drop-shadow(0 0 10px var(--gold))}
+.group.tint .item.counted{filter:hue-rotate(160deg) saturate(1.4) drop-shadow(0 0 10px var(--gold))}
+.item.ring::before{content:'';width:.78em;height:.78em;border-radius:50%;border:.15em solid #ffd23f;box-shadow:0 0 6px #ffb000,inset 0 0 6px #ffb000}
+[data-badge]{position:relative}
+[data-badge]::after{content:attr(data-badge);position:absolute;top:-6px;right:-8px;background:var(--gold);color:#24135e;font:700 20px/1 Fredoka,system-ui;border-radius:999px;min-width:30px;height:30px;display:grid;place-items:center;box-shadow:0 2px 0 #0004;z-index:2}
+.item.gone{opacity:.18;transform:translateY(-22px) scale(.8) rotate(25deg);filter:grayscale(1)}
+.item.extra{animation:glow 1s ease-in-out infinite;border-radius:50%}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.frames{display:flex;gap:18px;flex-wrap:wrap;justify-content:center}
+.frame{display:grid;grid-template-columns:repeat(5,var(--cs));gap:6px;padding:8px;background:var(--card);border:3px solid var(--frameline);border-radius:16px}
+.frame.mini{--cs:30px;gap:3px;padding:5px;border-width:2px;border-color:#2a1d7a55;background:#2a1d7a12;border-radius:10px}
+.frame.mini .cell{background:#2a1d7a14}
+.psec select{font-size:18px;padding:8px;border-radius:12px;width:100%}
+.frame.hidden{display:none}
+.cell{width:var(--cs);height:var(--cs);border-radius:10px;background:var(--cell);display:grid;place-items:center}
+.cell .item{font-size:calc(var(--cs) * .72)}
+.cell.counted{background:rgba(46,230,201,.35);box-shadow:inset 0 0 0 3px var(--teal)}
+.dot{width:72%;height:72%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3b0,#ffb000);box-shadow:0 2px 0 #0003}
+.dot.counted{box-shadow:0 0 12px var(--gold),0 0 0 3px #fff}
+.mini .dot{background:radial-gradient(circle at 35% 30%,#ffd7a0,#ff7a00)}
+.tap{cursor:pointer}
+
+.addrow{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center}
+.op{font-size:70px;font-weight:700;color:var(--num)}
+.eq{font-size:64px;font-weight:700;letter-spacing:.06em;background:var(--card);border:2px solid var(--line);border-radius:22px;padding:2px 26px}
+.bignum{font-size:130px;font-weight:700;line-height:1;color:var(--num);text-shadow:0 6px 0 #0003}
+
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:18px;width:100%;max-width:1000px}
+.panel{border-radius:26px;background:var(--card);border:3px solid var(--line);min-height:200px;display:flex;flex-wrap:wrap;justify-content:center;align-content:center;align-items:center;gap:8px;padding:16px}
+.panel:active{transform:scale(.98)}
+.panel.right{border-color:var(--teal);background:rgba(46,230,201,.22)}
+.panel.wrong{opacity:.45}
+.compare.aligned{grid-template-columns:1fr}
+.compare.aligned .panel{flex-wrap:nowrap;justify-content:flex-start;min-height:0;padding:10px 16px}
+.panel .bignum{font-size:110px}
+.panel .frame{margin-top:6px}
+
+.bond svg{width:300px;height:200px}
+.bond line{stroke:#fff9;stroke-width:6}
+.bond circle{fill:#2a1d7a;stroke:var(--gold);stroke-width:5}
+.bond circle.q{stroke:var(--teal);stroke-dasharray:10 7}
+.bond text{fill:#fff;font:700 44px Fredoka,system-ui;text-anchor:middle}
+
+/* ---------- overlays ---------- */
+.overlay{position:fixed;inset:0;background:#05082acc;display:none;align-items:center;justify-content:center;z-index:20;padding:20px}
+.overlay.on{display:flex}
+.card{background:linear-gradient(180deg,#2c1f7d,#1a1259);border:3px solid var(--line);border-radius:32px;padding:28px;text-align:center;max-width:620px;width:100%;box-shadow:0 30px 80px #000a}
+.card h2{margin:0 0 8px;font-size:44px}
+.bigstars{font-size:84px;letter-spacing:6px}
+.bigstars span{display:inline-block;opacity:.25;transform:scale(.6);transition:.4s}
+.bigstars span.on{opacity:1;transform:scale(1);color:var(--gold);text-shadow:0 0 20px #ffb000}
+.earn{font-size:28px;margin:6px 0 18px;color:var(--teal)}
+.row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn{border:0;border-radius:22px;padding:16px 26px;font-size:28px;font-weight:700;background:#fff;color:#2a1d7a;box-shadow:0 7px 0 var(--violet)}
+.btn.gold{background:linear-gradient(180deg,#ffe36e,#ffb000);color:#3b1d00;box-shadow:0 7px 0 #b86f00}
+.btn:active{transform:translateY(5px);box-shadow:0 2px 0 var(--violet)}
+.burst{position:fixed;font-size:40px;pointer-events:none;z-index:30;animation:burst 1.2s ease-out forwards}
+@keyframes burst{to{transform:translate(var(--dx),var(--dy)) rotate(360deg);opacity:0}}
+
+#pin .keys{display:grid;grid-template-columns:repeat(3,84px);gap:12px;justify-content:center;margin-top:14px}
+#pin .keys button{height:76px;border-radius:20px;border:0;font-size:34px;font-weight:700;background:#fff;color:#2a1d7a}
+.slabel{display:block;font-size:18px;margin:12px 0 6px;opacity:.85}
+.sinput{width:100%;font-size:26px;padding:12px 16px;border-radius:16px;border:2px solid var(--line);background:#0005;color:#fff}
+#pin .dots{font-size:40px;letter-spacing:10px;min-height:52px}
+
+/* ---------- parent ---------- */
+#parent{overflow:auto;display:none}
+#parent.on{display:block}
+.pwrap{max-width:820px;margin:0 auto;padding-bottom:40px}
+.psec{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:16px 18px;margin:14px 0;font-size:19px}
+.psec h3{margin:0 0 10px;font-size:24px;color:var(--num)}
+.psec table{width:100%;border-collapse:collapse}
+.psec td{padding:6px 4px;border-bottom:1px solid #ffffff18}
+.psec td:last-child{text-align:right;color:var(--num);letter-spacing:2px}
+.psec label{display:block;margin:10px 0 4px;font-size:16px;opacity:.85}
+.psec input[type=text],.psec input[type=password]{width:100%;font-size:18px;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:#0005;color:#fff}
+.psec .btn{font-size:20px;padding:10px 18px;box-shadow:0 5px 0 var(--violet);margin-top:10px}
+.muted{opacity:.7;font-size:16px}
+.ok{color:var(--teal)}.bad{color:var(--pink)}
+.stat{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center}
+.stat div{background:#0003;border-radius:14px;padding:10px}
+.stat b{display:block;font-size:32px;color:var(--num)}
+pre.out{white-space:pre-wrap;background:#0005;border-radius:12px;padding:10px;font-size:15px;margin:8px 0 0}
+
+@media (max-width:700px){
+  :root{--isz:40px;--cs:46px;--chs:92px}
+  h1{font-size:46px}.bigrocket{font-size:100px}
+  #map{grid-template-columns:repeat(2,1fr);gap:12px}
+  .planet{min-height:150px}.planet .pi{font-size:48px}.planet .pt{font-size:19px}
+  .eq{font-size:44px}.bignum{font-size:96px}.op{font-size:50px}
+  #prompt{font-size:22px}#bubble{font-size:19px}
+  .buddy svg{width:56px;height:56px}
+  .compare{grid-template-columns:1fr}
+  .stat{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-height:760px) and (min-width:701px){:root{--isz:48px;--cs:54px;--chs:104px}}
+</style>
+</head>
+<body>
+<div id="scene" aria-hidden="true"></div>
+
+<!-- START -->
+<section id="start" class="screen on">
+  <div class="bigrocket">🚀</div>
+  <h1><b>123</b> Rocket</h1>
+  <button class="go" id="goBtn">Blast off!</button>
+</section>
+
+<!-- HOME -->
+<section id="home" class="screen">
+  <div class="topbar">
+    <div class="pill">⭐ <span id="totalStars">0</span></div>
+    <div class="pill">⏱️ <span id="playMin">0</span> min</div>
+    <div class="grow"></div>
+    <button class="icon-btn small" id="parentBtn" aria-label="Parents">⚙️</button>
+  </div>
+  <button class="mission" id="missionBtn"></button>
+  <h2>Or pick a planet</h2>
+  <div id="map"></div>
+</section>
+
+<!-- LESSON -->
+<section id="lesson" class="screen">
+  <div class="topbar">
+    <button class="icon-btn" id="homeBtn" aria-label="Home">🏠</button>
+    <div id="track"></div>
+    <button class="icon-btn" id="demoBtn" aria-label="Show me">🎬</button>
+    <button class="icon-btn" id="sayBtn" aria-label="Say it again">🔊</button>
+  </div>
+  <div id="prompt"></div>
+  <div id="stage"></div>
+  <div class="buddy" id="buddy"></div>
+  <div id="answers"></div>
+</section>
+
+<!-- PARENT -->
+<section id="parent" class="screen">
+  <div class="pwrap">
+    <div class="topbar">
+      <button class="icon-btn" id="pBack" aria-label="Back">⬅️</button>
+      <h2 style="margin:0;font-size:30px">Parents</h2>
+    </div>
+    <div id="pBody"></div>
+  </div>
+</section>
+
+<!-- FINISH -->
+<div class="overlay" id="finish">
+  <div class="card">
+    <h2 id="fTitle">You did it!</h2>
+    <div class="bigstars" id="fStars"><span>★</span><span>★</span><span>★</span></div>
+    <div class="earn" id="fEarn"></div>
+    <div class="row">
+      <button class="btn gold" id="fNext">Next planet ➜</button>
+      <button class="btn" id="fAgain">Again</button>
+      <button class="btn" id="fHome">🏠</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETUP (first launch, for the parent) -->
+<div class="overlay" id="setup">
+  <div class="card" style="max-width:520px;text-align:left">
+    <h2 style="font-size:32px;text-align:center">Parent setup</h2>
+    <p class="muted" style="text-align:center;margin-top:0">One time only. Then hand the iPad to your kid.</p>
+    <label class="slabel">Kid's first name</label>
+    <input class="sinput" id="sName" type="text" maxlength="20" autocapitalize="words" autocorrect="off" placeholder="e.g. Maya">
+    <label class="slabel">Make a 4-digit parent PIN</label>
+    <input class="sinput" id="sPin" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••">
+    <div class="muted" id="sMsg" style="min-height:24px;margin:6px 0"></div>
+    <div class="row"><button class="btn gold" id="sGo">Start ➜</button></div>
+    <p class="muted" style="text-align:center">Tip: first tap Share → Add to Home Screen, then open it from the rocket icon so progress saves there.</p>
+  </div>
+</div>
+
+<!-- PIN -->
+<div class="overlay" id="pin">
+  <div class="card" style="max-width:380px">
+    <h2 style="font-size:30px">Parents only</h2>
+    <div class="dots" id="pinDots"></div>
+    <div class="keys" id="pinKeys"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   123 Rocket — K math with a scripted tutor (+ optional local AI)
+   ========================================================= */
+let KID = '';                       // set on first launch (setup screen)
+const KEY = 'rocketmath.v1';
+const GOAL = 6;                     // correct answers to finish a lesson
+const MAX_MIN = 30;                 // max play minutes earned per day
+const LESSONS_PER_BLOCK = 3;       // finished lessons needed for one block of play time
+const BLOCK_MIN = 15;              // iOS Screen Time grants 15 min at a time
+const heroes = () => ['Sonic','Tails','Peach','Toad'].concat(KID ? [KID] : []);
+const PRAISE = ['Great job!','You got it!','Awesome!','Yes! Nice counting!','Super star!','Way to go!','Rocket power!'];
+const SPACE_ITEMS = [
+  {e:'🍎',one:'apple',many:'apples'},{e:'⭐',one:'star',many:'stars'},{e:'🚀',one:'rocket',many:'rockets'},
+  {e:'🐟',one:'fish',many:'fish'},{e:'🍩',one:'donut',many:'donuts'},{e:'🎈',one:'balloon',many:'balloons'},
+  {e:'🪐',one:'planet',many:'planets'},{ring:true,one:'ring',many:'rings'}
+];
+const MISTAKES = {
+  'double-count':'Counting the same thing twice','skip':'Skipping objects when counting','count-error':'Counting carefully',
+  'forgot-ten':'Forgetting the full ten-frame','count-on':'Counting on from 10','frame-5':'Seeing 5 on a ten-frame',
+  'compare':'Comparing more / fewer','already-there':'Make 10: giving the number already there','empty-spots':'Make 10: counting empty spots',
+  'one-group':'Adding: counting only one group','add-not-sub':'Take away: adding instead','forgot-take':'Take away: forgetting the ones that left',
+  'took-away-count':'Take away: giving the number that left'
+};
+
+/* ---------- utils ---------- */
+const $ = s => document.querySelector(s);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const word = (t, n) => n === 1 ? t.one : t.many;
+const ABORT = new Error('abort');
+
+/* ---------- storage ---------- */
+function defaults(){ return {stars:{}, tested:{}, placed:false, unlockAll:false, mistakes:{}, day:null, theme:'auto', kid:'', pin:''}; }
+function load(){ try { return Object.assign(defaults(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch(e){ return defaults(); } }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S.data)); } catch(e){} }
+const S = { data: load(), lesson: null, screen: 'start' };
+function ensureDay(){
+  const d = new Date().toDateString();
+  if (!S.data.day || S.data.day.date !== d) S.data.day = {date:d, minutes:0, correct:0, misses:0, lessons:[], mistakes:{}};
+  return S.data.day;
+}
+ensureDay();
+KID = S.data.kid || '';
+
+/* ---------- sound ---------- */
+let AC = null;
+function ac(){ if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} } if (AC && AC.state === 'suspended') AC.resume(); return AC; }
+function tone(f, t0, d, type='sine', v=.14){
+  const a = ac(); if (!a) return;
+  const o = a.createOscillator(), g = a.createGain(), t = a.currentTime + t0;
+  o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+  o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + d + .05);
+}
+const chime = () => { tone(660,0,.25); tone(880,.1,.3); tone(1320,.2,.45); };
+const boop  = () => { tone(260,0,.18,'triangle',.12); tone(200,.12,.25,'triangle',.1); };
+const tick  = () => tone(1100,0,.07,'sine',.06);
+
+/* ---------- speech ---------- */
+let VOICE = null;
+function pickVoice(){
+  const v = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
+  VOICE = v.find(x => /Samantha|Karen|Moira|Tessa|Google US English/i.test(x.name) && /^en/i.test(x.lang))
+       || v.find(x => x.lang === 'en-US') || v.find(x => /^en/i.test(x.lang)) || null;
+}
+if ('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+let bubbleTimer = null;
+function bubble(text){
+  const b = $('#bubble'); if (!b) return;
+  b.textContent = text; b.classList.add('on'); $('#buddy').classList.add('talk');
+  clearTimeout(bubbleTimer);
+}
+function bubbleDone(){ clearTimeout(bubbleTimer); bubbleTimer = setTimeout(() => { $('#buddy') && $('#buddy').classList.remove('talk'); }, 200); }
+function say(text){
+  return new Promise(res => {
+    bubble(text);
+    if (!('speechSynthesis' in window)) { setTimeout(() => { bubbleDone(); res(); }, 400 + text.length * 45); return; }
+    try { speechSynthesis.cancel(); } catch(e){}
+    const u = new SpeechSynthesisUtterance(text);
+    if (VOICE) u.voice = VOICE;
+    u.rate = .92; u.pitch = 1.12; u.lang = (VOICE && VOICE.lang) || 'en-US';
+    let done = false; const fin = () => { if (!done) { done = true; bubbleDone(); res(); } };
+    u.onend = fin; u.onerror = fin;
+    setTimeout(fin, 900 + text.length * 95);
+    speechSynthesis.speak(u);
+  });
+}
+/* lesson-scoped speech: stops a running lesson flow if the kid leaves */
+async function ls(text){
+  const L = S.lesson; if (!L) throw ABORT;
+  await say(text);
+  if (S.lesson !== L) throw ABORT;
+}
+async function lsleep(ms){ const L = S.lesson; await sleep(ms); if (S.lesson !== L) throw ABORT; }
+
+/* ---------- buddy (Nova) ---------- */
+$('#buddy').innerHTML = `
+<svg viewBox="0 0 100 100" aria-hidden="true">
+  <ellipse cx="50" cy="58" rx="47" ry="13" fill="none" stroke="#ff5d8f" stroke-width="6" transform="rotate(-14 50 58)"/>
+  <circle cx="50" cy="52" r="32" fill="#ffb347"/>
+  <circle cx="40" cy="40" r="10" fill="#ffd08a" opacity=".7"/>
+  <ellipse cx="40" cy="50" rx="5" ry="7" fill="#2a1d7a"/><ellipse cx="60" cy="50" rx="5" ry="7" fill="#2a1d7a"/>
+  <circle cx="42" cy="47" r="1.8" fill="#fff"/><circle cx="62" cy="47" r="1.8" fill="#fff"/>
+  <path d="M41 62 Q50 70 59 62" stroke="#2a1d7a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <circle cx="32" cy="60" r="4" fill="#ff7a9a" opacity=".7"/><circle cx="68" cy="60" r="4" fill="#ff7a9a" opacity=".7"/>
+  <path d="M 6 70 Q 50 84 94 50" fill="none" stroke="#ff5d8f" stroke-width="6" stroke-linecap="round"/>
+  <g id="hat"></g>
+</svg><div id="bubble"></div>`;
+
+/* ---------- builders ---------- */
+function itemEl(t){ const d = el('div', 'item' + (t.ring ? ' ring' : '')); if (!t.ring) d.textContent = t.e; return d; }
+function scatterInto(parent, t, n){ const items = []; for (let i = 0; i < n; i++){ const it = itemEl(t); parent.appendChild(it); items.push(it); } return items; }
+function groupIn(parent, cls=''){ const g = el('div', 'group ' + cls); parent.appendChild(g); return g; }
+function frame(n, size=10, t=null){
+  const f = el('div', 'frame'); const cells = [], items = [], empties = [];
+  for (let i = 0; i < size; i++){
+    const c = el('div', 'cell'); cells.push(c); f.appendChild(c);
+    if (i < n){ const d = t ? itemEl(t) : el('div', 'dot'); c.appendChild(d); items.push(d); } else empties.push(c);
+  }
+  return {f, cells, items, empties};
+}
+function bond(T, k){
+  const d = el('div', 'bond');
+  d.innerHTML = `<svg viewBox="0 0 300 200"><line x1="150" y1="55" x2="75" y2="145"/><line x1="150" y1="55" x2="225" y2="145"/>
+  <circle cx="150" cy="52" r="42"/><circle cx="75" cy="148" r="42"/><circle cx="225" cy="148" r="42" class="q"/>
+  <text x="150" y="67">${T}</text><text x="75" y="163">${k}</text><text x="225" y="163">?</text></svg>`;
+  return d;
+}
+function wiggle(x){ x.classList.add('shake'); setTimeout(() => x.classList.remove('shake'), 400); }
+function makeCountable(items, counter){
+  items.forEach(it => {
+    it.classList.add('tap');
+    it.addEventListener('pointerdown', e => {
+      e.preventDefault(); e.stopPropagation(); ac();
+      const L = S.lesson; if (!L || L.busy) return;
+      if (it.dataset.badge){ say('Already counted that one!'); wiggle(it); return; }
+      counter.c++; it.dataset.badge = counter.c; it.classList.add('counted'); tick(); say(String(counter.c));
+    });
+  });
+}
+function resetCounts(items, counter){ items.forEach(i => { delete i.dataset.badge; i.classList.remove('counted', 'extra'); }); if (counter) counter.c = 0; }
+async function countAlong(items, start=1){
+  for (let i = 0; i < items.length; i++){
+    const it = items[i]; it.classList.add('counted'); it.dataset.badge = start + i; tick();
+    await ls(String(start + i));
+  }
+}
+function markTen(items, n){ items.forEach(i => i.classList.add('counted')); items[items.length - 1].dataset.badge = n; }
+function numChoices(ans, mistakes, min=0, max=20){
+  const set = [ans];
+  for (const m of [...mistakes, ans + 1, ans - 1, ans + 2, ans - 2, ans + 3]){
+    if (set.length >= 3) break;
+    if (m != null && m >= min && m <= max && !set.includes(m)) set.push(m);
+  }
+  return set.sort((a, b) => a - b).map(v => ({label:String(v), value:v}));
+}
+
+/* =========================================================
+   LESSONS — each gen(level) returns a problem:
+   {prompt, text, answer, secret, nums, render(stage), choices | custom, hint(v)->{code,text}, teach()}
+   ========================================================= */
+const LESSONS = [
+  {id:'count10', title:'Count to 10', icon:'🍎', color:'#ff5d8f', intro:introCount10, gen:genCount10},
+  {id:'count20', title:'Count to 20', icon:'⭐', color:'#f08c00', intro:introCount20, gen:genCount20},
+  {id:'match',   title:'Dot Frames',  icon:'🔟', color:'#20a4c9', intro:introMatch,   gen:genMatch},
+  {id:'compare', title:'More or Less',icon:'⚖️', color:'#7b5cff', intro:introCompare, gen:genCompare},
+  {id:'make10',  title:'Make 5 & 10', icon:'🧩', color:'#12a88f', intro:introMake10,  gen:genMake10},
+  {id:'add',     title:'Add to 10',   icon:'➕', color:'#e2489b', intro:introAdd,     gen:genAdd},
+  {id:'sub',     title:'Take Away',   icon:'➖', color:'#3b6cf0', intro:introSub,     gen:genSub},
+];
+
+/* --- 1. count to 10 --- */
+function genCount10(level){
+  const n = rnd(...[[1,5],[3,8],[5,10]][level - 1]); const t = pick(ITEMS()); const counter = {c:0}; let items;
+  return {
+    answer:n, secret:n, nums:[], text:`How many ${t.many}?`, prompt:`How many ${t.many}? Touch each one to count.`,
+    render(st){ items = scatterInto(groupIn(st), t, n); makeCountable(items, counter); },
+    choices: numChoices(n, [n + 1, n - 1], 1, 20),
+    hint(v){
+      if (v > n) return {code:'double-count', text:`Hmm, too many! Touch each ${t.one} only one time.`};
+      if (n - v === 1) return {code:'skip', text:'So close! Did we skip one? Touch every one.'};
+      return {code:'skip', text:`Let's touch every ${t.one} and count out loud.`};
+    },
+    async teach(){ resetCounts(items, counter); await ls("Let's count together."); await countAlong(items); await ls(`${n} ${word(t, n)}!`); }
+  };
+}
+async function introCount10(st){
+  const t = ITEMS()[0]; const items = scatterInto(groupIn(st), t, 4);
+  await ls(`Let's count! We touch each ${t.one} one time.`);
+  await countAlong(items);
+  await ls(`Four ${t.many}! The last number we say tells how many.`);
+}
+
+/* --- 2. count to 20 (ten-frames, counting on) --- */
+function genCount20(level){
+  const n = rnd(11, [14,17,20][level - 1]); const t = pick(ITEMS().filter(x => !x.ring)); const counter = {c:0}; let items, first;
+  return {
+    answer:n, secret:n, nums:[10], text:`How many ${t.many}?`, prompt:`How many ${t.many}? Touch to count.`,
+    render(st){
+      const row = el('div', 'frames'); const A = frame(10, 10, t), B = frame(n - 10, 10, t);
+      row.append(A.f, B.f); st.appendChild(row); first = A.items; items = A.items.concat(B.items); makeCountable(items, counter);
+    },
+    choices: numChoices(n, [n - 10, n + 1, n - 1], 1, 20),
+    hint(v){
+      if (v === n - 10) return {code:'forgot-ten', text:"Don't forget the full frame! A full frame is ten."};
+      return {code:'count-on', text:'A full frame is ten. Start at ten and count on.'};
+    },
+    async teach(){ resetCounts(items, counter); markTen(first, 10); await ls('A full frame is ten.'); await countAlong(items.slice(10), 11); await ls(`${n}!`); }
+  };
+}
+async function introCount20(st){
+  const row = el('div', 'frames'); const A = frame(10), B = frame(3); row.append(A.f, B.f); st.appendChild(row);
+  await ls('A full frame is ten. We do not need to count it again!');
+  markTen(A.items, 10); await ls('Ten.');
+  await countAlong(B.items, 11);
+  await ls('Thirteen! Counting on from ten is a shortcut.');
+}
+
+/* --- 3. dot frames (subitizing 5 / 10) --- */
+function genMatch(level){
+  if (level < 3){
+    const size = level === 1 ? 5 : 10; const n = rnd(1, size); const counter = {c:0}; let F;
+    return {
+      answer:n, secret:n, nums:[5], text:'How many dots?', prompt:'How many dots?',
+      render(st){ F = frame(n, size); st.appendChild(F.f); makeCountable(F.items, counter); },
+      choices: numChoices(n, [n + 1, n - 1], 1, 10),
+      hint(){ return (size === 10 && n > 5) ? {code:'frame-5', text:'Look at the top row. A full row is five. Count on from five.'}
+                                            : {code:'count-error', text:'Touch each dot and count.'}; },
+      async teach(){
+        resetCounts(F.items, counter);
+        if (n > 5){ markTen(F.items.slice(0, 5), 5); await ls('A full row is five.'); await countAlong(F.items.slice(5), 6); }
+        else await countAlong(F.items);
+        await ls(`${n} dots!`);
+      }
+    };
+  }
+  const n = rnd(3, 10); const frames = {};
+  const opts = numChoices(n, [n + 1, n - 1], 1, 10);
+  return {
+    answer:n, secret:null, nums:[n, 5], text:`Find ${n}`, prompt:`Find the frame with ${n} dots.`,
+    render(st){ st.appendChild(el('div', 'bignum', String(n))); },
+    choices: opts.map(o => ({value:o.value, html(){ const F = frame(o.value, 10); F.f.classList.add('mini'); frames[o.value] = F; return F.f; }})),
+    hint(){ return {code:'frame-5', text:'A full row is five. Count the dots in each frame.'}; },
+    async teach(){
+      const F = frames[n]; await ls("Let's count this one.");
+      if (n > 5){ markTen(F.items.slice(0, 5), 5); await ls('Five.'); await countAlong(F.items.slice(5), 6); } else await countAlong(F.items);
+    }
+  };
+}
+async function introMatch(st){
+  const F = frame(7); st.appendChild(F.f);
+  await ls('This is a ten frame. A full row is five.');
+  markTen(F.items.slice(0, 5), 5); await ls('Five.');
+  await countAlong(F.items.slice(5), 6);
+  await ls('Seven dots! No need to count every one.');
+}
+
+/* --- 4. more or less --- */
+function genCompare(level){
+  let a, b; const gap = level === 1 ? 2 : 1, top = level === 3 ? 10 : 8;
+  do { a = rnd(1, top); b = rnd(1, top); } while (Math.abs(a - b) < gap);
+  const ask = level === 1 ? 'more' : pick(['more', 'fewer']);
+  const bigWord = ask === 'more' ? 'bigger' : 'smaller';
+  const ans = ((ask === 'more') === (a > b)) ? 'A' : 'B';
+  const t = pick(ITEMS()), t2 = pick(ITEMS().filter(x => x !== t));
+  let wrap, PA, PB, IA, IB;
+  const p = {
+    answer:ans, secret:null, nums:[a, b], custom:true,
+    text: level < 3 ? `Which has ${ask}?` : `Which is ${bigWord}?`,
+    prompt: level < 3 ? `Which group has ${ask}? Tap it.` : `Which number is ${bigWord}? Tap it.`,
+    render(st){
+      wrap = el('div', 'compare'); PA = el('button', 'panel'); PB = el('button', 'panel'); PA.dataset.v = 'A'; PB.dataset.v = 'B';
+      if (level < 3){ IA = scatterInto(PA, t, a); IB = scatterInto(PB, t2, b); }
+      else { PA.appendChild(el('div', 'bignum', String(a))); PB.appendChild(el('div', 'bignum', String(b))); }
+      wrap.append(PA, PB); st.appendChild(wrap);
+      PA.onclick = () => answer(p, 'A', PA); PB.onclick = () => answer(p, 'B', PB);
+    },
+    hint(){
+      if (level < 3) return {code:'compare', text: ask === 'more' ? "Let's line them up in our heads. The group with extras has more."
+                                                                 : 'Line them up in your head. The group that runs out first has fewer.'};
+      return {code:'compare', text: ask === 'more' ? 'When we count, bigger numbers come later.' : 'When we count, smaller numbers come first.'};
+    },
+    async teach(){
+      if (level < 3){
+        wrap.classList.add('aligned'); await lsleep(350);
+        const big = a > b ? IA : IB; big.slice(Math.min(a, b)).forEach(i => i.classList.add('extra'));
+        await ls('Look! When we line them up, this group has extras. It has more.');
+        if (ask === 'fewer') await ls('So the other group has fewer.');
+      } else {
+        const FA = frame(a), FB = frame(b); FA.f.classList.add('mini'); FB.f.classList.add('mini');
+        FA.f.style.background = FB.f.style.background = '#fff2';
+        PA.appendChild(FA.f); PB.appendChild(FB.f);
+        await ls(`${Math.min(a, b)} comes before ${Math.max(a, b)} when we count. So ${Math.max(a, b)} is bigger.`);
+      }
+    }
+  };
+  return p;
+}
+async function introCompare(st){
+  const wrap = el('div', 'compare aligned'); const PA = el('div', 'panel'), PB = el('div', 'panel');
+  const I = ITEMS(), ta = I[2] || I[0], tb = I[1];
+  const A = scatterInto(PA, ta, 5); scatterInto(PB, tb, 3); wrap.append(PA, PB); st.appendChild(wrap);
+  await ls('Which has more? Line them up, one and one.');
+  A.slice(3).forEach(i => i.classList.add('extra'));
+  await ls(`The ${ta.many} have extras left over. So the ${ta.many} have more!`);
+  await ls(`And the ${tb.many} have fewer.`);
+}
+
+/* --- 5. make 5 / make 10 --- */
+function genMake10(level){
+  const T = level === 1 ? 5 : 10; const k = rnd(1, T - 1); const ans = T - k; const counter = {c:0}; let F;
+  return {
+    answer:ans, secret:ans, nums:[k, T], text:`${k} + ? = ${T}`, prompt:`${k} and how many more make ${T}?`,
+    render(st){
+      F = frame(k, T);
+      if (level === 3){ st.appendChild(bond(T, k)); F.f.classList.add('hidden'); }
+      st.appendChild(F.f); makeCountable(F.empties, counter);
+    },
+    choices: numChoices(ans, [k, ans + 1, ans - 1], 1, 10),
+    hint(v){
+      if (v === k) return {code:'already-there', text: level < 3 ? "That's how many are already here. Count the empty spots!" : "That's the number we already have. How many more do we need?"};
+      return {code:'empty-spots', text: level < 3 ? 'Count only the empty spots.' : `Count up from ${k} to ${T}.`};
+    },
+    async teach(){
+      F.f.classList.remove('hidden'); resetCounts(F.empties, counter);
+      await ls(`${k} ${k === 1 ? 'is' : 'are'} full. Let's count the empty spots.`);
+      await countAlong(F.empties); await ls(`${k} and ${ans} make ${T}!`);
+    }
+  };
+}
+async function introMake10(st){
+  const F = frame(7); st.appendChild(F.f);
+  await ls('Seven spots are full. How many more to make ten?');
+  await ls('Count the empty spots.'); await countAlong(F.empties);
+  await ls('Seven and three make ten!');
+}
+
+/* --- 6. add within 10 --- */
+function genAdd(level){
+  const max = level === 1 ? 5 : 10; const a = rnd(1, max - 1), b = rnd(1, max - a), s = a + b;
+  const t = pick(ITEMS()), who = pick(heroes()); const counter = {c:0}; let A, B;
+  return {
+    answer:s, secret:s, nums:[a, b], text:`${a} + ${b} = ?`,
+    prompt: level < 3 ? `${a} plus ${b}. How many ${t.many} in all?` : `${who} has ${a} ${word(t, a)}. Then ${who} finds ${b} more. How many ${t.many} now?`,
+    render(st){
+      const row = el('div', 'addrow'); const ga = el('div', 'group'), gb = el('div', 'group tint');
+      A = scatterInto(ga, t, a); B = scatterInto(gb, t, b); row.append(ga, el('div', 'op', '+'), gb);
+      st.append(row, el('div', 'eq', `${a} + ${b} = ?`)); makeCountable(A.concat(B), counter);
+    },
+    choices: numChoices(s, [Math.max(a, b), s + 1, s - 1], 1, 10),
+    hint(v){
+      if (v === a || v === b) return {code:'one-group', text:"That's just one group. Put both groups together and count them all!"};
+      if (v > s) return {code:'double-count', text:'Too many! Touch each one only one time.'};
+      return {code:'count-error', text:'Count all of them. Touch each one.'};
+    },
+    async teach(){
+      resetCounts(A.concat(B), counter);
+      if (level === 1){ await ls("Let's count them all."); await countAlong(A.concat(B)); }
+      else { markTen(A, a); await ls(`Start at ${a}, and count on.`); await countAlong(B, a + 1); }
+      await ls(`${a} plus ${b} is ${s}!`);
+    }
+  };
+}
+async function introAdd(st){
+  const row = el('div', 'addrow'); const ga = el('div', 'group'), gb = el('div', 'group tint');
+  const t = ITEMS()[3] || ITEMS()[0];
+  const A = scatterInto(ga, t, 2), B = scatterInto(gb, t, 1);
+  row.append(ga, el('div', 'op', '+'), gb); st.append(row, el('div', 'eq', '2 + 1 = ?'));
+  await ls(`Plus means put together. Two ${t.many}, plus one more.`);
+  await countAlong(A.concat(B));
+  await ls('Two plus one is three!');
+}
+
+/* --- 7. take away within 10 --- */
+function genSub(level){
+  const max = level === 1 ? 5 : 10; const a = rnd(2, max), b = rnd(1, a - 1), d = a - b;
+  const t = pick(ITEMS()), who = pick(heroes()); const counter = {c:0}; let keep, gone;
+  return {
+    answer:d, secret:d, nums:[a, b], text:`${a} − ${b} = ?`,
+    prompt: level < 3 ? `${a} take away ${b}. How many are left?` : `${who} has ${a} ${word(t, a)}. ${who} gives ${b} away. How many are left?`,
+    render(st){
+      const g = groupIn(st); const items = scatterInto(g, t, a); keep = items.slice(0, d); gone = items.slice(d);
+      st.appendChild(el('div', 'eq', `${a} − ${b} = ?`)); makeCountable(keep, counter);
+      gone.forEach(i => i.addEventListener('pointerdown', () => { if (i.classList.contains('gone')) say('That one went away!'); }));
+      setTimeout(() => gone.forEach((i, j) => setTimeout(() => { i.classList.add('gone'); tone(560 - j * 40, 0, .12, 'triangle', .05); }, j * 200)), 900);
+    },
+    choices: numChoices(d, [b, a + b, a, d + 1, d - 1], 1, 20),
+    hint(v){
+      if (v === a + b) return {code:'add-not-sub', text:'Take away means some go away. We should have fewer!'};
+      if (v === a) return {code:'forgot-take', text:'Oops, some went away! Count only the ones still here.'};
+      if (v === b) return {code:'took-away-count', text:"That's how many went away. How many are still here?"};
+      return {code:'count-error', text:'Touch the ones still here and count them.'};
+    },
+    async teach(){ resetCounts(keep, counter); await ls('Count only the ones still here.'); await countAlong(keep); await ls(`${a} take away ${b} is ${d}!`); }
+  };
+}
+async function introSub(st){
+  const t = ITEMS()[1]; const items = scatterInto(groupIn(st), t, 4); st.appendChild(el('div', 'eq', '4 − 1 = ?'));
+  await ls(`Take away means some go away. We have four ${t.many}.`);
+  items[3].classList.add('gone'); tone(500, 0, .15, 'triangle', .06);
+  await ls('One goes away! Count the ones still here.');
+  await countAlong(items.slice(0, 3));
+  await ls('Four take away one is three!');
+}
+
+
+/* =========================================================
+   SEASONS — same engine/looks as ABC Rocket & Word Hive, plus seasonal counting objects
+   ========================================================= */
+const frnd = (a, b) => a + Math.random() * (b - a);
+const LEAF = c => `<svg viewBox="0 0 40 40"><path d="M20 2l4 8 7-3-2 8 8 2-7 5 3 6-8-1-2 9-3-8-3 8-2-9-8 1 3-6-7-5 8-2-2-8 7 3z" fill="${c}"/><path d="M20 12v26" stroke="rgba(0,0,0,.25)" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const OVAL_LEAF = c => `<svg viewBox="0 0 40 40"><path d="M20 3C30 10 34 20 20 37 6 20 10 10 20 3z" fill="${c}"/><path d="M20 8v27" stroke="rgba(0,0,0,.22)" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const FLAKE = `<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M20 3v34M5 11.5l30 17M5 28.5l30-17"/><path d="M15 6l5 4 5-4M15 34l5-4 5 4M6 17l6 1.5-2 5.5M34 23l-6-1.5 2-5.5M6 23l6-1.5-2-5.5M34 17l-6 1.5 2 5.5"/></svg>`;
+const DOT = `<svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.5" fill="#fff"/></svg>`;
+const PETAL = c => `<svg viewBox="0 0 30 30"><path d="M15 2c8 6 9 16 0 26C6 18 7 8 15 2z" fill="${c}"/><path d="M15 6v16" stroke="rgba(255,255,255,.6)" stroke-width="1.4" stroke-linecap="round"/></svg>`;
+const BAT = `<svg viewBox="0 0 64 30"><path d="M32 10c2-4 4-5 4-5l1 4c3-1 7-1 10 2 4-4 11-6 17-4-5 2-7 7-7 12-3-3-7-3-9 0-2-3-6-3-8-1-2 3-5 6-8 7-3-1-6-4-8-7-2-2-6-2-8 1-2-3-6-3-9 0 0-5-2-10-7-12 6-2 13 0 17 4 3-3 7-3 10-2l1-4s2 1 4 5z" fill="#160C26"/></svg>`;
+const SPARK = c => `<svg viewBox="0 0 20 20"><path d="M10 0c1 6 4 9 10 10-6 1-9 4-10 10-1-6-4-9-10-10 6-1 9-4 10-10z" fill="${c}"/></svg>`;
+const BUBBLE = `<svg viewBox="0 0 30 30"><circle cx="15" cy="15" r="13" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.85)" stroke-width="2"/><path d="M8 12a8 8 0 0 1 6-5" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>`;
+const SUN = `<svg viewBox="0 0 100 100"><g class="rays" stroke="#FFD25A" stroke-width="5" stroke-linecap="round"><path d="M50 4v12M50 84v12M4 50h12M84 50h12M17 17l8.5 8.5M74.5 74.5L83 83M17 83l8.5-8.5M74.5 25.5L83 17"/></g><circle cx="50" cy="50" r="24" fill="#FFC93C"/></svg>`;
+function hills(c1, c2, extra=''){
+  return `<svg viewBox="0 0 1200 200" preserveAspectRatio="none"><path d="M0 110 C 180 40 360 60 520 100 S 860 40 1200 90 V200 H0z" fill="${c2}"/><path d="M0 150 C 220 100 420 120 620 145 S 980 110 1200 140 V200 H0z" fill="${c1}"/>${extra}</svg>`;
+}
+const PUMPKINS = `<g><ellipse cx="160" cy="168" rx="34" ry="24" fill="#FF8A1F"/><path d="M140 168c0-16 8-22 20-22s20 6 20 22" fill="none" stroke="#C25E05" stroke-width="3"/><rect x="157" y="136" width="6" height="12" rx="2" fill="#4E6B22"/><ellipse cx="1040" cy="172" rx="26" ry="18" fill="#FF9A2E"/><rect x="1037" y="148" width="5" height="10" rx="2" fill="#4E6B22"/></g>`;
+const JACK = `<g><ellipse cx="180" cy="166" rx="38" ry="27" fill="#FF8A1F"/><path d="M164 158l8-8 4 9zM196 158l-8-8-4 9zM164 172q16 12 32 0l-6 3-4-4-6 5-6-5-4 4z" fill="#FFD447"/><rect x="176" y="132" width="7" height="13" rx="2" fill="#3D5E1C"/><ellipse cx="1030" cy="172" rx="28" ry="20" fill="#E9761A"/><rect x="1027" y="146" width="6" height="11" rx="2" fill="#3D5E1C"/></g>`;
+const TREES = `<g fill="#1E7A45"><path d="M150 60l38 70h-18l26 44h-92l26-44h-18z"/><path d="M1050 80l32 60h-15l22 38h-78l22-38h-15z"/></g><g fill="#5B3A1C"><rect x="143" y="172" width="14" height="20"/><rect x="1043" y="176" width="14" height="18"/></g><g fill="#FFD166"><circle cx="150" cy="58" r="7"/></g>`;
+const FLOWERS = [180,330,520,760,930,1090].map((x,i)=>`<g transform="translate(${x} ${150+(i%2)*12})"><path d="M0 0v30" stroke="#4E9A3A" stroke-width="3"/><g fill="${['#FF8FB8','#FFD25A','#B98CFF','#FF8FB8','#FFB0C9','#FFD25A'][i]}"><circle cx="0" cy="-8" r="6"/><circle cx="8" cy="0" r="6"/><circle cx="0" cy="8" r="6"/><circle cx="-8" cy="0" r="6"/></g><circle r="4.5" fill="#FFF3B0"/></g>`).join('');
+const WAVES = `<path d="M0 175 q 30 -12 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 V200 H0z" fill="#5CC8F0" opacity=".9"/>`;
+const MOONROCK = `<g fill="#3a2f7a"><circle cx="200" cy="200" r="70"/><circle cx="1010" cy="205" r="55"/></g>`;
+const WITCH_HAT = `<g transform="translate(0 2)"><ellipse cx="50" cy="23" rx="30" ry="6" fill="#3a1d5c"/><path d="M34 22 L54 -14 Q58 -18 60 -12 L66 22 Z" fill="#4b2477"/><rect x="35" y="15" width="30" height="6" rx="2" fill="#ff8a1f"/></g>`;
+const SANTA_HAT = `<g><path d="M24 26 Q34 -2 64 4 Q82 8 84 30 Z" fill="#e0303f"/><circle cx="85" cy="32" r="7" fill="#fff"/><rect x="20" y="20" width="62" height="10" rx="5" fill="#fff"/></g>`;
+const WINTER_HAT = `<g><path d="M24 26 Q50 -6 76 26 Z" fill="#4cc9f0"/><circle cx="50" cy="4" r="7" fill="#fff"/><rect x="21" y="20" width="58" height="9" rx="4" fill="#fff"/></g>`;
+
+const DARK = {'--ink':'#FFFFFF','--card':'rgba(255,255,255,.11)','--line':'rgba(255,255,255,.22)','--cell':'rgba(255,255,255,.08)','--frameline':'rgba(255,255,255,.45)'};
+const lightVars = (ink, num) => ({'--ink':ink,'--card':'rgba(255,255,255,.72)','--line':'rgba(0,0,0,.14)','--cell':'rgba(0,0,0,.06)','--frameline':'rgba(0,0,0,.28)','--num':num});
+const SEASONS = {
+  space:{ label:'Space (no season)', months:[], greet:'Blast off!',
+    vars:{...DARK,'--sky':'radial-gradient(1200px 700px at 70% 120%,#3a1f8f 0%,transparent 60%),linear-gradient(160deg,#0b1033,#24176b)','--num':'#ffd23f'},
+    fx:'space', ground:null, hat:'', items:null,
+    praise:['Rocket power!','Out of this world!','Blast off!','Super star!'] },
+  autumn:{ label:'Fall leaves', months:[8,10], greet:'Happy fall!',
+    vars:{'--sky':'linear-gradient(180deg,#FFE9C9 0%,#FFCE94 55%,#F6A25A 100%)', ...lightVars('#3B2414','#C2410C')},
+    fx:'leaves', ground:hills('#B65A22','#D98A3D',PUMPKINS), hat:'',
+    items:[{e:'🍁',one:'leaf',many:'leaves'},{e:'🌰',one:'acorn',many:'acorns'},{e:'🍎',one:'apple',many:'apples'},{e:'🦃',one:'turkey',many:'turkeys'},{e:'🥧',one:'pie',many:'pies'},{e:'🍄',one:'mushroom',many:'mushrooms'}],
+    praise:['Fall-tastic!','Leaf it to you!','Gourd job!','Un-be-leaf-able!'] },
+  halloween:{ label:'Halloween', months:[9], greet:'Happy Halloween!',
+    vars:{...DARK,'--sky':'linear-gradient(180deg,#160C2E 0%,#2E1850 55%,#55296B 100%)','--num':'#FFB347'},
+    fx:'bats', moon:true, ground:hills('#120A22','#2A1846',JACK), hat:WITCH_HAT,
+    items:[{e:'🎃',one:'pumpkin',many:'pumpkins'},{e:'👻',one:'ghost',many:'ghosts'},{e:'🦇',one:'bat',many:'bats'},{e:'🍬',one:'candy',many:'candies'},{e:'🍭',one:'lollipop',many:'lollipops'},{e:'🕸️',one:'web',many:'webs'}],
+    praise:['Spook-tacular!','Boo-yah!','Fang-tastic!','Wicked good!'] },
+  christmas:{ label:'Christmas', months:[11], greet:'Merry Christmas!',
+    vars:{...DARK,'--sky':'linear-gradient(180deg,#0D1F3D 0%,#1B3961 60%,#2C5482 100%)','--num':'#FFD166'},
+    fx:'snow', lights:true, ground:hills('#F4F8FF','#D6E4F7',TREES), hat:SANTA_HAT,
+    items:[{e:'🎄',one:'tree',many:'trees'},{e:'🎁',one:'present',many:'presents'},{e:'⛄',one:'snowman',many:'snowmen'},{e:'🍪',one:'cookie',many:'cookies'},{e:'🔔',one:'bell',many:'bells'},{e:'🦌',one:'reindeer',many:'reindeer'}],
+    praise:['Ho ho ho!','You sleighed it!','Tree-mendous!','Jolly good!'] },
+  winter:{ label:'Winter snow', months:[0,1], greet:'Stay cozy!',
+    vars:{...DARK,'--sky':'linear-gradient(180deg,#3E6FB8 0%,#6F9EDB 55%,#A9CDF2 100%)','--card':'rgba(255,255,255,.18)','--cell':'rgba(255,255,255,.16)','--frameline':'rgba(255,255,255,.65)','--num':'#FFF27A'},
+    fx:'snow', ground:hills('#F6FAFF','#DCE8F7'), hat:WINTER_HAT,
+    items:[{e:'⛄',one:'snowman',many:'snowmen'},{e:'❄️',one:'snowflake',many:'snowflakes'},{e:'🐧',one:'penguin',many:'penguins'},{e:'🧤',one:'glove',many:'gloves'},{e:'🧣',one:'scarf',many:'scarves'},{e:'☕',one:'mug',many:'mugs'}],
+    praise:['Snow-tastic!','Ice work!','Cool as ice!','Flake-tacular!'] },
+  spring:{ label:'Spring blossoms', months:[2,3,4], greet:'Happy spring!',
+    vars:{'--sky':'linear-gradient(180deg,#DDF4FF 0%,#EAF8EE 55%,#FFE6F0 100%)', ...lightVars('#22352A','#2A7535')},
+    fx:'petals', sun:true, ground:hills('#7CC46A','#A5D98F',FLOWERS), hat:'',
+    items:[{e:'🌷',one:'flower',many:'flowers'},{e:'🐣',one:'chick',many:'chicks'},{e:'🦋',one:'butterfly',many:'butterflies'},{e:'🐞',one:'ladybug',many:'ladybugs'},{e:'🥚',one:'egg',many:'eggs'},{e:'🐰',one:'bunny',many:'bunnies'}],
+    praise:['Blooming great!','Hop-tastic!','Petal perfect!','Fresh as spring!'] },
+  summer:{ label:'Summer sun', months:[5,6,7], greet:'Happy summer!',
+    vars:{'--sky':'linear-gradient(180deg,#4FC3F7 0%,#8FDBFF 55%,#D3F3FF 100%)', ...lightVars('#0E3550','#C24A1A')},
+    fx:'bubbles', sun:true, ground:hills('#F5D99A','#EBC678',WAVES), hat:'',
+    items:[{e:'🍉',one:'watermelon',many:'watermelons'},{e:'🐚',one:'shell',many:'shells'},{e:'🍦',one:'ice cream',many:'ice creams'},{e:'🐠',one:'fish',many:'fish'},{e:'⛱️',one:'umbrella',many:'umbrellas'},{e:'🦀',one:'crab',many:'crabs'}],
+    praise:['Sun-sational!','Beach-y keen!','Wave-tastic!','Totally rad!'] }
+};
+const SEASON_ORDER = ['auto','autumn','halloween','christmas','winter','spring','summer','space'];
+function themeName(){
+  const t = S.data.theme || 'auto';
+  if (SEASONS[t]) return t;
+  const m = new Date().getMonth();
+  return Object.keys(SEASONS).find(k => SEASONS[k].months.includes(m)) || 'space';
+}
+const TH = () => SEASONS[themeName()];
+const ITEMS = () => TH().items || SPACE_ITEMS;
+
+function particle(svg, cls, o){
+  const st = Object.entries(o).map(([k,v]) => `--${k}:${v}`).join(';');
+  return `<div class="p ${cls}" style="${st}">${svg}</div>`;
+}
+function sceneFx(kind){
+  const out = [];
+  const fallers = (n, svgs, smin, smax, dmin, dmax) => { for (let i = 0; i < n; i++) out.push(particle(pick(svgs), '', {x:frnd(-4,98).toFixed(1)+'vw', s:frnd(smin,smax).toFixed(0)+'px', d:frnd(dmin,dmax).toFixed(1)+'s', dl:(-frnd(0,dmax)).toFixed(1)+'s', sw:frnd(1.6,3.4).toFixed(1)+'s', o:frnd(.75,1).toFixed(2)})); };
+  const stars = (n, c) => { for (let i = 0; i < n; i++) out.push(particle(SPARK(c), 'still', {x:frnd(0,100).toFixed(1)+'vw', y:frnd(2,80).toFixed(1)+'vh', s:frnd(5,12).toFixed(0)+'px', d:frnd(1.4,3.4).toFixed(1)+'s', dl:(-frnd(0,3)).toFixed(1)+'s', sw:'1s'})); };
+  if (kind === 'leaves'){ const cs = ['#D2542A','#F4A93A','#B83A1B','#E8C547','#9C4A2A','#E07A2E']; fallers(14, cs.map((c,i) => i % 2 ? OVAL_LEAF(c) : LEAF(c)), 22, 40, 11, 20); }
+  else if (kind === 'snow'){
+    for (let i = 0; i < 30; i++) out.push(particle(DOT, '', {x:frnd(0,100).toFixed(1)+'vw', s:frnd(4,10).toFixed(0)+'px', d:frnd(9,18).toFixed(1)+'s', dl:(-frnd(0,18)).toFixed(1)+'s', sw:frnd(2,4).toFixed(1)+'s', o:frnd(.5,.95).toFixed(2)}));
+    fallers(8, [FLAKE], 16, 28, 12, 22);
+  }
+  else if (kind === 'petals') fallers(16, ['#FF9EC4','#FFC2D9','#FFFFFF','#F7B3CF'].map(PETAL), 14, 24, 12, 20);
+  else if (kind === 'bubbles'){ for (let i = 0; i < 12; i++) out.push(particle(BUBBLE, 'up', {x:frnd(0,96).toFixed(1)+'vw', s:frnd(18,44).toFixed(0)+'px', d:frnd(14,26).toFixed(1)+'s', dl:(-frnd(0,26)).toFixed(1)+'s', sw:frnd(2.5,4.5).toFixed(1)+'s', o:frnd(.7,1).toFixed(2)})); }
+  else if (kind === 'bats'){ stars(24, '#FFF4C9'); for (let i = 0; i < 4; i++) out.push(particle(BAT, 'fly', {x:'0', y:frnd(10,38).toFixed(1)+'vh', s:frnd(34,62).toFixed(0)+'px', d:frnd(16,28).toFixed(1)+'s', dl:(-frnd(0,24)).toFixed(1)+'s', sw:'1s'})); }
+  else if (kind === 'space') stars(40, '#FFFFFF');
+  return out.join('');
+}
+function lightsSvg(){
+  const cs = ['#FF4D5E','#FFD166','#3DD68C','#6EC3FF','#FF8FD8']; let b = '';
+  for (let i = 0; i < 24; i++){ const x = 25 + i * 50, y = 12 + 9 * Math.sin((i % 6) / 6 * Math.PI); b += `<g><rect x="${x-3}" y="${y-4}" width="6" height="6" rx="1" fill="#2B3A2B"/><ellipse class="bulb" style="animation-delay:${(-Math.random()*1.6).toFixed(2)}s" cx="${x}" cy="${y+9}" rx="6" ry="9" fill="${cs[i%5]}"/></g>`; }
+  return `<svg viewBox="0 0 1200 40" preserveAspectRatio="none"><path d="M0 10 Q 25 26 50 12 T 100 12 T 150 12 T 200 12 T 250 12 T 300 12 T 350 12 T 400 12 T 450 12 T 500 12 T 550 12 T 600 12 T 650 12 T 700 12 T 750 12 T 800 12 T 850 12 T 900 12 T 950 12 T 1000 12 T 1050 12 T 1100 12 T 1150 12 T 1200 12" stroke="#2B3A2B" stroke-width="2" fill="none"/>${b}</svg>`;
+}
+let appliedTheme = null;
+function applyTheme(force){
+  const name = themeName(); if (name === appliedTheme && !force) return; appliedTheme = name;
+  const t = SEASONS[name], root = document.documentElement;
+  const all = new Set(Object.values(SEASONS).flatMap(x => Object.keys(x.vars)));
+  all.forEach(k => root.style.removeProperty(k));
+  Object.entries(t.vars).forEach(([k, v]) => root.style.setProperty(k, v));
+  $('#scene').innerHTML = (t.sun ? `<div class="sun">${SUN}</div>` : '') + (t.moon ? '<div class="moon"></div>' : '') +
+    (t.lights ? `<div class="lights">${lightsSvg()}</div>` : '') + sceneFx(t.fx) + (t.ground ? `<div class="ground">${t.ground}</div>` : '');
+  document.body.classList.toggle('has-lights', !!t.lights);
+  const hat = document.getElementById('hat'); if (hat) hat.innerHTML = t.hat || '';
+  const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = name === 'space' ? '#0b1033' : (getComputedStyle(root).getPropertyValue('--num').trim() || '#0b1033');
+}
+
+/* =========================================================
+   ENGINE
+   ========================================================= */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
+  S.screen = id;
+}
+function buildTrack(n=GOAL){
+  const tr = $('#track'); tr.innerHTML = '';
+  for (let i = 0; i < n; i++) tr.appendChild(el('div', 'slot'));
+  const ship = el('div', 'ship', '🚀'); tr.appendChild(ship); S.trackN = n; moveShip(0);
+}
+function moveShip(k){ const s = $('#track .ship'); if (s) s.style.left = `calc(${(k / S.trackN) * 100}% - ${k ? 18 : 0}px)`; }
+function fillProgress(k){ const slots = document.querySelectorAll('#track .slot'); slots.forEach((s, i) => s.classList.toggle('on', i < k)); moveShip(k); }
+
+/* ---------- Today's Mission: quick mixed review, then the next planet ---------- */
+const REVIEW_N = 4;
+function knownPlanets(){ return LESSONS.filter(d => (S.data.stars[d.id] || 0) > 0 || S.data.tested[d.id]); }
+function missionTarget(){
+  const i = LESSONS.findIndex((d, k) => unlocked(k) && !(S.data.stars[d.id] > 0) && !S.data.tested[d.id]);
+  if (i >= 0) return i;
+  const rm = S.data.rmiss || {}; let best = 0, bs = Infinity;          // everything done: weakest planet
+  LESSONS.forEach((d, k) => { const sc = (S.data.stars[d.id] || 0) * 10 - (rm[d.id] || 0) * 3; if (sc < bs){ bs = sc; best = k; } });
+  return best;
+}
+function pickReview(lastId){
+  let ks = knownPlanets(); if (ks.length > 1) ks = ks.filter(d => d.id !== lastId);
+  const rm = S.data.rmiss || {};
+  const w = ks.map(d => 1 + (rm[d.id] || 0) * 2 + ((S.data.stars[d.id] || 0) < 3 ? 1 : 0));
+  let r = Math.random() * w.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < ks.length; i++){ r -= w[i]; if (r <= 0) return ks[i]; }
+  return ks[ks.length - 1];
+}
+async function startMission(){
+  ensureDay(); const target = missionTarget();
+  if (!knownPlanets().length) return startLesson(target, {mission:true});
+  S.lesson = {review:true, mission:true, target, goal:REVIEW_N, def:null, level:1, correct:0, misses:0, streak:0, missRow:0, busy:true};
+  show('lesson'); buildTrack(REVIEW_N); $('#bubble').classList.remove('on');
+  $('#stage').innerHTML = ''; $('#answers').innerHTML = ''; $('#prompt').textContent = 'Review';
+  try { await ls(`Today's mission! First, ${REVIEW_N} quick review questions.`); runProblem(); } catch(e){}
+}
+async function finishReview(){
+  const L = S.lesson;
+  try { await ls(`Review done! Now, the ${LESSONS[L.target].title} planet!`); } catch(e){ return; }
+  startLesson(L.target, {mission:true});
+}
+
+async function startLesson(i, {demo=false, mission=false} = {}){
+  const d = LESSONS[i];
+  S.lesson = {i, def:d, mission, level: S.data.tested[d.id] ? 2 : 1, correct:0, misses:0, streak:0, missRow:0, busy:false};
+  show('lesson'); buildTrack(); $('#bubble').classList.remove('on');
+  try {
+    if (demo || !S.data.stars[d.id]) await runIntro();
+    runProblem();
+  } catch(e){ if (e !== ABORT) console.error(e); }
+}
+async function runIntro(){
+  const L = S.lesson; L.busy = true; $('#answers').innerHTML = '';
+  const st = $('#stage'); st.innerHTML = ''; $('#prompt').textContent = 'Watch!';
+  await L.def.intro(st); await lsleep(500); L.busy = false;
+}
+function runProblem(){
+  const L = S.lesson; if (!L) return;
+  if (L.review){ L.def = pickReview(L.lastId); L.lastId = L.def.id; L.level = (S.data.stars[L.def.id] || 0) >= 2 || S.data.tested[L.def.id] ? 2 : 1; }
+  const p = L.def.gen(L.level); p.tries = 0; L.p = p;
+  const st = $('#stage'); st.innerHTML = ''; $('#answers').innerHTML = '';
+  p.render(st);
+  if (!p.custom){
+    p.choices.forEach(ch => {
+      const b = el('button', 'choice' + (ch.html ? ' rich' : ''));
+      if (ch.html) b.appendChild(ch.html()); else b.textContent = ch.label;
+      b.dataset.v = ch.value; b.onclick = () => answer(p, ch.value, b);
+      $('#answers').appendChild(b);
+    });
+  }
+  $('#prompt').textContent = p.text;
+  L.busy = false;
+  const pre = L.levelUp ? 'Level up! ' : ''; L.levelUp = false;
+  say(pre + p.prompt);
+}
+function logMistake(code){
+  const day = ensureDay();
+  day.mistakes[code] = (day.mistakes[code] || 0) + 1;
+  S.data.mistakes[code] = (S.data.mistakes[code] || 0) + 1;
+}
+
+async function answer(p, v, btn){
+  const L = S.lesson;
+  if (!L || L.busy || L.p !== p || p.done) return;
+  ac(); L.busy = true;
+  const ok = String(v) === String(p.answer);
+  try {
+    if (L.warm) return await warmAnswer(p, ok, btn);
+    if (ok){
+      p.done = true; btn && btn.classList.add('right'); chime();
+      L.correct++; L.streak++; L.missRow = 0;
+      const day = ensureDay(); if (p.tries === 0) day.correct++;
+      if (L.review && p.tries === 0 && S.data.rmiss && S.data.rmiss[L.def.id] > 0) S.data.rmiss[L.def.id]--;
+      save();
+      fillProgress(L.correct);
+      await ls(pick(PRAISE.concat(TH().praise))); await lsleep(300);
+      if (!L.review && L.streak >= 3 && L.level < 3){ L.level++; L.streak = 0; L.levelUp = true; }
+      if (L.correct >= (L.goal || GOAL)) return L.review ? finishReview() : finishLesson();
+      runProblem();
+    } else {
+      p.tries++; L.misses++; L.streak = 0; L.missRow++;
+      if (!L.review && L.missRow >= 2 && L.level > 1){ L.level--; L.missRow = 0; }
+      if (L.review){ S.data.rmiss = S.data.rmiss || {}; S.data.rmiss[L.def.id] = (S.data.rmiss[L.def.id] || 0) + 1; }
+      ensureDay().misses++;
+      boop(); if (btn){ btn.classList.add('wrong'); if (btn.tagName === 'BUTTON') btn.disabled = true; }
+      const h = p.hint(v); logMistake(h.code); save();
+      if (p.tries === 1){
+        const hh = await aiHint(p, v, h);
+        await ls(hh.text); L.busy = false;
+      } else {
+        await p.teach();
+        const right = [...document.querySelectorAll('#lesson [data-v]')].find(b => b.dataset.v === String(p.answer));
+        if (right) right.classList.add('glow');
+        await ls('Now you tap it!'); L.busy = false;
+      }
+    }
+  } catch(e){ if (e !== ABORT) { console.error(e); L.busy = false; } }
+}
+
+function finishLesson(){
+  const L = S.lesson; const d = L.def;
+  const stars = L.misses <= 1 ? 3 : L.misses <= 3 ? 2 : 1;
+  S.data.stars[d.id] = Math.max(S.data.stars[d.id] || 0, stars);
+  const day = ensureDay();
+  day.lessons.push({id:d.id, stars, misses:L.misses, at:Date.now()});
+  if (L.mission) day.missionDone = true;
+  $('#fTitle').textContent = L.mission ? 'Mission complete!' : 'You did it!';
+  const before = day.minutes;
+  day.minutes = Math.min(MAX_MIN, Math.floor(day.lessons.length / LESSONS_PER_BLOCK) * BLOCK_MIN);
+  const earned = day.minutes - before;
+  const toGo = LESSONS_PER_BLOCK - (day.lessons.length % LESSONS_PER_BLOCK);
+  save();
+  const fs = $('#fStars').children; [...fs].forEach(s => s.classList.remove('on'));
+  [...fs].forEach((s, i) => { if (i < stars) setTimeout(() => { s.classList.add('on'); tone(700 + i * 200, 0, .3); }, 300 + i * 350); });
+  const full = day.minutes >= MAX_MIN;
+  const earnLine = earned ? `+${earned} minutes of play time!`
+                 : full ? 'Play time is full for today!'
+                 : `${toGo} more planet${toGo === 1 ? '' : 's'} for ${BLOCK_MIN} minutes of play time!`;
+  $('#fEarn').textContent = earnLine;
+  const next = L.i + 1 < LESSONS.length ? L.i + 1 : null;
+  $('#fNext').style.display = next != null ? '' : 'none';
+  $('#fNext').onclick = () => { $('#finish').classList.remove('on'); startLesson(next); };
+  $('#fAgain').onclick = () => { $('#finish').classList.remove('on'); startLesson(L.i); };
+  $('#fHome').onclick = () => { $('#finish').classList.remove('on'); goHome(); };
+  $('#finish').classList.add('on'); confetti();
+  const sw = stars === 3 ? 'three stars' : stars === 2 ? 'two stars' : 'one star';
+  say((L.mission ? `Mission complete, ${KID}! ` : `You did it, ${KID}! `) + `You got ${sw}!` + (earned ? ` You earned ${earned} minutes of play time!` : full ? '' : ` ${toGo === 1 ? 'One' : 'Two'} more planet${toGo === 1 ? '' : 's'} for play time!`));
+}
+function confetti(){
+  for (let i = 0; i < 22; i++){
+    const s = el('div', 'burst', pick(['⭐','✨','🌟','🚀','🪐']));
+    s.style.left = '50%'; s.style.top = '45%';
+    s.style.setProperty('--dx', (Math.random() * 700 - 350) + 'px'); s.style.setProperty('--dy', (Math.random() * 600 - 380) + 'px');
+    document.body.appendChild(s); setTimeout(() => s.remove(), 1300);
+  }
+}
+
+/* ---------- warm-up placement ---------- */
+const PROBES = [['count10',2],['count20',2],['match',2],['compare',1],['make10',2],['add',2],['sub',2]];
+async function startWarmup(){
+  S.lesson = {warm:true, wi:0, correct:0, misses:0, busy:true, level:2, def:null};
+  show('lesson'); buildTrack(PROBES.length);
+  try { $('#stage').innerHTML = ''; $('#answers').innerHTML = ''; $('#prompt').textContent = '';
+        await ls(`Hi ${KID}! I'm Nova. Let's do a quick warm up, so I know where to start.`); warmNext(); }
+  catch(e){}
+}
+function warmNext(){ const L = S.lesson; const [id, lv] = PROBES[L.wi]; L.def = LESSONS.find(x => x.id === id); L.level = lv; runProblem(); }
+async function warmAnswer(p, ok, btn){
+  const L = S.lesson; p.done = true;
+  if (btn) btn.classList.add(ok ? 'right' : 'wrong');
+  ok ? chime() : tone(440, 0, .2, 'triangle', .08);
+  L.correct++; fillProgress(L.correct);
+  await ls(ok ? pick(PRAISE) : 'Good try!'); await lsleep(250);
+  if (ok){ S.data.tested[L.def.id] = true; L.wi++; if (L.wi < PROBES.length) { save(); return warmNext(); } }
+  S.data.placed = true; save();
+  await ls("All set! Tap today's mission to start.");
+  goHome(true);
+}
+
+/* ---------- home ---------- */
+function unlocked(i){
+  if (S.data.unlockAll || i === 0) return true;
+  const prev = LESSONS[i - 1].id; return (S.data.stars[prev] || 0) > 0 || !!S.data.tested[prev];
+}
+function renderHome(){
+  const g = $('#map'); g.innerHTML = ''; let nextMarked = false;
+  LESSONS.forEach((d, i) => {
+    const st = S.data.stars[d.id] || 0, un = unlocked(i);
+    const b = el('button', 'planet' + (un ? '' : ' locked')); b.style.setProperty('--c', d.color);
+    const isNext = un && !st && !S.data.tested[d.id] && !nextMarked; if (isNext){ b.classList.add('next'); nextMarked = true; }
+    let starsHtml = ''; for (let k = 0; k < 3; k++) starsHtml += `<span class="${k < st ? 'on' : ''}">${k < st ? '★' : '☆'}</span>`;
+    b.innerHTML = `<div class="pi">${un ? d.icon : '🔒'}</div><div class="pt">${d.title}</div><div class="ps">${starsHtml}</div>` +
+                  (S.data.tested[d.id] && !st ? '<div class="tag">already knows ✓</div>' : '');
+    b.onclick = () => { ac(); un ? startLesson(i) : say('Finish the planet before it first!'); };
+    g.appendChild(b);
+  });
+  const mb = $('#missionBtn'), done = !!ensureDay().missionDone, tgt = LESSONS[missionTarget()];
+  mb.classList.toggle('done', done);
+  mb.innerHTML = done ? `<b>✅ Mission done!</b><small>Play it again?</small>`
+                      : `<b>🚀 Today's Mission</b><small>${knownPlanets().length ? 'Quick review + ' : ''}${tgt.icon} ${tgt.title}</small>`;
+  mb.onclick = () => { ac(); startMission(); };
+  $('#totalStars').textContent = Object.values(S.data.stars).reduce((a, b) => a + b, 0);
+  $('#playMin').textContent = ensureDay().minutes;
+}
+function goHome(quiet){
+  S.lesson = null; try { speechSynthesis.cancel(); } catch(e){}
+  show('home'); renderHome();
+  applyTheme();
+  if (!quiet) say(`${TH().greet} ` + (ensureDay().missionDone ? 'Pick a planet!' : "Tap today's mission!"));
+}
+
+/* No AI in the shared version: Nova always uses the built-in hints. */
+async function aiHint(p, wrong, h){ return h; }
+
+/* =========================================================
+   PARENTS
+   ========================================================= */
+let pinBuf = '';
+function openPin(){
+  if (!/^\d{4}$/.test(S.data.pin || '')) return;
+  pinBuf = ''; $('#pinDots').textContent = '○○○○'; $('#pin').classList.add('on');
+}
+(function buildPin(){
+  const k = $('#pinKeys');
+  ['1','2','3','4','5','6','7','8','9','✕','0','⌫'].forEach(c => {
+    const b = el('button', '', c);
+    b.onclick = () => {
+      if (c === '✕'){ $('#pin').classList.remove('on'); return; }
+      if (c === '⌫') pinBuf = pinBuf.slice(0, -1); else pinBuf += c;
+      $('#pinDots').textContent = '●'.repeat(pinBuf.length) + '○'.repeat(Math.max(0, S.data.pin.length - pinBuf.length));
+      if (pinBuf.length >= S.data.pin.length){
+        if (pinBuf === S.data.pin){ $('#pin').classList.remove('on'); openParent(); }
+        else { wiggle($('#pinDots')); pinBuf = ''; setTimeout(() => $('#pinDots').textContent = '○'.repeat(S.data.pin.length), 350); }
+      }
+    };
+    k.appendChild(b);
+  });
+})();
+
+function reportText(){
+  const day = ensureDay(); const lines = [];
+  lines.push(`123 Rocket — ${KID}`, new Date().toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'}), '');
+  lines.push(`Today: ${day.lessons.length} lesson${day.lessons.length === 1 ? '' : 's'} done, ${day.correct} right on first try, ${day.misses} misses`);
+  lines.push(`Today's mission: ${day.missionDone ? 'done ✓' : 'not yet'}`);
+  lines.push(`Play time earned: ${day.minutes} min`, '');
+  lines.push('Stars:');
+  LESSONS.forEach(d => { const s = S.data.stars[d.id] || 0; lines.push(`  ${d.title}: ${s ? '★'.repeat(s) + '☆'.repeat(3 - s) : (S.data.tested[d.id] ? 'already knows ✓' : '—')}`); });
+  const m = Object.entries(day.mistakes).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  if (m.length){ lines.push('', 'Working on today:'); m.forEach(([c, n]) => lines.push(`  ${MISTAKES[c] || c} (${n})`)); }
+  return lines.join('\n');
+}
+async function sendReport(){
+  const text = reportText();
+  try { if (navigator.share){ await navigator.share({title:'123 Rocket report', text}); return; } } catch(e){ if (e && e.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(text); alert('Report copied — paste it into Messages.'); } catch(e){ prompt('Copy this report:', text); }
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function openParent(){ show('parent'); renderParent(); }
+function renderParent(){
+  const day = ensureDay(); const a = S.data.ai;
+  const all = Object.entries(S.data.mistakes).sort((x, y) => y[1] - x[1]).slice(0, 5);
+  $('#pBody').innerHTML = `
+  <div class="psec"><h3>Today</h3>
+    <div class="stat"><div><b>${day.lessons.length}</b>lessons</div><div><b>${day.correct}</b>right</div><div><b>${day.misses}</b>misses</div><div><b>${day.minutes}</b>play min</div></div>
+    <button class="btn gold" id="pSend">Send to Parents</button>
+    <button class="btn" id="pResetMin">Reset today's play time</button>
+  </div>
+  <div class="psec"><h3>Progress</h3><table>${LESSONS.map(d => {
+      const s = S.data.stars[d.id] || 0;
+      return `<tr><td>${d.icon} ${d.title}</td><td>${s ? '★'.repeat(s) + '☆'.repeat(3 - s) : (S.data.tested[d.id] ? 'knows ✓' : '—')}</td></tr>`; }).join('')}</table>
+  </div>
+  <div class="psec"><h3>Working on (all time)</h3>
+    ${all.length ? '<table>' + all.map(([c, n]) => `<tr><td>${esc(MISTAKES[c] || c)}</td><td>${n}</td></tr>`).join('') + '</table>' : '<div class="muted">No mistakes logged yet.</div>'}
+  </div>
+  <div class="psec"><h3>Kid & PIN</h3>
+    <label>Kid's name</label><input type="text" id="pName" value="${esc(S.data.kid)}" maxlength="20" autocapitalize="words" autocorrect="off">
+    <label>Parent PIN (4 digits)</label><input type="text" id="pPin" value="${esc(S.data.pin)}" inputmode="numeric" maxlength="4" autocomplete="off">
+    <button class="btn" id="pSaveKid">Save</button> <span class="muted" id="pKidMsg"></span>
+  </div>
+  <div class="psec"><h3>Look</h3>
+    <select id="pTheme">${SEASON_ORDER.map(k => `<option value="${k}" ${(S.data.theme || 'auto') === k ? 'selected' : ''}>${k === 'auto' ? 'Auto by season (now: ' + SEASONS[themeName()].label + ')' : SEASONS[k].label}</option>`).join('')}</select>
+  </div>
+  <div class="psec"><h3>Setup</h3>
+    <button class="btn" id="pWarm">Redo warm-up</button>
+    <button class="btn" id="pUnlock">${S.data.unlockAll ? 'Lock planets in order' : 'Unlock all planets'}</button>
+    <button class="btn" id="pReset">Reset all progress</button>
+    <p class="muted">Add to Home Screen: open in Safari → Share → Add to Home Screen. Progress is saved on this device.</p>
+  </div>`;
+  $('#pSend').onclick = sendReport;
+  $('#pSaveKid').onclick = () => {
+    const n = $('#pName').value.trim().replace(/[^A-Za-z' -]/g, '').slice(0, 20), pin = $('#pPin').value.trim();
+    if (!n){ $('#pKidMsg').textContent = 'Enter a name.'; return; }
+    if (!/^\d{4}$/.test(pin)){ $('#pKidMsg').textContent = 'PIN must be 4 digits.'; return; }
+    S.data.kid = KID = n; S.data.pin = pin; save(); $('#pKidMsg').textContent = 'Saved.';
+  };
+  $('#pTheme').onchange = e => { S.data.theme = e.target.value; save(); applyTheme(true); renderParent(); };
+  $('#pResetMin').onclick = () => { if (confirm("Reset today's play time and lesson count?")){ day.minutes = 0; day.lessons = []; save(); renderParent(); } };
+  $('#pWarm').onclick = () => { S.data.tested = {}; S.data.placed = false; save(); startWarmup(); };
+  $('#pUnlock').onclick = () => { S.data.unlockAll = !S.data.unlockAll; save(); renderParent(); };
+  $('#pReset').onclick = () => { if (confirm('Erase all stars and progress?')){ const ai = S.data.ai; S.data = defaults(); S.data.ai = ai; ensureDay(); save(); renderParent(); } };
+}
+
+/* ---------- wiring ---------- */
+$('#goBtn').onclick = async () => {
+  ac(); pickVoice();
+  if (!S.data.kid || !/^\d{4}$/.test(S.data.pin || '')){ $('#setup').classList.add('on'); setTimeout(() => $('#sName').focus(), 50); return; }
+  if (!S.data.placed) startWarmup(); else goHome();
+};
+$('#homeBtn').onclick = () => goHome();
+$('#sayBtn').onclick = () => { ac(); const L = S.lesson; if (L && L.p) say(L.p.prompt); };
+$('#demoBtn').onclick = () => { const L = S.lesson; if (!L || L.warm || L.busy) return; startLesson(L.i, {demo:true}); };
+$('#parentBtn').onclick = openPin;
+$('#sGo').onclick = () => {
+  const n = $('#sName').value.trim().replace(/[^A-Za-z' -]/g, '').slice(0, 20), pin = $('#sPin').value.trim();
+  if (!n){ $('#sMsg').textContent = "Enter your kid's first name."; return; }
+  if (!/^\d{4}$/.test(pin)){ $('#sMsg').textContent = 'The PIN needs exactly 4 digits.'; return; }
+  S.data.kid = KID = n; S.data.pin = pin; save();
+  $('#setup').classList.remove('on'); $('#goBtn').click();
+};
+$('#pBack').onclick = () => goHome(true);
+document.addEventListener('visibilitychange', () => { if (document.hidden) try { speechSynthesis.cancel(); } catch(e){} else applyTheme(); });
+applyTheme();
+</script>
+</body>
+</html>
