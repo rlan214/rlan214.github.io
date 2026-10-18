@@ -84,7 +84,13 @@ h1 b{color:var(--num)}
 .pill{background:var(--card);border:2px solid var(--line);border-radius:999px;padding:8px 18px;font-size:26px;font-weight:600;display:flex;align-items:center;gap:8px}
 .icon-btn{width:64px;height:64px;border-radius:20px;border:2px solid var(--line);background:var(--card);font-size:32px;display:grid;place-items:center}
 .icon-btn.small{width:44px;height:44px;font-size:22px;border-radius:14px;opacity:.7}
-#home h2{margin:6px 0 4px;font-size:34px;text-align:center}
+#home h2{margin:6px 0 4px;font-size:26px;text-align:center;opacity:.85}
+.mission{display:flex;flex-direction:column;align-items:center;gap:2px;margin:4px auto 8px;border:0;border-radius:28px;padding:16px 40px;
+  background:linear-gradient(180deg,#ffe36e,#ffb000);color:#3b1d00;box-shadow:0 9px 0 #b86f00,0 16px 34px #0006;animation:pulse 1.6s ease-in-out infinite}
+.mission b{font-size:38px;font-weight:700}
+.mission small{font-size:19px;font-weight:600;opacity:.8}
+.mission.done{animation:none;background:linear-gradient(180deg,#b9fff1,#2ee6c9);color:#063d34;box-shadow:0 9px 0 #12a88f,0 16px 34px #0005}
+.mission:active{transform:translateY(6px);box-shadow:0 3px 0 #b86f00}
 #map{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px;align-content:center;max-width:1000px;width:100%;margin:0 auto;overflow:auto;padding:8px}
 .planet{color:#fff;border:0;border-radius:32px;padding:18px 10px 14px;background:radial-gradient(circle at 30% 25%,#ffffff40,transparent 60%),var(--c,#4cc9f0);
   box-shadow:0 8px 0 #0004,inset 0 -8px 0 #0002;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:190px;justify-content:center}
@@ -243,7 +249,8 @@ pre.out{white-space:pre-wrap;background:#0005;border-radius:12px;padding:10px;fo
     <div class="grow"></div>
     <button class="icon-btn small" id="parentBtn" aria-label="Parents">⚙️</button>
   </div>
-  <h2>Pick a planet!</h2>
+  <button class="mission" id="missionBtn"></button>
+  <h2>Or pick a planet</h2>
   <div id="map"></div>
 </section>
 
@@ -275,7 +282,7 @@ pre.out{white-space:pre-wrap;background:#0005;border-radius:12px;padding:10px;fo
 <!-- FINISH -->
 <div class="overlay" id="finish">
   <div class="card">
-    <h2>You did it!</h2>
+    <h2 id="fTitle">You did it!</h2>
     <div class="bigstars" id="fStars"><span>★</span><span>★</span><span>★</span></div>
     <div class="earn" id="fEarn"></div>
     <div class="row">
@@ -831,9 +838,41 @@ function buildTrack(n=GOAL){
 function moveShip(k){ const s = $('#track .ship'); if (s) s.style.left = `calc(${(k / S.trackN) * 100}% - ${k ? 18 : 0}px)`; }
 function fillProgress(k){ const slots = document.querySelectorAll('#track .slot'); slots.forEach((s, i) => s.classList.toggle('on', i < k)); moveShip(k); }
 
-async function startLesson(i, {demo=false} = {}){
+/* ---------- Today's Mission: quick mixed review, then the next planet ---------- */
+const REVIEW_N = 4;
+function knownPlanets(){ return LESSONS.filter(d => (S.data.stars[d.id] || 0) > 0 || S.data.tested[d.id]); }
+function missionTarget(){
+  const i = LESSONS.findIndex((d, k) => unlocked(k) && !(S.data.stars[d.id] > 0) && !S.data.tested[d.id]);
+  if (i >= 0) return i;
+  const rm = S.data.rmiss || {}; let best = 0, bs = Infinity;          // everything done: weakest planet
+  LESSONS.forEach((d, k) => { const sc = (S.data.stars[d.id] || 0) * 10 - (rm[d.id] || 0) * 3; if (sc < bs){ bs = sc; best = k; } });
+  return best;
+}
+function pickReview(lastId){
+  let ks = knownPlanets(); if (ks.length > 1) ks = ks.filter(d => d.id !== lastId);
+  const rm = S.data.rmiss || {};
+  const w = ks.map(d => 1 + (rm[d.id] || 0) * 2 + ((S.data.stars[d.id] || 0) < 3 ? 1 : 0));
+  let r = Math.random() * w.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < ks.length; i++){ r -= w[i]; if (r <= 0) return ks[i]; }
+  return ks[ks.length - 1];
+}
+async function startMission(){
+  ensureDay(); const target = missionTarget();
+  if (!knownPlanets().length) return startLesson(target, {mission:true});
+  S.lesson = {review:true, mission:true, target, goal:REVIEW_N, def:null, level:1, correct:0, misses:0, streak:0, missRow:0, busy:true};
+  show('lesson'); buildTrack(REVIEW_N); $('#bubble').classList.remove('on');
+  $('#stage').innerHTML = ''; $('#answers').innerHTML = ''; $('#prompt').textContent = 'Review';
+  try { await ls(`Today's mission! First, ${REVIEW_N} quick review questions.`); runProblem(); } catch(e){}
+}
+async function finishReview(){
+  const L = S.lesson;
+  try { await ls(`Review done! Now, the ${LESSONS[L.target].title} planet!`); } catch(e){ return; }
+  startLesson(L.target, {mission:true});
+}
+
+async function startLesson(i, {demo=false, mission=false} = {}){
   const d = LESSONS[i];
-  S.lesson = {i, def:d, level: S.data.tested[d.id] ? 2 : 1, correct:0, misses:0, streak:0, missRow:0, busy:false};
+  S.lesson = {i, def:d, mission, level: S.data.tested[d.id] ? 2 : 1, correct:0, misses:0, streak:0, missRow:0, busy:false};
   show('lesson'); buildTrack(); $('#bubble').classList.remove('on');
   try {
     if (demo || !S.data.stars[d.id]) await runIntro();
@@ -847,6 +886,7 @@ async function runIntro(){
 }
 function runProblem(){
   const L = S.lesson; if (!L) return;
+  if (L.review){ L.def = pickReview(L.lastId); L.lastId = L.def.id; L.level = (S.data.stars[L.def.id] || 0) >= 2 || S.data.tested[L.def.id] ? 2 : 1; }
   const p = L.def.gen(L.level); p.tries = 0; L.p = p;
   const st = $('#stage'); st.innerHTML = ''; $('#answers').innerHTML = '';
   p.render(st);
@@ -879,15 +919,18 @@ async function answer(p, v, btn){
     if (ok){
       p.done = true; btn && btn.classList.add('right'); chime();
       L.correct++; L.streak++; L.missRow = 0;
-      const day = ensureDay(); if (p.tries === 0) day.correct++; save();
+      const day = ensureDay(); if (p.tries === 0) day.correct++;
+      if (L.review && p.tries === 0 && S.data.rmiss && S.data.rmiss[L.def.id] > 0) S.data.rmiss[L.def.id]--;
+      save();
       fillProgress(L.correct);
       await ls(pick(PRAISE.concat(TH().praise))); await lsleep(300);
-      if (L.streak >= 3 && L.level < 3){ L.level++; L.streak = 0; L.levelUp = true; }
-      if (L.correct >= GOAL) return finishLesson();
+      if (!L.review && L.streak >= 3 && L.level < 3){ L.level++; L.streak = 0; L.levelUp = true; }
+      if (L.correct >= (L.goal || GOAL)) return L.review ? finishReview() : finishLesson();
       runProblem();
     } else {
       p.tries++; L.misses++; L.streak = 0; L.missRow++;
-      if (L.missRow >= 2 && L.level > 1){ L.level--; L.missRow = 0; }
+      if (!L.review && L.missRow >= 2 && L.level > 1){ L.level--; L.missRow = 0; }
+      if (L.review){ S.data.rmiss = S.data.rmiss || {}; S.data.rmiss[L.def.id] = (S.data.rmiss[L.def.id] || 0) + 1; }
       ensureDay().misses++;
       boop(); if (btn){ btn.classList.add('wrong'); if (btn.tagName === 'BUTTON') btn.disabled = true; }
       const h = p.hint(v); logMistake(h.code); save();
@@ -910,6 +953,8 @@ function finishLesson(){
   S.data.stars[d.id] = Math.max(S.data.stars[d.id] || 0, stars);
   const day = ensureDay();
   day.lessons.push({id:d.id, stars, misses:L.misses, at:Date.now()});
+  if (L.mission) day.missionDone = true;
+  $('#fTitle').textContent = L.mission ? 'Mission complete!' : 'You did it!';
   const before = day.minutes;
   day.minutes = Math.min(MAX_MIN, Math.floor(day.lessons.length / LESSONS_PER_BLOCK) * BLOCK_MIN);
   const earned = day.minutes - before;
@@ -929,7 +974,7 @@ function finishLesson(){
   $('#fHome').onclick = () => { $('#finish').classList.remove('on'); goHome(); };
   $('#finish').classList.add('on'); confetti();
   const sw = stars === 3 ? 'three stars' : stars === 2 ? 'two stars' : 'one star';
-  say(`You did it, ${KID}! You got ${sw}!` + (earned ? ` You earned ${earned} minutes of play time!` : full ? '' : ` ${toGo === 1 ? 'One' : 'Two'} more planet${toGo === 1 ? '' : 's'} for play time!`));
+  say((L.mission ? `Mission complete, ${KID}! ` : `You did it, ${KID}! `) + `You got ${sw}!` + (earned ? ` You earned ${earned} minutes of play time!` : full ? '' : ` ${toGo === 1 ? 'One' : 'Two'} more planet${toGo === 1 ? '' : 's'} for play time!`));
 }
 function confetti(){
   for (let i = 0; i < 22; i++){
@@ -958,7 +1003,7 @@ async function warmAnswer(p, ok, btn){
   await ls(ok ? pick(PRAISE) : 'Good try!'); await lsleep(250);
   if (ok){ S.data.tested[L.def.id] = true; L.wi++; if (L.wi < PROBES.length) { save(); return warmNext(); } }
   S.data.placed = true; save();
-  await ls('All set! Tap the glowing planet to start.');
+  await ls("All set! Tap today's mission to start.");
   goHome(true);
 }
 
@@ -979,6 +1024,11 @@ function renderHome(){
     b.onclick = () => { ac(); un ? startLesson(i) : say('Finish the planet before it first!'); };
     g.appendChild(b);
   });
+  const mb = $('#missionBtn'), done = !!ensureDay().missionDone, tgt = LESSONS[missionTarget()];
+  mb.classList.toggle('done', done);
+  mb.innerHTML = done ? `<b>✅ Mission done!</b><small>Play it again?</small>`
+                      : `<b>🚀 Today's Mission</b><small>${knownPlanets().length ? 'Quick review + ' : ''}${tgt.icon} ${tgt.title}</small>`;
+  mb.onclick = () => { ac(); startMission(); };
   $('#totalStars').textContent = Object.values(S.data.stars).reduce((a, b) => a + b, 0);
   $('#playMin').textContent = ensureDay().minutes;
 }
@@ -986,7 +1036,7 @@ function goHome(quiet){
   S.lesson = null; try { speechSynthesis.cancel(); } catch(e){}
   show('home'); renderHome();
   applyTheme();
-  if (!quiet) say(`${TH().greet} Pick a planet!`);
+  if (!quiet) say(`${TH().greet} ` + (ensureDay().missionDone ? 'Pick a planet!' : "Tap today's mission!"));
 }
 
 /* =========================================================
@@ -1087,6 +1137,7 @@ function reportText(){
   const day = ensureDay(); const lines = [];
   lines.push(`123 Rocket — ${KID}`, new Date().toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'}), '');
   lines.push(`Today: ${day.lessons.length} lesson${day.lessons.length === 1 ? '' : 's'} done, ${day.correct} right on first try, ${day.misses} misses`);
+  lines.push(`Today's mission: ${day.missionDone ? 'done ✓' : 'not yet'}`);
   lines.push(`Play time earned: ${day.minutes} min`, '');
   lines.push('Stars:');
   LESSONS.forEach(d => { const s = S.data.stars[d.id] || 0; lines.push(`  ${d.title}: ${s ? '★'.repeat(s) + '☆'.repeat(3 - s) : (S.data.tested[d.id] ? 'already knows ✓' : '—')}`); });
