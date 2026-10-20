@@ -449,6 +449,18 @@ body.theme-christmas .btn.good,body.theme-christmas .btn.bad,body.theme-christma
 .fmap-key{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;font-size:.8rem;font-weight:700;color:var(--muted);margin:4px 0 8px}
 .fmap-key i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 .missed.win span{background:var(--good-soft);color:var(--fb-good)}
+.daily.strat{background:var(--good);box-shadow:0 5px 0 var(--good-deep)}
+.daily.strat:active{box-shadow:0 2px 0 var(--good-deep)}
+.steps{display:flex;flex-direction:column;gap:8px}
+.step{display:flex;align-items:center;gap:10px;background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:8px 14px;font-size:1.45rem;font-weight:700;color:var(--ink)}
+.step .blank{font-size:1.45rem}
+.step.done{border-color:var(--good);color:var(--good)}
+.step.cur{border-color:var(--accent)}
+.step .ok{margin-left:auto;width:22px;height:22px;color:var(--good)}
+.qm{color:var(--muted)}
+.strat-tools{display:flex;gap:10px}
+.strat-tools .btn{width:auto;flex:1;padding:10px 12px;font-size:.9rem}
+@media (min-width:700px){ .step{font-size:2rem;padding:12px 20px;border-radius:18px} .step .blank{font-size:2rem} .step .ok{width:30px;height:30px} .strat-tools .btn{font-size:1.05rem;padding:14px} }
 @media (min-width:700px){ .daily{padding:18px 22px;border-radius:22px;margin-top:14px} .daily b{font-size:1.45rem} .daily small{font-size:.95rem} .daily .di{width:58px;height:58px;border-radius:16px} .daily .di svg{width:32px;height:32px} .daily .dm b{font-size:2rem} .fmap td,.fmap th{width:26px;height:26px} .fmap table{font-size:.8rem} }
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -629,6 +641,7 @@ function factMapHTML(){
 function makeGenerator(L){
   if (L.kind==='daily'){ const list = buildDaily(); let j = 0; return () => list[Math.min(j++, list.length-1)]; }
   if (L.kind==='exam'){ const list = buildExam(); let j = 0; return () => list[Math.min(j++, list.length-1)]; }
+  if (L.kind==='strat'){ let j = 0; return () => { const m = j<4 ? 'guided' : j<7 ? 'hint' : 'solo'; j++; return stratProblem(m); }; }
   let i = 0, bag = [];
   const draw = () => { if (!bag.length) bag = shuffle([...Array(12)].map((_,k)=>k+1)); return bag.pop(); };
   const unlockedTables = () => {
@@ -681,6 +694,57 @@ function makeGenerator(L){
     return finalize(q, step%5===4 ? 'choice' : (step%3===2 ? 'missing' : 'type'));
   };
 }
+/* ---------- Strategy lessons (Greg Tang style) ----------
+   Bigger problems she can't just remember, solved by breaking them into easy facts.
+   mode: 'guided' (step by step) -> 'hint' (idea shown, she works it out) -> 'solo' (hint on request). */
+const STRAT_KINDS = [['split',35],['sub',25],['double',15],['halve',15],['quarter',10]];
+let lastStrat = '';
+function stratProblem(mode){
+  const big = mode !== 'guided';
+  let kind;
+  do {
+    let r = Math.random()*100, i = 0;
+    while (r > STRAT_KINDS[i][1]){ r -= STRAT_KINDS[i][1]; i++; }
+    kind = STRAT_KINDS[i][0];
+  } while (kind === lastStrat);
+  lastStrat = kind;
+  let x, y, name, hint, steps;
+  if (kind==='split'){
+    const a = ri(3,9), T = 10*ri(1, big ? 4 : 2), u = ri(2,9), b = T+u;
+    x = a; y = b; name = 'Break apart';
+    hint = `Break ${b} into ${T} and ${u}. Multiply each part by ${a}, then add.`;
+    steps = [{t:`${a} × ${T}`, a:a*T}, {t:`${a} × ${u}`, a:a*u}, {t:`${a*T} + ${a*u}`, a:a*b}];
+  } else if (kind==='sub'){
+    const a = ri(3,9), R = 10*ri(2, big ? 5 : 3), d = Math.random()<.65 ? 1 : 2, b = R-d;
+    x = a; y = b; name = 'Subtract to add';
+    if (d===1){
+      hint = `${b} is one less than ${R}. Do ${a} × ${R}, then take away one ${a}.`;
+      steps = [{t:`${a} × ${R}`, a:a*R}, {t:`${a*R} − ${a}`, a:a*b}];
+    } else {
+      hint = `${b} is ${R} − 2. Do ${a} × ${R}, then take away ${a} × 2.`;
+      steps = [{t:`${a} × ${R}`, a:a*R}, {t:`${a} × 2`, a:a*2}, {t:`${a*R} − ${a*2}`, a:a*b}];
+    }
+  } else if (kind==='double'){
+    const a = Math.random()<.5 ? 4 : 8, b = a===4 ? ri(13, big ? 39 : 25) : ri(12, big ? 24 : 16);
+    x = a; y = b; name = a===4 ? 'Double, double' : 'Double three times';
+    hint = a===4 ? `× 4 is double, then double again. Start with ${b}.` : `× 8 is double, double, double. Start with ${b}.`;
+    steps = [{t:`Double ${b}`, a:2*b}, {t:`Double ${2*b}`, a:4*b}];
+    if (a===8) steps.push({t:`Double ${4*b}`, a:8*b});
+  } else if (kind==='halve'){
+    const b = 2*ri(6, big ? 24 : 12);
+    x = 5; y = b; name = 'Halve it';
+    hint = `× 5 is half of × 10. Take half of ${b}, then times 10.`;
+    steps = [{t:`Half of ${b}`, a:b/2}, {t:`${b/2} × 10`, a:5*b}];
+  } else {
+    const b = 4*ri(3, big ? 9 : 5);
+    x = 25; y = b; name = 'Quarters';
+    hint = `Four 25s make 100. How many 4s are in ${b}? Then times 100.`;
+    steps = [{t:`${b} ÷ 4`, a:b/4}, {t:`${b/4} × 100`, a:25*b}];
+  }
+  return {kind:'strat', mode, x, y, r:x*y, name, hint, steps, si:0,
+          summary: steps.map(s => `${s.t} = ${s.a}`).join(', then ')};
+}
+
 function weakFacts(){
   return Object.entries(S.facts).filter(([,v])=>v.w>0)
     .map(([k,v]) => ({k, f:k.split(' × ').map(Number), w:v.w, c:v.c}))
@@ -1127,6 +1191,7 @@ function renderHome(scrollToCurrent=true){
         <div><h3>${S.name ? esc(S.name)+'’s daily goal' : 'Daily goal'}</h3><p class="num">${Math.min(txp,S.goal)} / ${S.goal} XP today${txp>=S.goal?' · done!':''}</p></div>
       </section>
       <button class="daily" id="daily"><span class="di">${I.mix}</span><span class="dt"><b>Daily Mix</b><small>${S.dailyLast && dayKey(new Date(S.dailyLast))===dayKey() ? 'Done today · go again anytime' : DAILY_N + ' questions picked for you'}</small></span><span class="dm"><b class="num">${masteredCount()}</b><small>of 78 memorized</small></span></button>
+      <button class="daily strat" id="strat"><span class="di">${I.bulb}</span><span class="dt"><b>Strategy</b><small>Big problems, broken into easy ones</small></span><span class="dm"><b class="num">${S.stratDone||0}</b><small>lessons done</small></span></button>
       <div class="quick">
         <button id="weak" ${weakCount?'':'disabled'}><span class="qi" style="background:var(--bad-soft);color:var(--bad)">${I.target}</span><span><b>Fix mistakes</b><small>${weakCount ? weakCount + (weakCount===1 ? ' fact' : ' facts') : 'None yet'}</small></span></button>
         <button id="all"><span class="qi" style="background:var(--accent-soft);color:var(--accent)">${I.bolt}</span><span><b>Review</b><small>Tables so far</small></span></button>
@@ -1186,6 +1251,7 @@ function renderHome(scrollToCurrent=true){
   };
   scr.querySelector('#exam').appendChild(ex);
   scr.querySelector('#daily').onclick = () => startLesson({id:'daily', kind:'daily', name:'Daily Mix'});
+  scr.querySelector('#strat').onclick = () => startLesson({id:'strat', kind:'strat', name:'Strategy'});
   scr.querySelector('#weak').onclick = () => startLesson({id:'weak',kind:'weak',name:'Fix mistakes'});
   scr.querySelector('#all').onclick = () => startLesson({id:'review',kind:'review',name:'Review'});
   scr.querySelector('#dad').onclick = openReport;
@@ -1489,6 +1555,7 @@ function startLesson(L){
     const due = retries.findIndex(r => r.due <= answered);
     if (due > -1){ q = retries.splice(due,1)[0].q; } else q = gen();
     input = ''; phase = 'answer'; qStart = performance.now();
+    if (q.kind==='strat') return renderStrat();
     let title, body, extra = '';
     if (q.kind==='skip'){
       title = `Count by ${q.n}s. What comes next?`;
@@ -1524,6 +1591,86 @@ function startLesson(L){
     setKeys(onKey);
   }
 
+  /* ----- Strategy problems: one screen per step ----- */
+  function renderStrat(){
+    const guided = q.mode==='guided';
+    q.ans = guided ? q.steps[q.si].a : q.r;
+    const title = guided ? (q.retry ? 'Let’s walk through that one' : 'Work it out step by step')
+      : q.mode==='hint' ? 'Use the tip to work it out' : 'Work it out your way';
+    const body = `<div class="bubble num" id="bubble"><span>${q.x}</span><span class="op">×</span><span>${q.y}</span><span class="op">=</span>${guided ? '<span class="qm">?</span>' : blankHTML()}</div>`;
+    let extra = '';
+    if (guided || q.mode==='hint' || q.showHint) extra += `<div class="helper"><b>${esc(q.name)}</b><span>${esc(q.hint)}</span></div>`;
+    if (guided){
+      extra += '<div class="steps">' + q.steps.slice(0, q.si+1).map((s,i) => i < q.si
+        ? `<div class="step done num"><span>${esc(s.t)} = ${s.a}</span><span class="ok">${I.check}</span></div>`
+        : `<div class="step cur num"><span>${esc(s.t)} =</span>${blankHTML()}</div>`).join('') + '</div>';
+    } else {
+      extra += `<div class="strat-tools">${q.showHint || q.mode==='hint' ? '' : '<button class="btn ghost" id="hintb">Hint</button>'}<button class="btn ghost" id="stepsb">Show steps</button></div>`;
+    }
+    stage.innerHTML = `<div><div class="combo">${combo>=3?combo+' in a row':''}</div><h2 class="kicker">${title}</h2></div>
+      <div class="prompt-row">${pip(combo>=3?'wow':'happy')}${body}</div>${extra}<div id="ans" class="keypad"></div>`;
+    const hb = stage.querySelector('#hintb'); if (hb) hb.onclick = () => { sfx.tap(); q.showHint = true; renderStrat(); };
+    const sb = stage.querySelector('#stepsb'); if (sb) sb.onclick = () => { sfx.tap(); q.mode = 'guided'; q.si = 0; q.helped = true; input = ''; renderStrat(); };
+    const ans = stage.querySelector('#ans');
+    [1,2,3,4,5,6,7,8,9,'C',0,'⌫'].forEach(k => {
+      const b = $(`<button class="key num" data-k="${k}" aria-label="${k==='⌫'?'Delete':k==='C'?'Clear':k}">${k==='⌫'?I.back:k}</button>`);
+      b.onclick = () => press(k); ans.appendChild(b);
+    });
+    foot.className = 'lesson-foot';
+    foot.innerHTML = `<button class="btn" id="check" disabled>Check</button>`;
+    foot.querySelector('#check').onclick = check;
+    refreshBlank();
+    setBar(false);
+    setKeys(onKey);
+  }
+  function queueStratRetry(){
+    if (q.queued) return;
+    q.queued = true;
+    retries.push({q: Object.assign({}, q, {mode:'guided', si:0, retry:true, showHint:false, helped:false}), due: answered + 2});
+  }
+  function checkStrat(ok){
+    answered++;
+    const guided = q.mode==='guided', last = !guided || q.si === q.steps.length-1;
+    const label = `${q.x} × ${q.y}`, full = `${label} = ${q.r}`;
+    if (ok && !last){              // a middle step: tick it and move on
+      sfx.good();
+      const row = stage.querySelector('.step.cur'); if (row) row.classList.add('pop');
+      setTimeout(() => { q.si++; input = ''; phase = 'answer'; renderStrat(); }, 450);
+      return;
+    }
+    let go;
+    if (ok){
+      progress++; combo++;
+      if (!q.retry && !q.helped) firstTryRight++;
+      sfx.good();
+      const bub = stage.querySelector('#bubble'); bub.classList.add('pop');
+      const br = bub.getBoundingClientRect(); burst(br.left + br.width/2, br.top + br.height/2, 16);
+      const TP = TH(), PR = TP ? TP.praise : ['Nice!','Correct!','Great job!','You got it!','Awesome!'];
+      const praise = combo>=5 ? (TP ? TP.fire : 'On fire!') : PR[ri(0, PR.length-1)];
+      foot.className = 'lesson-foot good';
+      foot.innerHTML = `<div class="fb"><div class="badge">${I.check}</div><div><h4>${praise}</h4><p class="num">${full}</p>${guided ? '' : `<p class="how">${esc(q.summary)}.</p>`}</div></div><button class="btn good" id="go">Continue</button>`;
+      go = next;
+    } else {
+      wrongs++; combo = 0;
+      const lost = Math.min(1, progress); progress -= lost;
+      missed.set(label, (missed.get(label)||0)+1);
+      if (!q.retry) queueStratRetry();
+      sfx.bad();
+      (stage.querySelector('.step.cur') || stage.querySelector('#bubble')).classList.add('shake');
+      const m = stage.querySelector('.mascot'); if (m) m.outerHTML = pip('sad');
+      const s = guided ? q.steps[q.si] : null;
+      const head = `${TH() ? TH().wrong : 'Not quite'}${lost?` · −${lost}`:''}`;
+      const line = guided ? `${s.t} = ${s.a}` : `Answer: ${full}`;
+      const how = guided ? (last ? 'That finishes it. You’ll get another one like it soon.' : 'Fill that in and keep going.') : q.summary + '.';
+      foot.className = 'lesson-foot bad';
+      foot.innerHTML = `<div class="fb"><div class="badge">${I.x}</div><div><h4>${head}</h4><p class="num">${line}</p><p class="how">${esc(how)}</p></div></div><button class="btn bad" id="go">Got it</button>`;
+      go = (guided && !last) ? () => { q.si++; input = ''; phase = 'answer'; renderStrat(); } : next;
+    }
+    setBar(!ok);
+    const btn = foot.querySelector('#go');
+    btn.onclick = go; btn.focus({preventScroll:true});
+  }
+
   function refreshBlank(){
     const b = stage.querySelector('#blank');
     if (b){ b.textContent = input===''?'0':input; b.classList.toggle('empty', input===''); }
@@ -1547,6 +1694,7 @@ function startLesson(L){
     if (phase!=='answer' || input==='') return;
     phase = 'feedback';
     const ok = Number(input)===q.ans;
+    if (q.kind==='strat') return checkStrat(ok);
     const k = factKey(q.f), rec = S.facts[k] || {c:0,w:0};
     if (q.kind==='fact'){
       const ms = performance.now() - qStart, today = dayKey();
@@ -1628,6 +1776,7 @@ function startLesson(L){
       S.streak.last = today;
     }
     if (L.unit) S.done[L.id] = true;
+    if (L.kind==='strat') S.stratDone = (S.stratDone||0) + 1;
     const label = L.unit ? `${L.unit}s ${L.name}` : L.name;
     S.log.push({t:Date.now(), label, acc:accuracy, wrong:wrongs, secs});
     if (S.log.length > 200) S.log = S.log.slice(-200);
