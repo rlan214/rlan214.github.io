@@ -346,9 +346,97 @@ ALT["Lying Leg Curl"]=["Dumbbell Lying Leg Curl","Seated Leg Curl","Swiss Ball L
 const GEARNAME=Object.fromEntries(GEAR.map(([k,l])=>[k,l.toLowerCase()]));
 function missingGear(n){ const g=gear(); return needs(n).filter(k=>g[k]===false).map(k=>GEARNAME[k].replace(" / pec deck / row machines","")) }
 const HEAVY=["barbell","cable","machine","smith","legpress","legmach","hyper","trap"];
-/* manual swap > dumbbell mode > missing gear > original */
+/* ===================== KNEE MODE =====================
+   A switch, not a rewrite: the program above is untouched. With Knee mode on, moves that load
+   the knee or need you standing/kneeling are shown as seated/lying stand-ins. Stand-ins log under
+   their own names, so your normal lifts' history is waiting when you switch it off. */
+const KNEE_RULES=[
+ ["glute",/Hip Thrust|Hip Abductions|Hyperextensions \(glute|Bulgarian Split Squat \(glute/,"12-15/side"],
+ ["quad",/Squat|Lunge|Step-Ups|Leg Press|Leg Extension|Pistol/,"12-15/side"],
+ ["hinge",/Deadlift|Hyperextensions \(back/,"12-15"],
+ ["legcurl",/Leg Curl|Hamstring Curl/,"12-15/side"],
+ ["calf",/Calf Raise/,"15-20/side"],
+ ["ohp",/Standing (Barbell Overhead|Dumbbell Shoulder) Press|Pike Push-Ups/],
+ ["row",/Barbell Row|Half-Kneeling Cable Row|Inverted Row|Chest-Supported Dumbbell Row \(lat|Dumbbell Chest-Supported Row/],
+ ["vpull",/Pull-Ups|Chin-Ups|Kneeling One-Arm Lat Pulldown/],
+ ["face",/Face Pulls|Rear Delt Cable Row|Chest-Supported DB Rear Delt Row/],
+ ["lat",/Cable Lateral Raise|Lean-In Lateral Raise|^Dumbbell Lateral Raise/],
+ ["tri",/Pushdowns|Overhead Rope Extension|Towel Triceps/],
+ ["bi",/Cable Curl|Towel Biceps|Hammer Curls|Spider Curls/],
+ ["fly",/Standing High-to-Low Cable Fly/],
+ ["press",/^Banded Push-Ups/],
+ ["cgpress",/Close-Grip Push-Ups|Diamond Push-Ups/],
+ ["plank",/RKC Plank|Bird Dog/,"8/side"],
+ ["side",/Side Plank|Palloff Press/,"10/side"],
+ ["hang",/Hanging Leg Raise/,"10-15"],
+ ["crunch",/^Cable Crunch/],
+ ["scap",/Dead Hang|Wall Slides/,"12-15"]
+];
+const KNEE_POOL={
+ quad:["Straight-Leg Raise","Side-Lying Hip Abduction","Side-Lying Hip Adduction"],
+ glute:["Side-Lying Hip Abduction","Reverse Hyperextensions","Side-Lying Hip Adduction"],
+ hinge:["Reverse Hyperextensions","Side-Lying Hip Abduction"],
+ legcurl:["Side-Lying Hip Adduction","Reverse Hyperextensions","Straight-Leg Raise"],
+ calf:["Seated Banded Calf Press"],
+ ohp:["Seated Dumbbell Shoulder Press","Seated Neutral-Grip DB Press (shoulder friendly)"],
+ row:["Seated Cable Row (mid/upper back)","Lat-Focused Cable Row"],
+ vpull:["Lat Pulldown","Seated Banded Lat Pulldown"],
+ face:["Seated Face Pulls","Seated Banded Pull-Aparts"],
+ lat:["Seated Dumbbell Lateral Raise","Lying Incline Lateral Raise"],
+ tri:["Incline Dumbbell Overhead Extension","Seated Dumbbell Overhead Extension"],
+ bi:["Seated Dumbbell Curl","Seated Hammer Curls","Incline Dumbbell Curl"],
+ fly:["Seated Mid-Chest Cable Fly","Dumbbell Fly"],
+ press:["Flat Dumbbell Press","Low Incline Dumbbell Press"],
+ cgpress:["Close-Grip DB Press","Seated Dumbbell Overhead Extension"],
+ plank:["Dead Bug","Seated Pallof Press"],
+ side:["Seated Pallof Press","Dead Bug"],
+ hang:["Lying Leg Raise","Reverse Crunch"],
+ crunch:["Weighted Crunch","Reverse Crunch"],
+ scap:["Seated Banded Pull-Aparts","Prone Y Raise"]
+};
+const KNEE_LOWER=new Set(["quad","glute","hinge","legcurl","calf"]);
+const KNEE_FALLBACK=["Lying Leg Raise","Dead Bug","Seated Pallof Press"];
+function kneeCat(n){ const r=KNEE_RULES.find(([,re])=>re.test(n)); return r?{cat:r[0],r:r[2]}:null }
+function kneeMode(){ return !!settings().kneeMode }
+function kneeify(w){
+  if(!kneeMode()||!w) return w;
+  const used=new Set(w.ex.filter(e=>!kneeCat(e.n)).map(e=>e.n));
+  const ex=w.ex.map(e=>{
+    const k=kneeCat(e.n); if(!k) return e;
+    const pool=KNEE_POOL[k.cat];
+    const pick=pool.find(n=>!used.has(n)) || (KNEE_LOWER.has(k.cat)? KNEE_FALLBACK.find(n=>!used.has(n)) : null) || pool[0];
+    used.add(pick);
+    let r=e.r;
+    if(k.r){ r=/^RP30/.test(e.r)? "RP30"+(/side/.test(k.r)?"/side":"") : k.r }
+    else if(/^1-3 short|\+F$/.test(e.r)) r="10-12";
+    const rest=KNEE_LOWER.has(k.cat)&&!e.ss? Math.min(e.rest||60,60) : e.rest;
+    return Object.assign({},e,{r,rest,kn:pick,kcat:k.cat,note:0});
+  });
+  return Object.assign({},w,{ex,knee:ex.some(e=>e.kn)});
+}
+const KNEE_WARM=[["Ankle pumps","20 / side"],["Quad sets (tighten thigh, 5 s hold)","10 / side"],["Glute squeezes (5 s hold)","10"],["Dead bug","5 / side"]];
+const KNEE_STRETCH=[["Cat-cow (on hands and good knee, or seated)","60 s"],["Seated thoracic rotations","30 s / side"],["Lying hamstring stretch (strap, leg straight)","30 s / side"],["Doorway chest stretch (seated)","30 s / side"],["Wall slides (seated against a wall)","60 s"]];
+function stretchRows(){ return kneeMode()? KNEE_STRETCH : STRETCH }
+Object.assign(CUE,{
+ "Straight-Leg Raise":"Lie on your back, good knee bent. Tighten the thigh of the straight leg, lift it to the height of the bent knee, lower slowly. Ankle weight only once your PT says so.",
+ "Side-Lying Hip Abduction":"Lie on your side, bottom knee bent, top leg straight and slightly behind you. Lift with the side of the hip, toes pointing forward, lower slowly.",
+ "Side-Lying Hip Adduction":"Lie on your side, top leg bent and resting in front. Lift the straight bottom leg a few inches using the inner thigh, pause, lower.",
+ "Reverse Hyperextensions":"Lie face down on a flat bench, hips at the edge, hold the bench. Keep both legs straight and squeeze glutes to lift them to hip height. No knee bend.",
+ "Seated Banded Calf Press":"Sit with the leg straight, band around the ball of the foot. Point the toes against the band, pause, return slowly. Knee stays straight and unloaded.",
+ "Seated Face Pulls":"Sit on a bench facing the cable at face height, rope handle. Pull to your forehead, elbows high, squeeze rear delts.",
+ "Seated Banded Pull-Aparts":"Sit tall, arms straight in front, pull the band apart to your chest by squeezing your shoulder blades.",
+ "Seated Dumbbell Lateral Raise":"Sit at the end of a bench, slight forward lean, raise in the scapular plane, no swinging.",
+ "Seated Dumbbell Overhead Extension":"Sit with back support, one dumbbell in both hands overhead, lower behind the head with elbows pointing up, extend.",
+ "Seated Hammer Curls":"Sit tall with back support, palms facing in, elbows pinned, no swinging.",
+ "Seated Banded Lat Pulldown":"Band anchored high, sit on a bench below it. Pull elbows down to your sides, chest up.",
+ "Seated Pallof Press":"Sit side-on to a cable or band at chest height. Press straight out and hold 2 s without letting it twist you.",
+ "Lying Leg Raise":"Lie flat, hands under hips, legs straight. Raise to vertical, lower slowly without arching. Bend the knees if the injured leg complains.",
+ "Prone Y Raise":"Lie face down on an incline bench or the floor, thumbs up, raise arms into a Y, squeeze, lower."
+});
+/* knee mode > manual swap > dumbbell mode > missing gear > original */
 function resolveName(e){
   const s=settings(), alts=ALT[e.n]||[];
+  if(e.kn){ const m=s.swaps["knee|"+s.split+"|"+e.n]; return {name:m||e.kn,why:"Knee mode"} }
   const manual=s.swaps[s.split+"|"+e.n];
   if(manual) return {name:manual,why:"manual"};
   if(s.dbMode && needs(e.n).some(k=>HEAVY.includes(k))){
@@ -564,13 +652,14 @@ const slug = n=>n.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 function settings(){ const s=Object.assign({split:"4",ver:"1",start:TODAY,verStart:TODAY,wt:"17:30",wake:"06:30",bed:"22:30",bw:"",sched:null,swaps:{}},get("settings")); s.swaps=s.swaps||{}; return s }
 function prog(){ const s=settings(); return PROGRAMS[s.split] }
 function schedule(){ const s=settings(), p=prog(); const sc={}; for(let d=0;d<7;d++){ sc[d]= s.sched&&s.sched[s.split]&&s.sched[s.split][d]!==undefined ? s.sched[s.split][d] : (p.sched[d]||"") } return sc }
-function workout(key){ const s=settings(), p=prog(); if(EXTRA[key]) return EXTRA[key]; const len=s.len||"full"; const ex= len==="30"? TS30[s.split][key] : len==="15"? TS15[s.split][key] : p.v[s.ver][key]; return {name:p.names[key]+(len==="full"?"":" · "+len+" min"), ex} }
+function workout(key){ return kneeify(workout0(key)) }
+function workout0(key){ const s=settings(), p=prog(); if(EXTRA[key]) return EXTRA[key]; const len=s.len||"full"; const ex= len==="30"? TS30[s.split][key] : len==="15"? TS15[s.split][key] : p.v[s.ver][key]; return {name:p.names[key]+(len==="full"?"":" · "+len+" min"), ex} }
 function warmType(key){ if(prog()===PROGRAMS[3]) return "both"; return /^L/.test(key)?"lower":"upper" }
 function weeksSince(d){ const st=new Date(d+"T00:00"); const n=Math.floor((new Date(TODAY+"T00:00")-st)/864e5); return n<0?1:Math.floor(n/7)+1 }
 function weekNo(){ return weeksSince(settings().start) }
 function isDeload(){ return weekNo()%9===0 }
 function dayPlan(date){ const d=new Date(date+"T00:00").getDay(), p=prog(), sc=schedule(); const w=sc[d]; const extras=[]; if(p.abs[0]===d) extras.push("abs1"); if(p.abs[1]===d) extras.push("abs2"); if(p.prehab.includes(d)) extras.push("prehab"); return {w,extras} }
-function dayChecks(date){ const p=dayPlan(date); const L=[]; if(p.w) L.push("w_"+p.w); p.extras.forEach(e=>L.push("x_"+e)); L.push("steps","stretch","cals","protein","logwt","creatine","fishoil","vitd"); return L }
+function dayChecks(date){ const p=dayPlan(date); const L=[]; if(p.w) L.push("w_"+p.w); p.extras.forEach(e=>L.push("x_"+e)); if(!kneeMode()) L.push("steps"); L.push("stretch","cals","protein","logwt","creatine","fishoil","vitd"); return L }
 function dayScore(date){ const r=get("day-"+date); const c=Object.assign({},r.c||{}); if(+r.steps>=8000) c.steps=true; if(r.wt) c.logwt=true; const L=dayChecks(date); return {n:L.filter(k=>c[k]).length,t:L.length,c} }
 function parseReps(r){
   if(/^RP30/.test(r)) return {rp:1,lo:30,hi:30,label:"30 total · rest-pause"+(/side/.test(r)?" / side":"")};
@@ -729,7 +818,7 @@ function viewTrain(){
   let wu="";
   if(!EXTRA[wk]){
     const wt=warmType(wk);
-    const rows=[...(wt!=="lower"?WARM.upper:[]),...(wt!=="upper"?WARM.lower:[])];
+    const rows=[...(wt!=="lower"?WARM.upper:[]),...(wt!=="upper"?(kneeMode()?KNEE_WARM:WARM.lower):[])];
     wu=`<details class="g"><summary><h3>Warm-up · 5-10 min</h3></summary><div class="gb">
       <p class="small muted">Optional: 5 min easy cardio first if you've been sitting or it's cold.</p>
       <div class="tbl"><table>${rows.map(r=>`<tr><td>${r[0]}</td><td class="mono">${r[1]}</td></tr>`).join("")}</table></div>
@@ -750,10 +839,12 @@ function viewTrain(){
   return `<h2>Workouts</h2>
   <div class="row between" style="margin-bottom:10px"><span class="small muted">${p.label} · Version ${s.ver} · week ${verWk} on this version</span><button type="button" class="btn sm ghost" data-tab="guide">Change</button></div>
   <button type="button" class="check ${s.dbMode?"on":""}" data-dbmode="1" style="margin-bottom:10px"><span class="box">✓</span><span><div class="t" style="text-decoration:none;color:var(--ink)">Dumbbell mode</div><div class="s">Swap barbell, cable and machine lifts for their dumbbell alternatives</div></span></button>
+  <button type="button" class="check ${s.kneeMode?"on":""}" data-kneemode="1" style="margin-bottom:10px"><span class="box">✓</span><span><div class="t" style="text-decoration:none;color:var(--ink)">Knee mode</div><div class="s">Seated/lying stand-ins for anything that loads the knee or needs you standing. Turn off when you're cleared; your normal program and logs are untouched.</div></span></button>
   <div class="seg">${seg}</div>
   ${lenSeg}
   <div class="stack" style="margin-top:12px">
     ${isDeload()?`<div class="banner">Deload week: half the sets, ~20% lighter.</div>`:""}
+    ${w.knee?`<div class="banner">Knee mode: do your PT exercises first (<a href="https://rlan214.github.io/recovery-daily/" target="_blank" rel="noopener">Recovery Daily</a>). Skip anything that hurts or your PT hasn't cleared yet.</div>`:""}
     ${wu}${note}
     ${w.ex.map((e,i)=>exCard(wk,e,i)).join("")}
   </div>
@@ -762,7 +853,7 @@ function viewTrain(){
 
 function exCard(wk,e,i){
   const s=settings();
-  const swapKey=s.split+"|"+e.n;
+  const swapKey=(e.kn?"knee|":"")+s.split+"|"+e.n;
   const res = resolveName(e), name=res.name;
   const pr = parseReps(e.r);
   const key = "ex-"+slug(name)+(pr.rp?"-rp":"");
@@ -782,13 +873,13 @@ function exCard(wk,e,i){
       <input type="number" inputmode="numeric" aria-label="Set ${j+1} ${pr.unit||"reps"}" data-set="${key}|${j}|1" value="${t[1]??""}" placeholder="${pv[1]??(pr.unit?"sec":"reps")}">`;
   }
   const a=advice(name,pr,hist);
-  const alts=ALT[e.n]||[];
+  const alts=e.kn? KNEE_POOL[e.kcat].filter(n=>n!==e.kn) : (ALT[e.n]||[]);
   const cue = name===e.n ? (e.note||CUE[e.n]||"") : (CUE[name]||"Same sets, reps and rest as the original.");
   return `<div class="card ex">
     <div class="exh" data-open="${wk+i}">
       <div class="exn">${e.ss?"":"E"+(i+1)}</div>
       <div style="flex:1;min-width:0">
-        ${name!==e.n?`<div class="swapped">${res.why==="manual"?"Swapped for":res.why==="Dumbbell mode"?"Dumbbell mode · replaces":"Your gear · replaces"} ${esc(e.n)}</div>`:""}
+        ${name!==e.n?`<div class="swapped">${res.why==="Knee mode"?"Knee mode · replaces":res.why==="manual"?"Swapped for":res.why==="Dumbbell mode"?"Dumbbell mode · replaces":"Your gear · replaces"} ${esc(e.n)}</div>`:""}
         <h3>${e.ss?`<span class="sstag">${e.ss}</span>`:""}${esc(name)}</h3>
         <div class="meta">${pr.rp?pr.label+" · 15-20s mini-rests":(nSets+" × "+pr.label+" · rest "+(e.ss&&e.rest===SS?"1 min between":e.ss&&e.rest===30?"30s between":fmtRest(e.rest)))}</div>
       </div>
@@ -806,7 +897,7 @@ function exCard(wk,e,i){
       </div>
       ${ui.swapOpen[wk+i]?`<div class="stack small">
         <div class="label">Swap ${esc(e.n)} for (logs under the new name)</div>
-        <div class="row" style="gap:6px">${[e.n,...alts].map(al=>`<button type="button" class="btn sm ${al===name?"primary":""}" data-swap="${esc(swapKey)}" data-alt="${esc(al)}">${esc(al)}${al===e.n?" (original)":""}${needs(al).includes("db")?" · DB":""}${canDo(al)?"":` <span style="opacity:.7;font-weight:600">· needs ${esc(missingGear(al).join(", "))}</span>`}</button>`).join("")}</div>
+        <div class="row" style="gap:6px">${(e.kn?[e.kn,...alts]:[e.n,...alts]).map(al=>`<button type="button" class="btn sm ${al===name?"primary":""}" data-swap="${esc(swapKey)}" data-alt="${esc(al)}">${esc(al)}${al===e.n?" (original)":al===e.kn?" (knee default)":""}${needs(al).includes("db")?" · DB":""}${canDo(al)?"":` <span style="opacity:.7;font-weight:600">· needs ${esc(missingGear(al).join(", "))}</span>`}</button>`).join("")}</div>
         <p class="small muted">Everything's tappable, including machine moves for when you're at a gym.</p>
         ${s.swaps[swapKey]?`<button type="button" class="btn sm ghost" data-swap="${esc(swapKey)}" data-alt="${esc(e.n)}" data-clear="1">Clear my pick (back to auto)</button>`:""}
       </div>`:""}
@@ -910,7 +1001,7 @@ function viewGuide(){
 
   <h2>Rest days</h2>
   <div class="stack">
-  ${g("Daily 5-min stretch",`<div class="tbl"><table>${STRETCH.map(r=>`<tr><td>${r[0]}</td><td class="mono">${r[1]}</td></tr>`).join("")}</table></div><p class="muted">As many quality reps as you can in each slot. Once a day, whenever you'll do it.</p>`)}
+  ${g("Daily 5-min stretch",`<div class="tbl"><table>${stretchRows().map(r=>`<tr><td>${r[0]}</td><td class="mono">${r[1]}</td></tr>`).join("")}</table></div><p class="muted">As many quality reps as you can in each slot. Once a day, whenever you'll do it.</p>`)}
   ${g("Active rest",`<p>Don't sit all day: extra walk for steps, foam rolling, a hobby or sport. Do prehab and abs here. Optional cool-down after leg days: 5 min foam rolling + 5 min easy bike.</p>`)}
   ${g("Optional HIIT",`<p>Not in the 2.0 plan (steps do the job), but if you like it: on a bike, 30 s hard / 60-90 s easy × 6, once a week, never right before lifting.</p>`)}
   </div>
@@ -952,6 +1043,7 @@ document.addEventListener("click",async ev=>{
   if(t.dataset.swapopen){ ui.swapOpen[t.dataset.swapopen]=!ui.swapOpen[t.dataset.swapopen]; render(); return }
   if(t.dataset.swap){ const s=get("settings"); s.swaps=s.swaps||{}; if(t.dataset.clear) delete s.swaps[t.dataset.swap]; else s.swaps[t.dataset.swap]=t.dataset.alt; put("settings",s); render(); return }
   if(t.dataset.len){ const s=get("settings"); s.len=t.dataset.len; put("settings",s); render(); return }
+  if(t.dataset.kneemode!==undefined){ const s=get("settings"); s.kneeMode=!settings().kneeMode; put("settings",s); render(); toast(s.kneeMode?"Knee mode on":"Knee mode off · back to the full program"); return }
   if(t.dataset.dbmode!==undefined){ const s=get("settings"); s.dbMode=!settings().dbMode; put("settings",s); render(); toast(s.dbMode?"Dumbbell mode on":"Dumbbell mode off"); return }
   if(t.dataset.gear){ const s=get("settings"); s.gear=Object.assign({},s.gear||{}); s.gear[t.dataset.gear]= gear()[t.dataset.gear]===false; put("settings",s); render(); return }
   if(t.dataset.timer){ startTimer(+t.dataset.timer); return }
