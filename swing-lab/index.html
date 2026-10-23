@@ -99,6 +99,14 @@ ol.tips li{margin-bottom:4px}
 .hitem.open .detail{display:block}
 .badge{font-size:11px;background:#facc15;color:#422006;border-radius:6px;padding:2px 6px;font-weight:800;margin-left:6px}
 .empty{color:var(--muted);text-align:center;padding:40px 0}
+.checks{margin:0;padding:0;list-style:none}
+.checks li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.checks li:first-child{border-top:0}
+.checks .tg{color:var(--muted);white-space:nowrap;font-size:13px}
+.checks .grp{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);padding-top:12px;border-top:0;justify-content:flex-start}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:10px}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
 .loading{position:absolute;inset:0;display:grid;place-items:center;z-index:9;background:#000c;font-weight:700;text-align:center;padding:20px}
 </style>
 </head>
@@ -116,6 +124,13 @@ ol.tips li{margin-bottom:4px}
     <h3>Camera view</h3>
     <div class="seg" data-key="view"><button data-val="face">Face-on</button><button data-val="dtl">Down-the-line</button></div>
     <p class="hint" id="viewHint"></p>
+  </div>
+
+  <div class="card">
+    <h3>What it checks</h3>
+    <ul class="checks" id="checkList"></ul>
+    <div class="legend"><span><i style="background:var(--good)"></i>on target</span><span><i style="background:var(--warn)"></i>close</span><span><i style="background:var(--bad)"></i>fix this</span></div>
+    <p class="hint">Score = average of all checks (green 1, yellow ½, red 0). The worst one is read out as your main fix.</p>
   </div>
 
   <div class="row2">
@@ -214,12 +229,43 @@ const VIEW_HINTS = {
   face: "Phone faces your chest, straight across from you. Measures head and hip sway, weight shift, finish balance and tempo.",
   dtl: "Phone behind you, on your hand line, looking at the target. Measures posture, early extension, head height, knee flex and tempo."
 };
+const CHECKS = {
+  both: [
+    ["Tempo (backswing : downswing)", "≈ 3 : 1"],
+    ["Head height at impact", "within 2\""],
+    ["Lead arm at the top", "≥ 150° (fairly straight)"],
+    ["Full finish", "hands above shoulders"]
+  ],
+  face: [
+    ["Head move in backswing", "0–4\" back"],
+    ["Head at impact", "at or behind address"],
+    ["Hip sway at the top", "< 3\""],
+    ["Hip shift at impact", "1.5–6\" toward target"],
+    ["Weight at finish", "≥ 75% on lead foot"]
+  ],
+  dtl: [
+    ["Spine tilt at address", "28–45°"],
+    ["Posture held at the top", "within ±6°"],
+    ["Posture held at impact", "within 5°"],
+    ["Early extension (hips toward ball)", "< 1.5\""],
+    ["Knee flex at address", "145–165°"]
+  ]
+};
+function paintChecks(){
+  const v = db.settings.view;
+  const row = ([t, g]) => `<li><span>${t}</span><span class="tg">${g}</span></li>`;
+  $("checkList").innerHTML =
+    `<li class="grp">Every swing</li>` + CHECKS.both.map(row).join("") +
+    `<li class="grp">${v === "face" ? "Face-on view" : "Down-the-line view"}</li>` + CHECKS[v].map(row).join("") +
+    (db.settings.ball === "on" ? `<li class="grp">Foam ball</li>` + row(v === "face" ? ["Launch angle + rough ball speed", "info only"] : ["Start line (left / straight / right)", "info only"]) : "");
+}
 function paintSegs(){
   document.querySelectorAll(".seg").forEach(seg => {
     const k = seg.dataset.key;
     seg.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.val === db.settings[k]));
   });
   $("viewHint").textContent = VIEW_HINTS[db.settings.view];
+  paintChecks();
 }
 document.querySelectorAll(".seg").forEach(seg => seg.addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
