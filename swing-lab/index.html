@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b1410">
+<title>Swing Lab</title>
+<style>
+:root{
+  --bg:#0b1410; --panel:#13201a; --panel2:#1a2b23; --line:#2a3d33;
+  --text:#eef5f0; --muted:#9db3a6; --accent:#4ade80; --accent2:#22c55e;
+  --good:#4ade80; --warn:#fbbf24; --bad:#f87171; --lead:#4ade80; --trail:#e2e8f0;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Segoe UI,Roboto,sans-serif}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+.screen{display:none;min-height:100%}
+.screen.active{display:block}
+
+/* ---------- setup ---------- */
+#setup{padding:calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 24px);max-width:560px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.brand svg{width:44px;height:44px}
+h1{font-size:28px;margin:0;letter-spacing:-.5px}
+.sub{color:var(--muted);margin:0 0 20px;font-size:15px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.seg{display:flex;background:var(--bg);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;padding:10px 6px;border-radius:9px;background:transparent;color:var(--muted);font-weight:600;font-size:14px}
+.seg button.on{background:var(--panel2);color:var(--text);box-shadow:inset 0 0 0 1px var(--accent2)}
+.hint{color:var(--muted);font-size:13px;margin:8px 2px 0;line-height:1.4}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.big{width:100%;padding:16px;border-radius:14px;background:var(--accent);color:#052e16;font-weight:800;font-size:18px;margin-top:6px}
+.ghost{width:100%;padding:13px;border-radius:14px;background:var(--panel);border:1px solid var(--line);font-weight:600;margin-top:10px}
+ol.tips{margin:0;padding-left:18px;color:var(--text);font-size:14px;line-height:1.5}
+ol.tips li{margin-bottom:4px}
+
+/* ---------- live ---------- */
+#live{position:fixed;inset:0;background:#000}
+#stage{position:absolute;inset:0;overflow:hidden}
+#frame{position:absolute}
+#frame.mirror{transform:scaleX(-1)}
+#video,#overlay{position:absolute;inset:0;width:100%;height:100%}
+#video{object-fit:fill}
+.topbar{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 8px) 10px 8px;display:flex;gap:8px;align-items:center;z-index:5;
+  background:linear-gradient(#000a,#0000)}
+.iconbtn{background:#0009;border:1px solid #fff2;border-radius:12px;padding:9px 12px;font-weight:600;font-size:14px;backdrop-filter:blur(8px)}
+#status{flex:1;text-align:center;font-weight:700;font-size:16px;padding:9px 10px;border-radius:12px;background:#0009;border:1px solid #fff2;backdrop-filter:blur(8px);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#status.ok{background:#14532dcc;border-color:var(--accent)}
+#status.go{background:#713f12cc;border-color:var(--warn)}
+#warn{position:absolute;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 62px);z-index:5;background:#7f1d1dd9;border:1px solid var(--bad);
+  padding:7px 12px;border-radius:10px;font-size:14px;font-weight:600;display:none;max-width:92%;text-align:center}
+#fps{position:absolute;right:10px;top:calc(env(safe-area-inset-top) + 62px);font-size:11px;color:#fff9;z-index:4}
+#ballBtn{position:absolute;left:10px;bottom:calc(env(safe-area-inset-bottom) + 14px);z-index:6}
+#chip{position:absolute;right:10px;bottom:calc(env(safe-area-inset-bottom) + 14px);z-index:6;display:none}
+
+/* results sheet */
+#sheet{position:absolute;left:0;right:0;bottom:0;max-height:72%;overflow:auto;z-index:8;background:#0b1410f2;border-top:1px solid var(--line);
+  border-radius:20px 20px 0 0;padding:14px 14px calc(env(safe-area-inset-bottom) + 16px);transform:translateY(105%);transition:transform .28s ease}
+#sheet.open{transform:none}
+.sheethead{display:flex;align-items:center;gap:14px}
+.score{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;font-size:34px;font-weight:900;flex:none;border:6px solid var(--accent)}
+.headtxt .tempo{font-size:24px;font-weight:800}
+.headtxt .tempo small{font-size:13px;color:var(--muted);font-weight:600}
+.headtxt .main{font-size:14px;margin-top:4px;line-height:1.35}
+.thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0}
+.thumbs figure{margin:0}
+.thumbs img{width:100%;border-radius:8px;display:block;background:#000}
+.thumbs figcaption{font-size:11px;color:var(--muted);text-align:center;margin-top:3px}
+.ballbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:14px}
+.ballbox b{color:var(--accent)}
+.met{display:flex;gap:10px;padding:10px 2px;border-top:1px solid var(--line);align-items:flex-start}
+.dot{width:12px;height:12px;border-radius:50%;margin-top:4px;flex:none}
+.dot.good{background:var(--good)}.dot.warn{background:var(--warn)}.dot.bad{background:var(--bad)}
+.met .l{flex:1}
+.met .t{font-weight:600;font-size:15px}
+.met .tip{color:var(--muted);font-size:13px;margin-top:2px;line-height:1.35}
+.met .v{font-weight:700;text-align:right;font-size:15px;white-space:nowrap}
+.met .v small{display:block;color:var(--muted);font-weight:500;font-size:11px}
+.sheetbtns{display:flex;gap:8px;margin-top:12px}
+.sheetbtns button{flex:1;padding:12px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);font-weight:700}
+.sheetbtns button.pri{background:var(--accent);color:#052e16;border:0}
+
+/* history */
+#history{padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 24px);max-width:640px;margin:0 auto}
+.hhead{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.hhead h2{flex:1;margin:0;font-size:22px}
+.hitem{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.hitem .top{display:flex;align-items:center;gap:12px}
+.hitem .sc{font-size:22px;font-weight:900;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;border:4px solid var(--accent);flex:none}
+.hitem .meta{flex:1;font-size:14px}
+.hitem .meta div:first-child{font-weight:700}
+.hitem .meta div+div{color:var(--muted);font-size:13px}
+.hitem .detail{display:none;margin-top:10px}
+.hitem.open .detail{display:block}
+.badge{font-size:11px;background:#facc15;color:#422006;border-radius:6px;padding:2px 6px;font-weight:800;margin-left:6px}
+.empty{color:var(--muted);text-align:center;padding:40px 0}
+.loading{position:absolute;inset:0;display:grid;place-items:center;z-index:9;background:#000c;font-weight:700;text-align:center;padding:20px}
+</style>
+</head>
+<body>
+
+<!-- ================= SETUP ================= -->
+<section id="setup" class="screen active">
+  <div class="brand">
+    <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#14532d"/><circle cx="30" cy="31" r="7" fill="#f0fdf4"/><path d="M14 10 L28 30" stroke="#4ade80" stroke-width="3" stroke-linecap="round"/><circle cx="14" cy="10" r="3" fill="#4ade80"/></svg>
+    <h1>Swing Lab</h1>
+  </div>
+  <p class="sub">Camera swing check: posture, head, hips, arm and tempo, with optional foam-ball tracking.</p>
+
+  <div class="card">
+    <h3>Camera view</h3>
+    <div class="seg" data-key="view"><button data-val="face">Face-on</button><button data-val="dtl">Down-the-line</button></div>
+    <p class="hint" id="viewHint"></p>
+  </div>
+
+  <div class="row2">
+    <div class="card"><h3>Golfer</h3>
+      <div class="seg" data-key="hand"><button data-val="R">Righty</button><button data-val="L">Lefty</button></div></div>
+    <div class="card"><h3>Camera</h3>
+      <div class="seg" data-key="cam"><button data-val="back">Back</button><button data-val="front">Front</button></div></div>
+  </div>
+
+  <div class="row2">
+    <div class="card"><h3>Tracking</h3>
+      <div class="seg" data-key="model"><button data-val="lite">Fast</button><button data-val="full">Accurate</button></div></div>
+    <div class="card"><h3>Voice</h3>
+      <div class="seg" data-key="voice"><button data-val="on">On</button><button data-val="off">Off</button></div></div>
+  </div>
+
+  <div class="card">
+    <h3>Foam-ball tracker (beta)</h3>
+    <div class="seg" data-key="ball"><button data-val="off">Off</button><button data-val="on">On</button></div>
+    <p class="hint">Rough start line (down-the-line) or launch angle and speed (face-on) from the first frames after impact. Phone cameras are too slow for spin or carry. A white or bright ball against a darker background works best.</p>
+  </div>
+
+  <div class="card">
+    <h3>Setup</h3>
+    <ol class="tips">
+      <li>Tripod at hip height, 8–10 ft away, phone <b>upright (portrait)</b>.</li>
+      <li>Whole body in frame with room above your head and below your feet.</li>
+      <li>Good light. Avoid a bright window behind you.</li>
+      <li>Set up at address and hold still about 1 second. A beep means it's armed. Then make a full swing.</li>
+      <li>Keep the phone in the same spot every session so results compare fairly.</li>
+    </ol>
+  </div>
+
+  <button class="big" id="startBtn">Start</button>
+  <button class="ghost" id="histBtn1">Swing history</button>
+</section>
+
+<!-- ================= LIVE ================= -->
+<section id="live" class="screen">
+  <div id="stage">
+    <div id="frame"><video id="video" playsinline muted autoplay></video><canvas id="overlay"></canvas></div>
+  </div>
+  <div class="topbar">
+    <button class="iconbtn" id="backBtn">‹ Setup</button>
+    <div id="status">Starting…</div>
+    <button class="iconbtn" id="histBtn2">History</button>
+  </div>
+  <div id="warn"></div>
+  <div id="fps"></div>
+  <button class="iconbtn" id="ballBtn" style="display:none">Set ball spot</button>
+  <button class="iconbtn" id="chip">Last swing</button>
+  <div id="sheet"></div>
+  <div class="loading" id="loading" style="display:none">Loading…</div>
+</section>
+
+<!-- ================= HISTORY ================= -->
+<section id="history" class="screen">
+  <div class="hhead">
+    <button class="iconbtn" id="histBack">‹ Back</button>
+    <h2>History</h2>
+    <button class="iconbtn" id="histClear">Clear</button>
+  </div>
+  <div id="histList"></div>
+</section>
+
+<script type="module">
+import { PoseLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+
+const WASM = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm";
+const MODELS = {
+  lite: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",
+  full: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task"
+};
+const TORSO_IN = 19;        // assumed shoulder-to-hip length in inches, used to turn pixels into inches
+const RING = 32;            // recent small frames kept for key-position snapshots
+const $ = id => document.getElementById(id);
+
+/* ---------------- storage ---------------- */
+const STORE = "swinglab.v1";
+const DEFAULTS = { view:"face", hand:"R", cam:"back", model:"lite", voice:"on", ball:"off" };
+let db;
+try { db = JSON.parse(localStorage.getItem(STORE)) || {}; } catch { db = {}; }
+db.settings = Object.assign({}, DEFAULTS, db.settings || {});
+db.swings = db.swings || [];
+db.best = db.best || {};
+db.ballSpot = db.ballSpot || {};
+function save(){
+  for (let i = 0; i < 5; i++){
+    try { localStorage.setItem(STORE, JSON.stringify(db)); return; }
+    catch { if (db.swings.length > 10) db.swings.splice(-10); else return; }
+  }
+}
+
+/* ---------------- setup UI ---------------- */
+const VIEW_HINTS = {
+  face: "Phone faces your chest, straight across from you. Measures head and hip sway, weight shift, finish balance and tempo.",
+  dtl: "Phone behind you, on your hand line, looking at the target. Measures posture, early extension, head height, knee flex and tempo."
+};
+function paintSegs(){
+  document.querySelectorAll(".seg").forEach(seg => {
+    const k = seg.dataset.key;
+    seg.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.val === db.settings[k]));
+  });
+  $("viewHint").textContent = VIEW_HINTS[db.settings.view];
+}
+document.querySelectorAll(".seg").forEach(seg => seg.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  db.settings[seg.dataset.key] = b.dataset.val; save(); paintSegs();
+}));
+paintSegs();
+
+function show(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id));
+}
+
+/* ---------------- audio / voice ---------------- */
+let actxAudio = null;
+function unlockAudio(){
+  try {
+    actxAudio = actxAudio || new (window.AudioContext || window.webkitAudioContext)();
+    actxAudio.resume();
+  } catch {}
+  try { if (db.settings.voice === "on") speechSynthesis.speak(new SpeechSynthesisUtterance(" ")); } catch {}
+}
+function beep(freq = 880, ms = 120){
+  if (!actxAudio) return;
+  try {
+    const o = actxAudio.createOscillator(), g = actxAudio.createGain();
+    o.frequency.value = freq; g.gain.value = 0.08;
+    o.connect(g); g.connect(actxAudio.destination);
+    o.start(); o.stop(actxAudio.currentTime + ms / 1000);
+  } catch {}
+}
+function speak(text){
+  if (db.settings.voice !== "on") return;
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 1.05; speechSynthesis.speak(u); } catch {}
+}
+let wakeLock = null;
+async function keepAwake(){ try { wakeLock = await navigator.wakeLock?.request("screen"); } catch {} }
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && running) keepAwake(); });
+
+/* ---------------- camera + pose ---------------- */
+const video = $("video"), overlay = $("overlay"), octx = overlay.getContext("2d");
+const stage = $("stage"), frame = $("frame");
+let vision = null, landmarker = null, landmarkerModel = null;
+let stream = null, running = false, vw = 0, vh = 0, rect = { x:0, y:0, w:1, h:1 };
+let frameId = 0, lastTs = 0;
+
+async function initPose(){
+  const m = db.settings.model;
+  if (landmarker && landmarkerModel === m) return;
+  if (!vision) vision = await FilesetResolver.forVisionTasks(WASM);
+  if (landmarker) { try { landmarker.close(); } catch {} }
+  const opts = delegate => ({
+    baseOptions: { modelAssetPath: MODELS[m], delegate },
+    runningMode: "VIDEO", numPoses: 1,
+    minPoseDetectionConfidence: 0.5, minPosePresenceConfidence: 0.5, minTrackingConfidence: 0.5
+  });
+  try { landmarker = await PoseLandmarker.createFromOptions(vision, opts("GPU")); }
+  catch { landmarker = await PoseLandmarker.createFromOptions(vision, opts("CPU")); }
+  landmarkerModel = m;
+}
+
+async function startCamera(){
+  stopCamera();
+  const facing = db.settings.cam === "front" ? "user" : "environment";
+  stream = await navigator.mediaDevices.getUserMedia({
+    audio: false,
+    video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 60 } }
+  });
+  video.srcObject = stream;
+  await video.play().catch(() => {});
+  if (video.readyState < 2) await new Promise(r => video.addEventListener("loadeddata", r, { once: true }));
+  frame.classList.toggle("mirror", facing === "user");
+  onDims();
+}
+function stopCamera(){
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  stream = null;
+}
+function onDims(){
+  vw = video.videoWidth; vh = video.videoHeight;
+  layout(); setupRing(); setupAnalysis();
+}
+function layout(){
+  if (!vw) return;
+  const W = stage.clientWidth, H = stage.clientHeight;
+  const s = Math.min(W / vw, H / vh), w = vw * s, h = vh * s;
+  rect = { x: (W - w) / 2, y: (H - h) / 2, w, h };
+  Object.assign(frame.style, { left: rect.x + "px", top: rect.y + "px", width: w + "px", height: h + "px" });
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  overlay.width = Math.round(w * dpr); overlay.height = Math.round(h * dpr);
+  octx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener("resize", layout);
+
+/* ring buffer of small frames, for key-position snapshots */
+let ring = [], ringIds = [];
+function setupRing(){
+  const w = 220, h = Math.round(w * vh / vw);
+  ring = []; ringIds = new Array(RING).fill(-1);
+  for (let i = 0; i < RING; i++){
+    const c = document.createElement("canvas"); c.width = w; c.height = h;
+    ring.push({ c, ctx: c.getContext("2d") });
+  }
+}
+function grabSnap(id, rec){
+  const i = id % RING;
+  if (ringIds[i] !== id) return null;
+  const src = ring[i].c, c = document.createElement("canvas");
+  c.width = src.width; c.height = src.height;
+  c.getContext("2d").drawImage(src, 0, 0);
+  return { c, rec };
+}
+
+/* ---------------- landmarks ---------------- */
+const SIDE = {
+  L: { sh:11, el:13, wr:15, hip:23, kn:25, an:27 },
+  R: { sh:12, el:14, wr:16, hip:24, kn:26, an:28 }
+};
+const lead  = () => db.settings.hand === "R" ? SIDE.L : SIDE.R;
+const trail = () => db.settings.hand === "R" ? SIDE.R : SIDE.L;
+const BONES = [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28],[27,31],[28,32],[27,29],[28,30]];
+
+const mid  = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const deg  = r => r * 180 / Math.PI;
+function angle3(a, b, c){
+  const v1 = { x: a.x - b.x, y: a.y - b.y }, v2 = { x: c.x - b.x, y: c.y - b.y };
+  const d = (v1.x * v2.x + v1.y * v2.y) / (Math.hypot(v1.x, v1.y) * Math.hypot(v2.x, v2.y) || 1);
+  return deg(Math.acos(Math.max(-1, Math.min(1, d))));
+}
+function derive(P, t, id){
+  const sh = mid(P[11], P[12]), hip = mid(P[23], P[24]);
+  return { t, id, P, sh, hip, nose: P[0], hands: mid(P[15], P[16]), torso: dist(sh, hip) || 1 };
+}
+function makeRec(lm, t){
+  return derive(lm.map(p => ({ x: p.x * vw, y: p.y * vh, v: p.visibility ?? 1 })), t, frameId);
+}
+function averageRec(list){
+  const n = list.length, P = list[0].P.map((_, i) => {
+    let x = 0, y = 0, v = 0;
+    for (const r of list){ x += r.P[i].x; y += r.P[i].y; v += r.P[i].v; }
+    return { x: x / n, y: y / n, v: v / n };
+  });
+  const last = list[n - 1];
+  return derive(P, last.t, last.id);
+}
+const spread = (arr, f) => { let lo = Infinity, hi = -Infinity; for (const a of arr){ const v = f(a); if (v < lo) lo = v; if (v > hi) hi = v; } return hi - lo; };
+const spineAngle = r => deg(Math.atan2(Math.abs(r.sh.x - r.hip.x), r.hip.y - r.sh.y));
+
+/* ---------------- ball tracker ---------------- */
+const acan = document.createElement("canvas");
+let actx = acan.getContext("2d", { willReadFrequently: true }), aw = 0, ah = 0;
+const B = { spot: null, color: null, tol: 62, r: 4, refCount: 0, refImg: null, setMode: false,
+            lowRun: 0, pending: null, gone: null, track: [], after: 0 };
+function setupAnalysis(){
+  aw = vw > vh ? 640 : 480; ah = Math.round(aw * vh / vw);
+  acan.width = aw; acan.height = ah;
+  const saved = db.ballSpot[db.settings.view];
+  B.spot = saved ? { x: saved.x, y: saved.y } : null;
+  B.color = saved ? saved.color : null;
+}
+const ballOn = () => db.settings.ball === "on";
+const cdist = (d, i, c) => Math.hypot(d[i] - c[0], d[i + 1] - c[1], d[i + 2] - c[2]);
+function spotA(){ return { x: Math.round(B.spot.x * aw), y: Math.round(B.spot.y * ah) }; }
+function countAtSpot(rad){
+  const o = spotA(), x0 = Math.max(0, o.x - rad), y0 = Math.max(0, o.y - rad);
+  const w = Math.min(aw, o.x + rad + 1) - x0, h = Math.min(ah, o.y + rad + 1) - y0;
+  if (w <= 0 || h <= 0) return 0;
+  const d = actx.getImageData(x0, y0, w, h).data;
+  let n = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++){
+    const dx = x0 + x - o.x, dy = y0 + y - o.y;
+    if (dx * dx + dy * dy > rad * rad) continue;
+    if (cdist(d, (y * w + x) * 4, B.color) < B.tol) n++;
+  }
+  return n;
+}
+function ballReference(addr){
+  if (!ballOn() || !B.spot || !B.color) return;
+  const ppiA = (addr.torso / TORSO_IN) * (aw / vw);
+  B.r = Math.max(2, Math.min(14, 0.85 * ppiA));
+  B.refCount = countAtSpot(Math.ceil(B.r * 1.6));
+  B.refImg = actx.getImageData(0, 0, aw, ah);
+}
+function ballResetSwing(){ B.lowRun = 0; B.pending = null; B.gone = null; B.track = []; B.after = 0; }
+function ballFrame(rec){
+  if (!ballOn() || !B.spot || !B.refImg || B.refCount < 3) return;
+  if (!B.gone){
+    const c = countAtSpot(Math.ceil(B.r * 1.6));
+    if (c < 0.35 * B.refCount){
+      B.lowRun++;
+      const pt = trackPoint(rec);
+      if (B.lowRun === 1) B.pending = { t: rec.t, id: rec.id, pt };
+      else {
+        B.gone = { t: B.pending.t, id: B.pending.id };
+        if (B.pending.pt) B.track.push(B.pending.pt);
+        if (pt) B.track.push(pt);
+        B.after = 2;
+      }
+    } else { B.lowRun = 0; B.pending = null; }
+  } else if (B.after < 7){
+    const pt = trackPoint(rec);
+    if (pt) B.track.push(pt);
+    B.after++;
+  }
+}
+function trackPoint(rec){
+  const img = actx.getImageData(0, 0, aw, ah).data, ref = B.refImg.data;
+  const sx = aw / vw, sy = ah / vh, ppiA = (rec.torso / TORSO_IN) * sx;
+  // body box (with margin) is excluded so white shirts and shoes don't look like the ball
+  let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
+  for (const p of rec.P){ if (p.v < 0.3) continue; bx0 = Math.min(bx0, p.x); bx1 = Math.max(bx1, p.x); by0 = Math.min(by0, p.y); by1 = Math.max(by1, p.y); }
+  const m = 2.5 * ppiA;
+  bx0 = bx0 * sx - m; bx1 = bx1 * sx + m; by0 = by0 * sy - 3 * m; by1 = by1 * sy + m * 0.5;
+  const o = spotA(), excl = B.r * 1.8;
+  const cs = Math.max(4, Math.round(B.r * 2.5)), gw = Math.ceil(aw / cs), gh = Math.ceil(ah / cs);
+  const grid = new Uint16Array(gw * gh);
+  for (let y = 0; y < ah; y++){
+    for (let x = 0; x < aw; x++){
+      if (x > bx0 && x < bx1 && y > by0 && y < by1) continue;
+      if (Math.abs(x - o.x) < excl && Math.abs(y - o.y) < excl) continue;
+      const i = (y * aw + x) * 4;
+      if (cdist(img, i, B.color) >= B.tol) continue;
+      if (Math.abs(img[i] - ref[i]) + Math.abs(img[i + 1] - ref[i + 1]) + Math.abs(img[i + 2] - ref[i + 2]) < 50) continue;
+      grid[((y / cs) | 0) * gw + ((x / cs) | 0)]++;
+    }
+  }
+  let best = -1, bc = 0;
+  for (let i = 0; i < grid.length; i++) if (grid[i] > bc){ bc = grid[i]; best = i; }
+  if (bc < 3) return null;
+  const gx = best % gw, gy = (best / gw) | 0;
+  let sxs = 0, sys = 0, n = 0;
+  for (let y = Math.max(0, (gy - 1) * cs); y < Math.min(ah, (gy + 2) * cs); y++){
+    for (let x = Math.max(0, (gx - 1) * cs); x < Math.min(aw, (gx + 2) * cs); x++){
+      const i = (y * aw + x) * 4;
+      if (cdist(img, i, B.color) < B.tol &&
+          Math.abs(img[i] - ref[i]) + Math.abs(img[i + 1] - ref[i + 1]) + Math.abs(img[i + 2] - ref[i + 2]) >= 50){ sxs += x; sys += y; n++; }
+    }
+  }
+  if (!n) return null;
+  return { t: rec.t, x: sxs / n, y: sys / n, n };
+}
+function ballResult(addr, targetSign){
+  if (!ballOn()) return null;
+  if (!B.spot) return { ok: false, msg: "Ball spot not set. Tap “Set ball spot” and tap the ball." };
+  if (B.refCount < 3) return { ok: false, msg: "Couldn't see the ball at the saved spot at address. Re-set the ball spot." };
+  if (!B.gone) return { ok: false, msg: "Didn't see the ball leave. Check the lighting and the ball spot." };
+  const o = spotA(), ppiA = (addr.torso / TORSO_IN) * (aw / vw);
+  // keep points that keep moving away from the ball spot
+  const pts = []; let lastD = B.r * 1.5;
+  for (const p of B.track){ const d = dist(p, o); if (d > lastD){ pts.push(p); lastD = d; } }
+  if (!pts.length) return { ok: false, msg: "Ball left the spot but wasn't picked up in flight (too fast or blurred)." };
+  const use = pts.slice(0, 3);
+  let speed = null;
+  if (pts.length >= 2){
+    const p1 = pts[0], p2 = pts[1], dt = (p2.t - p1.t) / 1000;
+    if (dt > 0) speed = (dist(p1, p2) / ppiA) / dt * 0.0568;
+  }
+  if (db.settings.view === "face"){
+    const angs = use.map(p => deg(Math.atan2(o.y - p.y, (p.x - o.x) * targetSign))).filter(a => a > -20 && a < 80);
+    if (!angs.length) return { ok: false, msg: "Ball track looked wrong (moved backward). Treat this swing's ball data as unreliable." };
+    const la = angs.reduce((a, b) => a + b, 0) / angs.length;
+    return { ok: true, text: `Launch ≈ <b>${la.toFixed(0)}°</b>` + (speed ? ` · ball speed ≈ <b>${speed.toFixed(0)} mph</b>` : "") +
+             `<br><small>Rough, from ${pts.length} frame${pts.length > 1 ? "s" : ""}. A foam ball's speed is much lower than a real ball's.</small>` };
+  }
+  const angs = use.map(p => deg(Math.atan2(p.x - o.x, o.y - p.y)));
+  const a = angs.reduce((x, y) => x + y, 0) / angs.length;
+  const dir = Math.abs(a) < 4 ? "Straight" : a < 0 ? "Left" : "Right";
+  return { ok: true, text: `Start line: <b>${dir}</b> (≈${Math.abs(a).toFixed(0)}° in-frame)<br><small>Assumes the phone is lined up with your target. Perspective makes the angle approximate.</small>` };
+}
+
+/* tap to set the ball spot */
+stage.addEventListener("click", e => {
+  if (!B.setMode) return;
+  const r = frame.getBoundingClientRect();
+  let x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+  if (frame.classList.contains("mirror")) x = 1 - x;
+  if (x < 0 || x > 1 || y < 0 || y > 1) return;
+  actx.drawImage(video, 0, 0, aw, ah);
+  const px = Math.round(x * aw), py = Math.round(y * ah), k = 3;
+  const d = actx.getImageData(Math.max(0, px - k), Math.max(0, py - k), 2 * k + 1, 2 * k + 1).data;
+  let r0 = 0, g0 = 0, b0 = 0, n = 0;
+  for (let i = 0; i < d.length; i += 4){ r0 += d[i]; g0 += d[i + 1]; b0 += d[i + 2]; n++; }
+  B.spot = { x, y }; B.color = [r0 / n, g0 / n, b0 / n];
+  db.ballSpot[db.settings.view] = { x, y, color: B.color }; save();
+  B.setMode = false; $("ballBtn").textContent = "Set ball spot";
+  setStatus("Ball spot saved. Get into address");
+});
+$("ballBtn").addEventListener("click", e => {
+  e.stopPropagation();
+  B.setMode = !B.setMode;
+  $("ballBtn").textContent = B.setMode ? "Cancel" : "Set ball spot";
+  if (B.setMode) setStatus("Tap the ball on screen", "go");
+});
+
+/* ---------------- swing state machine ---------------- */
+const S = { mode: "search", hist: [], addr: null, addrSnap: null, lastStill: null, sw: null, noPose: 0, frames: 0 };
+function resetState(){
+  Object.assign(S, { mode: "search", hist: [], addr: null, addrSnap: null, lastStill: null, sw: null, noPose: 0 });
+  ballResetSwing();
+}
+function setStatus(txt, cls = ""){ const s = $("status"); s.textContent = txt; s.className = cls; }
+function toSearch(msg){
+  S.mode = "search"; S.addr = null; S.sw = null; ballResetSwing();
+  setStatus(msg || "Get set at address and hold still");
+}
+let framingOK = false;
+function framingCheck(r){
+  let w = "";
+  if (!r) w = "Step into view";
+  else {
+    const anklesVis = Math.max(r.P[27].v, r.P[28].v);
+    if (r.nose.y < 0.03 * vh) w = "Head cut off. Move the phone back or lower it";
+    else if (anklesVis < 0.35 || Math.max(r.P[27].y, r.P[28].y) > 0.98 * vh) w = "Feet cut off. Move the phone back";
+    else if (r.torso < 0.11 * vh) w = "Too far away. Move the phone closer";
+  }
+  framingOK = !w;
+  const el = $("warn"); el.textContent = w; el.style.display = w && S.mode !== "swing" ? "block" : "none";
+}
+
+function step(r){
+  if (!r){
+    S.noPose++;
+    framingCheck(null);
+    if (S.mode !== "search" && S.noPose > 25) toSearch("Lost you. Step back into frame");
+    return;
+  }
+  S.noPose = 0;
+  S.hist.push(r);
+  while (S.hist.length && r.t - S.hist[0].t > 1500) S.hist.shift();
+  framingCheck(r);
+  if (S.mode === "swing") swingStep(r);
+  else addressStep(r);
+}
+
+function addressStep(r){
+  const win = S.hist.filter(h => r.t - h.t <= 500);
+  if (win.length < 6) return;
+  const tor = r.torso;
+  const handsLow = r.hands.y > r.hip.y - 0.15 * tor;
+  const still = spread(win, h => h.hands.x) < 0.07 * tor && spread(win, h => h.hands.y) < 0.07 * tor &&
+                spread(win, h => h.nose.x) < 0.06 * tor && spread(win, h => h.nose.y) < 0.06 * tor;
+
+  if (S.mode === "search"){
+    if (handsLow && still && framingOK){
+      S.mode = "address";
+      S.addr = averageRec(win.slice(-8)); S.lastStill = r;
+      S.addrSnap = grabSnap(r.id, S.addr);
+      ballResetSwing(); ballReference(S.addr);
+      beep(); setStatus("Armed. Swing when ready", "ok");
+      collapseSheet();
+    }
+    return;
+  }
+  // address mode
+  const a = S.addr;
+  if (handsLow && still){
+    S.addr = averageRec(win.slice(-8)); S.lastStill = r;
+    if (r.id % 4 === 0){ S.addrSnap = grabSnap(r.id, S.addr) || S.addrSnap; }
+    if (r.id % 15 === 0) ballReference(S.addr);
+    return;
+  }
+  if (dist(r.nose, a.nose) > 1.0 * a.torso){ toSearch(); return; }  // walked off
+  if (r.hands.y < a.hands.y - 0.3 * a.torso){
+    // takeaway: start = last frame where hands were still at the address position
+    let start = S.lastStill;
+    for (const h of S.hist) if (h.t > start.t && dist(h.hands, a.hands) < 0.1 * a.torso) start = h;
+    S.mode = "swing";
+    S.sw = { start, frames: S.hist.filter(h => h.t >= start.t), phase: "back", peak: null, top: null, low: null,
+             impact: null, finish: null, snaps: {} };
+    setStatus("Swinging…", "go");
+  }
+}
+
+function swingStep(r){
+  const sw = S.sw, a = S.addr, tor = a.torso;
+  sw.frames.push(r);
+  const dt = r.t - sw.start.t;
+  if (dt > 5000){ toSearch(); return; }
+
+  if (sw.phase === "back"){
+    if (!sw.peak || r.hands.y < sw.peak.hands.y) sw.peak = r;
+    const highEnough = sw.peak.hands.y < a.sh.y + 0.15 * tor;
+    if (highEnough && r.hands.y > sw.peak.hands.y + 0.25 * tor){
+      sw.top = sw.peak; sw.phase = "down";
+      sw.snaps.top = grabSnap(sw.top.id, sw.top);
+      ballFrame(r);
+    } else if (!highEnough && dt > 400 && r.hands.y > a.hands.y - 0.1 * tor){
+      // half swing / waggle: back to armed
+      S.mode = "address"; S.sw = null; S.lastStill = r; setStatus("Armed. Swing when ready", "ok");
+    }
+    return;
+  }
+
+  ballFrame(r);
+
+  if (sw.phase === "down"){
+    if (!sw.low || r.hands.y > sw.low.hands.y) sw.low = r;
+    let imp = null;
+    if (r.hands.y >= a.hands.y - 0.12 * tor){
+      const c = sw.frames.slice(-3).filter(f => f.t > sw.top.t);
+      imp = c.reduce((b, f) => Math.abs(f.hands.y - a.hands.y) < Math.abs(b.hands.y - a.hands.y) ? f : b);
+    } else if (sw.low.hands.y > a.sh.y + 0.3 * tor && r.hands.y < sw.low.hands.y - 0.2 * tor){
+      imp = sw.low;   // hands bottomed out above address height and are rising again
+    }
+    if (imp){
+      sw.impact = imp; sw.phase = "follow";
+      sw.snaps.impact = grabSnap(imp.id, imp);
+    }
+    return;
+  }
+
+  if (sw.phase === "follow"){
+    const since = r.t - sw.impact.t;
+    const recent = sw.frames.filter(f => r.t - f.t < 250);
+    const settled = recent.length > 4 && spread(recent, f => f.hands.y) < 0.08 * tor;
+    if (since > 1500 || (since > 700 && r.hands.y < a.sh.y && settled)){
+      sw.finish = r; sw.snaps.finish = grabSnap(r.id, r);
+      finishSwing();
+    }
+  }
+}
+
+/* ---------------- analysis ---------------- */
+function grade(v, good, warn){ return v >= good[0] && v <= good[1] ? "good" : v >= warn[0] && v <= warn[1] ? "warn" : "bad"; }
+const inch = v => Math.abs(v).toFixed(1) + '"';
+
+function analyze(a, sw){
+  const view = db.settings.view, LD = lead(), TR = trail();
+  const st = sw.start, top = sw.top, fin = sw.finish;
+  let imp = sw.impact;
+  // a clean ball-leave moment is a better impact timestamp than the hands
+  if (B.gone && Math.abs(B.gone.t - imp.t) < 150){
+    const f = sw.frames.reduce((b, x) => Math.abs(x.t - B.gone.t) < Math.abs(b.t - B.gone.t) ? x : b);
+    imp = f;
+  }
+  const ppi = a.torso / TORSO_IN;
+  const M = [];
+  const add = (key, label, val, fmt, good, warn, tipLow, tipHigh, target) => {
+    if (val == null || !isFinite(val)) return;
+    const s = grade(val, good, warn);
+    const tip = s === "good" ? "" : (val < good[0] ? tipLow : tipHigh);
+    M.push({ key, label, val, disp: fmt(val), status: s, tip, target });
+  };
+
+  const back = (top.t - st.t) / 1000, down = (imp.t - top.t) / 1000;
+  const ratio = down > 0 ? back / down : null;
+  add("tempo", "Tempo (back : down)", ratio, x => x.toFixed(1) + " : 1", [2.5, 3.6], [2.0, 4.3],
+      "Backswing is rushed compared with the downswing. Let the takeaway breathe; aim for about 3 : 1.",
+      "Downswing is slow compared with the backswing, or the backswing drags. Aim for about 3 : 1.", "≈ 3 : 1");
+
+  const headDy = (imp.nose.y - a.nose.y) / ppi;
+  add("headH", "Head height at impact", headDy, v => (v >= 0 ? "dropped " : "rose ") + inch(v), [-2, 2], [-3.5, 3.5],
+      "Head rose. You're likely standing up out of posture (early extension).",
+      "Head dropped toward the ball. Keep your chest height through impact.", "within 2\"");
+
+  if (top.P[LD.el].v > 0.4 && top.P[LD.wr].v > 0.3){
+    const arm = angle3(top.P[LD.sh], top.P[LD.el], top.P[LD.wr]);
+    add("arm", "Lead arm at top", arm, v => v.toFixed(0) + "°", [148, 181], [133, 181],
+        "Lead arm bending a lot at the top. Keep width; a shorter backswing is fine.", "", "≥ 150°");
+  }
+
+  const finHigh = (a.sh.y - fin.hands.y) / a.torso;
+  add("finish", "Full finish", finHigh, v => v >= 0 ? "hands high" : "low", [0, 99], [-0.35, 99],
+      "Abbreviated finish. Swing through to a full, balanced finish.", "", "hands above shoulders");
+
+  if (view === "face"){
+    let ts = Math.sign(a.P[LD.hip].x - a.P[TR.hip].x);
+    if (Math.abs(a.P[LD.hip].x - a.P[TR.hip].x) < 0.1 * a.torso || !ts) ts = db.settings.hand === "R" ? 1 : -1;
+    const dirFmt = v => inch(v) + (v < 0 ? " away" : " toward tgt");
+
+    add("headBack", "Head move in backswing", (top.nose.x - a.nose.x) * ts / ppi, dirFmt, [-4, 1], [-6, 2.5],
+        "Head sliding well off the ball. Turn around your spine instead of swaying.",
+        "Head moving toward the target in the backswing (reverse pivot). Let it stay put or drift back slightly.", "0–4\" back");
+    add("headImp", "Head at impact", (imp.nose.x - a.nose.x) * ts / ppi, dirFmt, [-5, 1], [-7, 3],
+        "Head far behind at impact, so you're likely hanging back. Get your weight forward.",
+        "Head ahead of where it started. Stay behind the ball and let the hips lead.", "at/behind address");
+    add("hipTop", "Hip sway at top", (top.hip.x - a.hip.x) * ts / ppi, dirFmt, [-3, 1.5], [-5, 3],
+        "Hips sliding away from the target. Rotate the trail hip back instead of swaying.",
+        "Hips moving toward the target in the backswing (reverse pivot).", "< 3\" sway");
+    add("hipImp", "Hip shift at impact", (imp.hip.x - a.hip.x) * ts / ppi, dirFmt, [1.5, 6.5], [0, 8.5],
+        "Weight hanging back at impact. Start the downswing by shifting the lead hip toward the target.",
+        "Big lateral slide. Rotate more and slide less.", "1.5–6\" toward tgt");
+    const la = a.P[LD.an], ta = a.P[TR.an];
+    if (Math.abs(la.x - ta.x) > 0.2 * a.torso){
+      const frac = (fin.hip.x - ta.x) / (la.x - ta.x);
+      add("bal", "Weight at finish", frac * 100, v => v.toFixed(0) + "% lead", [72, 160], [50, 160],
+          "Finishing on the back foot. Get your belt buckle to the target with weight on the lead foot.", "", "≥ 75% lead");
+    }
+  } else {
+    const bs = Math.sign(a.nose.x - a.hip.x) || 1;
+    const spA = spineAngle(a);
+    add("spine", "Spine tilt at address", spA, v => v.toFixed(0) + "°", [28, 46], [20, 53],
+        "Setup is quite upright. Hinge more from the hips.",
+        "Very bent over at address. Stand a little taller.", "28–45°");
+    add("spineTop", "Posture at top", spineAngle(top) - spA, v => (v >= 0 ? "+" : "") + v.toFixed(0) + "°", [-6, 6], [-10, 10],
+        "Standing up during the backswing. Keep the same spine tilt as you turn.",
+        "Bending over more during the backswing. Turn level.", "±6°");
+    add("spineImp", "Posture at impact", spineAngle(imp) - spA, v => (v >= 0 ? "+" : "") + v.toFixed(0) + "°", [-5, 8], [-10, 12],
+        "Lost spine angle (stood up through impact). Keep your chest over the ball.",
+        "Chest diving down through impact.", "kept within 5°");
+    add("ee", "Hips toward ball (early ext.)", (imp.hip.x - a.hip.x) * bs / ppi,
+        v => inch(v) + (v > 0 ? " toward ball" : " back"), [-4, 1.5], [-6, 3],
+        "Hips moved well away from the ball. Check that the camera is lined up behind you.",
+        "Hips thrusting toward the ball (early extension). Keep your trail glute on an imaginary wall through impact.", "< 1.5\"");
+    const knees = [LD, TR].filter(s => a.P[s.kn].v > 0.4 && a.P[s.an].v > 0.3)
+                          .map(s => angle3(a.P[s.hip], a.P[s.kn], a.P[s.an]));
+    if (knees.length){
+      add("knee", "Knee flex at address", knees.reduce((x, y) => x + y) / knees.length, v => v.toFixed(0) + "°", [143, 166], [133, 173],
+          "Too much knee bend. Sit less and hinge more from the hips.",
+          "Legs nearly straight. Add a little knee flex.", "145–165°");
+    }
+  }
+
+  const pts = { good: 1, warn: 0.5, bad: 0 };
+  const score = M.length ? Math.round(100 * M.reduce((s, m) => s + pts[m.status], 0) / M.length) : 0;
+  const worst = M.find(m => m.status === "bad") || M.find(m => m.status === "warn");
+  return {
+    score, metrics: M, back, down, ratio,
+    main: worst ? worst.tip : "Solid swing. Repeat it.",
+    ball: ballResult(a, view === "face" ? (Math.sign(a.P[LD.hip].x - a.P[TR.hip].x) || (db.settings.hand === "R" ? 1 : -1)) : 0),
+    impactRec: imp
+  };
+}
+
+/* ---------------- drawing ---------------- */
+function drawSkeleton(ctx, rec, sx, sy, lw = 3){
+  const LDs = new Set(Object.values(lead()));
+  ctx.lineCap = "round"; ctx.lineWidth = lw;
+  for (const [i, j] of BONES){
+    const p = rec.P[i], q = rec.P[j];
+    if (p.v < 0.3 || q.v < 0.3) continue;
+    ctx.strokeStyle = LDs.has(i) && LDs.has(j) ? "#4ade80" : "#e2e8f0";
+    ctx.beginPath(); ctx.moveTo(p.x * sx, p.y * sy); ctx.lineTo(q.x * sx, q.y * sy); ctx.stroke();
+  }
+  const n = rec.nose;
+  ctx.fillStyle = "#facc15"; ctx.beginPath(); ctx.arc(n.x * sx, n.y * sy, lw * 1.8, 0, 7); ctx.fill();
+}
+function drawOverlay(rec){
+  const w = rect.w, h = rect.h, sx = w / vw, sy = h / vh;
+  octx.clearRect(0, 0, w, h);
+  // address reference: where your head and hips started
+  if (S.addr){
+    const a = S.addr;
+    octx.setLineDash([6, 6]); octx.lineWidth = 1.5; octx.strokeStyle = "#facc15aa";
+    octx.beginPath(); octx.moveTo(a.nose.x * sx, 0); octx.lineTo(a.nose.x * sx, h); octx.stroke();
+    octx.beginPath(); octx.moveTo(0, a.nose.y * sy); octx.lineTo(w, a.nose.y * sy); octx.stroke();
+    octx.strokeStyle = "#4ade8088";
+    octx.beginPath(); octx.moveTo(a.hip.x * sx, a.hip.y * sy - 40); octx.lineTo(a.hip.x * sx, a.hip.y * sy + 40); octx.stroke();
+    octx.setLineDash([]);
+  }
+  if (rec) drawSkeleton(octx, rec, sx, sy, 3);
+  if (ballOn() && B.spot){
+    octx.strokeStyle = B.refCount >= 3 || S.mode === "search" ? "#38bdf8" : "#f87171"; octx.lineWidth = 2;
+    octx.beginPath(); octx.arc(B.spot.x * w, B.spot.y * h, Math.max(8, B.r * 2.2 * (w / aw)), 0, 7); octx.stroke();
+    octx.fillStyle = "#38bdf8";
+    for (const p of lastBallTrack){ octx.beginPath(); octx.arc(p.x * w / aw, p.y * h / ah, 4, 0, 7); octx.fill(); }
+  }
+}
+let lastBallTrack = [];
+function thumb(snap, width){
+  if (!snap) return "";
+  const src = snap.c, c = document.createElement("canvas");
+  c.width = width; c.height = Math.round(width * src.height / src.width);
+  const x = c.getContext("2d");
+  if (frame.classList.contains("mirror")){ x.translate(c.width, 0); x.scale(-1, 1); }
+  x.drawImage(src, 0, 0, c.width, c.height);
+  drawSkeleton(x, snap.rec, c.width / vw, c.height / vh, Math.max(1.5, width / 110));
+  return c.toDataURL("image/jpeg", 0.7);
+}
+
+/* ---------------- results ---------------- */
+let lastResult = null;
+const COLOR = s => s >= 80 ? "var(--good)" : s >= 55 ? "var(--warn)" : "var(--bad)";
+function finishSwing(){
+  const sw = S.sw, a = S.addr;
+  const res = analyze(a, sw);
+  if (!sw.snaps.impact || res.impactRec.id !== sw.impact.id) sw.snaps.impact = grabSnap(res.impactRec.id, res.impactRec) || sw.snaps.impact;
+  const snaps = [["Address", S.addrSnap], ["Top", sw.snaps.top], ["Impact", sw.snaps.impact], ["Finish", sw.snaps.finish]];
+  const big = snaps.map(([l, s]) => [l, thumb(s, 220)]);
+  const small = snaps.map(([l, s]) => [l, thumb(s, 100)]);
+  lastBallTrack = B.track.slice();
+
+  const rec = {
+    id: Date.now(), ts: new Date().toISOString(), view: db.settings.view, hand: db.settings.hand,
+    score: res.score, ratio: res.ratio, back: res.back, down: res.down, main: res.main,
+    metrics: res.metrics.map(m => ({ key: m.key, label: m.label, disp: m.disp, status: m.status, tip: m.tip, target: m.target })),
+    ball: res.ball, thumbs: small
+  };
+  db.swings.unshift(rec);
+  if (db.swings.length > 60) db.swings.length = 60;
+  save();
+  lastResult = { ...rec, bigThumbs: big };
+  renderSheet(lastResult, true);
+
+  const sayTempo = res.ratio ? `Tempo ${res.ratio.toFixed(1)} to 1.` : "";
+  speak(`${res.score}. ${sayTempo} ${res.main}`);
+  beep(660, 90);
+
+  S.mode = "search"; S.sw = null; S.addr = null; S.hist = []; ballResetSwing();
+  setStatus(`Score ${res.score}. Set up again for the next swing`);
+}
+
+function metricRows(r){
+  const best = db.best[r.view] || {};
+  return r.metrics.map(m => `
+    <div class="met"><div class="dot ${m.status}"></div>
+      <div class="l"><div class="t">${m.label}</div>${m.tip ? `<div class="tip">${m.tip}</div>` : ""}</div>
+      <div class="v">${m.disp}<small>${m.target || ""}${best[m.key] ? ` · best ${best[m.key]}` : ""}</small></div>
+    </div>`).join("");
+}
+function ballHTML(b){
+  if (!b) return "";
+  return `<div class="ballbox">🏌️ ${b.ok ? b.text : `<span style="color:var(--muted)">${b.msg}</span>`}</div>`;
+}
+function renderSheet(r, open){
+  const sheet = $("sheet");
+  const tempo = r.ratio ? `${r.ratio.toFixed(1)} : 1 <small>${r.back.toFixed(2)}s / ${r.down.toFixed(2)}s</small>` : "—";
+  sheet.innerHTML = `
+    <div class="sheethead">
+      <div class="score" style="border-color:${COLOR(r.score)}">${r.score}</div>
+      <div class="headtxt"><div class="tempo">${tempo}</div><div class="main">${r.main}</div></div>
+    </div>
+    <div class="thumbs">${(r.bigThumbs || r.thumbs).map(([l, src]) => `<figure>${src ? `<img src="${src}">` : `<img alt="">`}<figcaption>${l}</figcaption></figure>`).join("")}</div>
+    ${ballHTML(r.ball)}
+    ${metricRows(r)}
+    <div class="sheetbtns"><button id="bestBtn">★ Save as best</button><button class="pri" id="hideBtn">Hide</button></div>
+    <p class="hint">Measured in 2D from one camera. Inches assume a ~19" shoulder-to-hip torso. Use it to spot trends, not as exact numbers.</p>`;
+  $("hideBtn").onclick = e => { e.stopPropagation(); collapseSheet(); };
+  $("bestBtn").onclick = e => {
+    e.stopPropagation();
+    db.best[r.view] = Object.fromEntries(r.metrics.map(m => [m.key, m.disp]));
+    db.bestId = db.bestId || {}; db.bestId[r.view] = r.id; save();
+    $("bestBtn").textContent = "★ Saved";
+  };
+  if (open) sheet.classList.add("open");
+  $("chip").style.display = "block";
+  $("chip").textContent = `Last: ${r.score} · ${r.ratio ? r.ratio.toFixed(1) + ":1" : ""}`;
+}
+function collapseSheet(){ $("sheet").classList.remove("open"); }
+$("chip").addEventListener("click", e => { e.stopPropagation(); if (lastResult) $("sheet").classList.toggle("open"); });
+$("sheet").addEventListener("click", e => e.stopPropagation());
+
+/* ---------------- history ---------------- */
+function renderHistory(){
+  const list = $("histList");
+  if (!db.swings.length){ list.innerHTML = `<div class="empty">No swings yet.</div>`; return; }
+  const bestIds = db.bestId || {};
+  list.innerHTML = db.swings.map((r, i) => {
+    const d = new Date(r.ts);
+    const when = d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + " " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    const isBest = bestIds[r.view] === r.id;
+    return `<div class="hitem" data-i="${i}">
+      <div class="top"><div class="sc" style="border-color:${COLOR(r.score)}">${r.score}</div>
+        <div class="meta"><div>${when}${isBest ? '<span class="badge">BEST</span>' : ""}</div>
+          <div>${r.view === "face" ? "Face-on" : "Down-the-line"} · tempo ${r.ratio ? r.ratio.toFixed(1) + " : 1" : "—"}</div></div></div>
+      <div class="detail">
+        <div class="thumbs">${r.thumbs.map(([l, s]) => `<figure>${s ? `<img src="${s}">` : `<img alt="">`}<figcaption>${l}</figcaption></figure>`).join("")}</div>
+        <div class="hint" style="margin-bottom:6px">${r.main}</div>
+        ${ballHTML(r.ball)}${metricRows(r)}
+      </div></div>`;
+  }).join("");
+  list.querySelectorAll(".hitem").forEach(el => el.addEventListener("click", () => el.classList.toggle("open")));
+}
+let historyFrom = "setup";
+function openHistory(from){ historyFrom = from; renderHistory(); show("history"); }
+$("histBtn1").onclick = () => openHistory("setup");
+$("histBtn2").onclick = e => { e.stopPropagation(); openHistory("live"); };
+$("histBack").onclick = () => show(historyFrom);
+$("histClear").onclick = () => {
+  if (!confirm("Delete all saved swings?")) return;
+  db.swings = []; db.best = {}; db.bestId = {}; save(); renderHistory();
+};
+
+/* ---------------- main loop ---------------- */
+let fpsN = 0, fpsT = 0;
+function onFrame(tMedia){
+  if (!running || !landmarker) return;
+  if (video.videoWidth !== vw || video.videoHeight !== vh){ onDims(); resetState(); }
+  let t = tMedia; if (t <= lastTs) t = lastTs + 1; lastTs = t;
+  frameId++;
+  const slot = frameId % RING;
+  ring[slot].ctx.drawImage(video, 0, 0, ring[slot].c.width, ring[slot].c.height); ringIds[slot] = frameId;
+  if (ballOn() && aw) actx.drawImage(video, 0, 0, aw, ah);
+
+  let res;
+  try { res = landmarker.detectForVideo(video, t); } catch { return; }
+  const lm = res && res.landmarks && res.landmarks[0];
+  const rec = lm ? makeRec(lm, t) : null;
+  step(rec);
+  drawOverlay(rec);
+
+  fpsN++;
+  const now = performance.now();
+  if (now - fpsT > 1000){ $("fps").textContent = fpsN + " fps"; fpsN = 0; fpsT = now; }
+}
+function loop(){
+  if (!running) return;
+  if (video.requestVideoFrameCallback){
+    video.requestVideoFrameCallback((now, meta) => { onFrame((meta && meta.mediaTime ? meta.mediaTime * 1000 : now)); loop(); });
+  } else {
+    requestAnimationFrame(now => { onFrame(now); loop(); });
+  }
+}
+
+async function start(){
+  unlockAudio();
+  keepAwake();
+  show("live");
+  $("ballBtn").style.display = ballOn() ? "block" : "none";
+  $("loading").style.display = "grid"; $("loading").textContent = "Starting camera…";
+  setStatus("Starting…");
+  try {
+    await startCamera();
+    $("loading").textContent = "Loading pose model… (first time takes a few seconds)";
+    await initPose();
+  } catch (err){
+    $("loading").textContent = (err && err.name === "NotAllowedError")
+      ? "Camera blocked. Allow camera access for this site in Settings › Safari › Camera, then reload."
+      : "Couldn't start: " + (err && err.message || err);
+    return;
+  }
+  $("loading").style.display = "none";
+  resetState();
+  if (ballOn() && !B.spot){ B.setMode = true; $("ballBtn").textContent = "Cancel"; setStatus("Tap the ball on screen", "go"); }
+  else setStatus("Get set at address and hold still");
+  running = true; loop();
+}
+function stop(){
+  running = false; stopCamera();
+  try { wakeLock && wakeLock.release(); } catch {}
+  collapseSheet();
+}
+$("startBtn").onclick = start;
+$("backBtn").onclick = e => { e.stopPropagation(); stop(); show("setup"); };
+</script>
+</body>
+</html>
