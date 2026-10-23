@@ -67,7 +67,7 @@ ol.tips li{margin-bottom:4px}
 .headtxt .tempo{font-size:24px;font-weight:800}
 .headtxt .tempo small{font-size:13px;color:var(--muted);font-weight:600}
 .headtxt .main{font-size:14px;margin-top:4px;line-height:1.35}
-.thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0}
+.thumbs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;margin:12px 0}
 .thumbs figure{margin:0}
 .thumbs img{width:100%;border-radius:8px;display:block;background:#000}
 .thumbs figcaption{font-size:11px;color:var(--muted);text-align:center;margin-top:3px}
@@ -100,10 +100,18 @@ ol.tips li{margin-bottom:4px}
 .badge{font-size:11px;background:#facc15;color:#422006;border-radius:6px;padding:2px 6px;font-weight:800;margin-left:6px}
 .empty{color:var(--muted);text-align:center;padding:40px 0}
 .checks{margin:0;padding:0;list-style:none}
-.checks li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.checks li{padding:8px 0;border-top:1px solid var(--line);font-size:14px;cursor:pointer}
+.checks li .r{display:flex;justify-content:space-between;gap:10px}
+.checks li .r span:first-child::after{content:" ⓘ";color:var(--muted);font-size:12px}
+.more{display:none;margin-top:8px;padding:10px 12px;background:var(--bg);border-radius:10px;font-size:13px;line-height:1.45;color:var(--text);text-align:left;white-space:normal}
+.more p{margin:0 0 6px}.more p:last-child{margin:0}
+.more b{color:var(--accent)}
+.x > .more,.x .l > .more{display:block}
+.met{cursor:pointer}
+.met .t::after{content:" ⓘ";color:var(--muted);font-size:12px;font-weight:400}
 .checks li:first-child{border-top:0}
 .checks .tg{color:var(--muted);white-space:nowrap;font-size:13px}
-.checks .grp{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);padding-top:12px;border-top:0;justify-content:flex-start}
+.checks .grp{cursor:default;display:flex;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);padding-top:12px;border-top:0;justify-content:flex-start}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:10px}
 .legend span{display:flex;align-items:center;gap:5px}
 .legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
@@ -130,7 +138,7 @@ ol.tips li{margin-bottom:4px}
     <h3>What it checks</h3>
     <ul class="checks" id="checkList"></ul>
     <div class="legend"><span><i style="background:var(--good)"></i>on target</span><span><i style="background:var(--warn)"></i>close</span><span><i style="background:var(--bad)"></i>fix this</span></div>
-    <p class="hint">Score = average of all checks (green 1, yellow ½, red 0). The worst one is read out as your main fix.</p>
+    <p class="hint">Tap any check for what it means, why it matters and a drill. Score = average of all checks (green 1, yellow ½, red 0). The worst one is read out as your main fix.</p>
   </div>
 
   <div class="row2">
@@ -205,7 +213,7 @@ const MODELS = {
   full: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task"
 };
 const TORSO_IN = 19;        // assumed shoulder-to-hip length in inches, used to turn pixels into inches
-const RING = 32;            // recent small frames kept for key-position snapshots
+const RING = 72;            // recent small frames kept for key-position snapshots
 const $ = id => document.getElementById(id);
 
 /* ---------------- storage ---------------- */
@@ -231,33 +239,132 @@ const VIEW_HINTS = {
 };
 const CHECKS = {
   both: [
-    ["Tempo (backswing : downswing)", "≈ 3 : 1"],
-    ["Head height at impact", "within 2\""],
-    ["Lead arm at the top", "≥ 150° (fairly straight)"],
-    ["Full finish", "hands above shoulders"]
+    ["tempo", "Tempo (backswing : downswing)", "≈ 3 : 1"],
+    ["headH", "Head height at impact", "within 2\""],
+    ["arm", "Lead arm at the top", "≥ 150° (fairly straight)"],
+    ["finish", "Full finish", "hands above shoulders"]
   ],
   face: [
-    ["Head move in backswing", "0–4\" back"],
-    ["Head at impact", "at or behind address"],
-    ["Hip sway at the top", "< 3\""],
-    ["Hip shift at impact", "1.5–6\" toward target"],
-    ["Weight at finish", "≥ 75% on lead foot"]
+    ["headBack", "Head move in backswing", "0–4\" back"],
+    ["headImp", "Head at impact", "at or behind address"],
+    ["hipTop", "Hip sway at the top", "< 3\""],
+    ["hipImp", "Hip shift at impact", "1.5–6\" toward target"],
+    ["bal", "Weight at finish", "≥ 75% on lead foot"]
   ],
   dtl: [
-    ["Spine tilt at address", "28–45°"],
-    ["Posture held at the top", "within ±6°"],
-    ["Posture held at impact", "within 5°"],
-    ["Early extension (hips toward ball)", "< 1.5\""],
-    ["Knee flex at address", "145–165°"]
-  ]
+    ["spine", "Spine tilt at address", "28–45°"],
+    ["spineTop", "Posture held at the top", "within ±6°"],
+    ["spineImp", "Posture held at impact", "within 5°"],
+    ["ee", "Early extension (hips toward ball)", "< 1.5\""],
+    ["knee", "Knee flex at address", "145–165°"]
+  ],
+  ball: {
+    face: ["ballFace", "Launch angle + rough ball speed", "info only"],
+    dtl: ["ballDtl", "Start line (left / straight / right)", "info only"]
+  }
 };
+
+// what each check means, why it matters, and a drill you can do indoors
+const INFO = {
+  tempo: {
+    what: "Time from takeaway to the top, divided by time from the top to impact. Most good players, from tour pros down, land near 3 : 1 whatever their overall speed.",
+    why: "A rushed backswing (low number) usually means a jerky transition and poor sequencing. A very high number often means a slow, decelerating downswing.",
+    drill: "Count “one-two-three” going back and “four” at impact, out loud. Make 10 slow-motion swings with that count, then speed both parts up together, keeping the rhythm."
+  },
+  headH: {
+    what: "How far your head moved up or down between address and impact.",
+    why: "Rising usually means you're standing up (early extension), which causes thins, tops and blocks. Dropping causes fat shots. Staying level gives consistent contact.",
+    drill: "Set up with the top of your head lightly touching a door frame or a broom handle a friend holds. Make slow half swings keeping that light contact through impact."
+  },
+  arm: {
+    what: "The angle at your lead elbow at the top. 180° is perfectly straight.",
+    why: "A straight-ish lead arm keeps your swing width, so the club returns to the same spot. A collapsed arm makes the swing short and the low point inconsistent.",
+    drill: "Swing back only as far as you can keep the lead arm fairly straight. That's your top for now. A shorter, wider backswing beats a long, bent one. Do 10 slow ones, checking the Backswing and Top photos."
+  },
+  finish: {
+    what: "Whether your hands ended up above your shoulders after the swing.",
+    why: "Stopping short usually means you're decelerating or hitting at the ball instead of swinging through it.",
+    drill: "After every swing, hold your finish for a 3-count: belt buckle facing the target, trail heel up, hands high. If you can't hold it, the swing was out of balance."
+  },
+  headBack: {
+    what: "Side-to-side head movement from address to the top (face-on view). A little movement away from the target is normal.",
+    why: "A big slide off the ball (sway) forces you to slide back to hit it. Moving toward the target (reverse pivot) puts your weight on the wrong foot.",
+    drill: "Put a piece of tape on a wall or mirror lined up with your head at address. Make backswings turning your shoulders while keeping your head within a ball's width of the tape."
+  },
+  headImp: {
+    what: "Where your head is at impact compared with address (face-on view).",
+    why: "Head at or slightly behind the ball lets you hit with the club, not your body. A head that slides toward the target steepens and opens the club.",
+    drill: "Impact drill: slowly swing to the impact position and pause. Your head should be over or behind its address spot while your hips have moved toward the target."
+  },
+  hipTop: {
+    what: "How far your hips slid sideways in the backswing (face-on view).",
+    why: "You want your hips to turn, not slide. A sway moves your low point and makes it hard to get back to the ball.",
+    drill: "Place a chair or alignment stick just outside your trail hip. Make backswings turning your hip back behind you without bumping the chair."
+  },
+  hipImp: {
+    what: "How far your hips moved toward the target by impact (face-on view).",
+    why: "A small shift forward is what puts weight on your lead side, so you hit the ball and then the floor. Too little means hanging back; too much is a slide.",
+    drill: "Step drill: start with feet together, step toward the target with your lead foot as you start the downswing, and swing. It trains the shift before the turn."
+  },
+  bal: {
+    what: "Where your hips finished between your feet (face-on view). 100% means fully over the lead foot.",
+    why: "Finishing on your back foot means your weight never transferred, a common cause of fat and thin shots.",
+    drill: "Hit foam balls and finish with your trail foot up on its toe so you could lift the trail foot completely off the floor without falling."
+  },
+  spine: {
+    what: "How far your upper body leans forward at address (down-the-line view).",
+    why: "Too upright and the swing gets flat and rotational; too bent and it gets steep and hard to turn.",
+    drill: "Stand tall with the club across your hips, push your hips back until your chest is over the balls of your feet, add a little knee flex, then let your arms hang straight down. That's your posture."
+  },
+  spineTop: {
+    what: "Whether your forward lean changed during the backswing (down-the-line view).",
+    why: "Standing up in the backswing changes the club's path, and you have to dip back down to hit the ball.",
+    drill: "Cross your arms over your chest in your golf posture and turn back, keeping the same bend. Your lead shoulder should point at the ball, not the sky."
+  },
+  spineImp: {
+    what: "Whether you kept your forward lean through impact (down-the-line view).",
+    why: "This is the most common amateur fault: standing up through the ball, which leads to blocks, hooks, thins and tops.",
+    drill: "Practise slow swings with your rear end lightly touching a chair or wall behind you. Keep it touching through impact."
+  },
+  ee: {
+    what: "How far your hips moved toward the ball by impact (down-the-line view). This is “early extension.”",
+    why: "When the hips thrust toward the ball, the arms get jammed and you have to flip your hands, leading to inconsistent strikes.",
+    drill: "Wall drill: set up with your rear end just touching a wall. Make slow swings so your trail glute stays on the wall going back and your lead glute is on it at impact."
+  },
+  knee: {
+    what: "The bend in your knees at address (down-the-line view). 180° is straight.",
+    why: "A little flex makes you athletic and balanced. Too much makes you squat and lose your posture; too little makes you stiff.",
+    drill: "Use the posture drill: hinge first, then just “unlock” your knees. You should feel your weight on the balls of your feet, not your heels."
+  },
+  ballFace: {
+    what: "From the face-on view: the ball's launch angle and a rough speed, from the first frames after impact.",
+    why: "Useful for seeing whether you're launching it low or high. A foam ball is much slower than a real ball, so compare only with your other foam-ball swings.",
+    drill: "Use a bright ball against a darker background, and tap the ball on screen after moving it."
+  },
+  ballDtl: {
+    what: "From down-the-line: whether the ball started left, straight or right of the camera line.",
+    why: "Start direction is mostly set by club-face angle at impact, so this tells you whether the face was open or closed.",
+    drill: "Line the phone up behind the ball and pointing at your target so “straight” means straight."
+  }
+};
+const infoHTML = k => {
+  const i = INFO[k]; if (!i) return "";
+  return `<div class="more"><p><b>What:</b> ${i.what}</p><p><b>Why it matters:</b> ${i.why}</p><p><b>Drill:</b> ${i.drill}</p></div>`;
+};
+function bindInfo(el, sel){
+  el.addEventListener("click", e => {
+    const row = e.target.closest(sel);
+    if (!row || !el.contains(row)) return;
+    row.classList.toggle("x");
+  });
+}
 function paintChecks(){
   const v = db.settings.view;
-  const row = ([t, g]) => `<li><span>${t}</span><span class="tg">${g}</span></li>`;
+  const row = ([k, t, g]) => `<li><div class="r"><span>${t}</span><span class="tg">${g}</span></div>${infoHTML(k)}</li>`;
   $("checkList").innerHTML =
     `<li class="grp">Every swing</li>` + CHECKS.both.map(row).join("") +
     `<li class="grp">${v === "face" ? "Face-on view" : "Down-the-line view"}</li>` + CHECKS[v].map(row).join("") +
-    (db.settings.ball === "on" ? `<li class="grp">Foam ball</li>` + row(v === "face" ? ["Launch angle + rough ball speed", "info only"] : ["Start line (left / straight / right)", "info only"]) : "");
+    (db.settings.ball === "on" ? `<li class="grp">Foam ball</li>` + row(CHECKS.ball[v]) : "");
 }
 function paintSegs(){
   document.querySelectorAll(".seg").forEach(seg => {
@@ -537,6 +644,8 @@ function ballResult(addr, targetSign){
 
 /* tap to set the ball spot */
 stage.addEventListener("click", e => {
+  // tapping the camera while reviewing a swing closes the review (same as Hide)
+  if ($("sheet").classList.contains("open")){ collapseSheet(); return; }
   if (!B.setMode) return;
   const r = frame.getBoundingClientRect();
   let x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
@@ -650,6 +759,11 @@ function swingStep(r){
     if (highEnough && r.hands.y > sw.peak.hands.y + 0.25 * tor){
       sw.top = sw.peak; sw.phase = "down";
       sw.snaps.top = grabSnap(sw.top.id, sw.top);
+      // mid-backswing: frame where the hands were halfway between address and the top
+      const midY = (a.hands.y + sw.top.hands.y) / 2;
+      const cands = sw.frames.filter(f => f.t > sw.start.t && f.t < sw.top.t);
+      cands.sort((f, g) => Math.abs(f.hands.y - midY) - Math.abs(g.hands.y - midY));
+      for (const f of cands){ const sn = grabSnap(f.id, f); if (sn){ sw.snaps.back = sn; break; } }
       ballFrame(r);
     } else if (!highEnough && dt > 400 && r.hands.y > a.hands.y - 0.1 * tor){
       // half swing / waggle: back to armed
@@ -842,7 +956,7 @@ function finishSwing(){
   const sw = S.sw, a = S.addr;
   const res = analyze(a, sw);
   if (!sw.snaps.impact || res.impactRec.id !== sw.impact.id) sw.snaps.impact = grabSnap(res.impactRec.id, res.impactRec) || sw.snaps.impact;
-  const snaps = [["Address", S.addrSnap], ["Top", sw.snaps.top], ["Impact", sw.snaps.impact], ["Finish", sw.snaps.finish]];
+  const snaps = [["Address", S.addrSnap], ["Backswing", sw.snaps.back], ["Top", sw.snaps.top], ["Impact", sw.snaps.impact], ["Finish", sw.snaps.finish]];
   const big = snaps.map(([l, s]) => [l, thumb(s, 220)]);
   const small = snaps.map(([l, s]) => [l, thumb(s, 100)]);
   lastBallTrack = B.track.slice();
@@ -871,7 +985,7 @@ function metricRows(r){
   const best = db.best[r.view] || {};
   return r.metrics.map(m => `
     <div class="met"><div class="dot ${m.status}"></div>
-      <div class="l"><div class="t">${m.label}</div>${m.tip ? `<div class="tip">${m.tip}</div>` : ""}</div>
+      <div class="l"><div class="t">${m.label}</div>${m.tip ? `<div class="tip">${m.tip}</div>` : ""}${infoHTML(m.key)}</div>
       <div class="v">${m.disp}<small>${m.target || ""}${best[m.key] ? ` · best ${best[m.key]}` : ""}</small></div>
     </div>`).join("");
 }
@@ -906,6 +1020,9 @@ function renderSheet(r, open){
 function collapseSheet(){ $("sheet").classList.remove("open"); }
 $("chip").addEventListener("click", e => { e.stopPropagation(); if (lastResult) $("sheet").classList.toggle("open"); });
 $("sheet").addEventListener("click", e => e.stopPropagation());
+bindInfo($("sheet"), ".met");
+bindInfo($("histList"), ".met");
+bindInfo($("checkList"), "li:not(.grp)");
 
 /* ---------------- history ---------------- */
 function renderHistory(){
@@ -926,7 +1043,7 @@ function renderHistory(){
         ${ballHTML(r.ball)}${metricRows(r)}
       </div></div>`;
   }).join("");
-  list.querySelectorAll(".hitem").forEach(el => el.addEventListener("click", () => el.classList.toggle("open")));
+  list.querySelectorAll(".hitem").forEach(el => el.addEventListener("click", e => { if (!e.target.closest(".met")) el.classList.toggle("open"); }));
 }
 let historyFrom = "setup";
 function openHistory(from){ historyFrom = from; renderHistory(); show("history"); }
