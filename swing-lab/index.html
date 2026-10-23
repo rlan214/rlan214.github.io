@@ -7,6 +7,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b1410">
 <title>Swing Lab</title>
+<meta name="apple-mobile-web-app-title" content="Swing Lab">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=4">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=4">
 <style>
 :root{
   --bg:#0b1410; --panel:#13201a; --panel2:#1a2b23; --line:#2a3d33;
@@ -56,6 +59,7 @@ ol.tips li{margin-bottom:4px}
   padding:7px 12px;border-radius:10px;font-size:14px;font-weight:600;display:none;max-width:92%;text-align:center}
 #fps{position:absolute;right:10px;top:calc(env(safe-area-inset-top) + 62px);font-size:11px;color:#fff9;z-index:4}
 #ballBtn{position:absolute;left:10px;bottom:calc(env(safe-area-inset-bottom) + 14px);z-index:6}
+#clubBtn{position:absolute;left:10px;bottom:calc(env(safe-area-inset-bottom) + 64px);z-index:6}
 #chip{position:absolute;right:10px;bottom:calc(env(safe-area-inset-bottom) + 14px);z-index:6;display:none}
 
 /* results sheet */
@@ -69,7 +73,15 @@ ol.tips li{margin-bottom:4px}
 .headtxt .main{font-size:14px;margin-top:4px;line-height:1.35}
 .thumbs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;margin:12px 0}
 .thumbs figure{margin:0}
-.thumbs img{width:100%;border-radius:8px;display:block;background:#000}
+.thumbs img{width:100%;border-radius:8px;display:block;background:#000;cursor:zoom-in}
+#viewer{position:fixed;inset:0;z-index:50;background:#000;display:none;flex-direction:column}
+#viewer.on{display:flex}
+#viewer .vimg{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top) + 56px) 8px 8px}
+#viewer img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px}
+#viewer .vtop{position:absolute;top:calc(env(safe-area-inset-top) + 8px);left:10px;right:10px;display:flex;align-items:center;gap:8px}
+#viewer .vtop div{flex:1;text-align:center;font-weight:800;font-size:18px}
+#viewer .vbar{display:flex;gap:8px;padding:8px 10px calc(env(safe-area-inset-bottom) + 12px)}
+#viewer .vbar button{flex:1;padding:14px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);font-weight:700;font-size:16px}
 .thumbs figcaption{font-size:11px;color:var(--muted);text-align:center;margin-top:3px}
 .ballbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:14px}
 .ballbox b{color:var(--accent)}
@@ -156,6 +168,14 @@ ol.tips li{margin-bottom:4px}
   </div>
 
   <div class="card">
+    <h3>Club tape tracking (beta)</h3>
+    <div class="seg" data-key="club"><button data-val="off">Off</button><button data-val="on">On</button></div>
+    <p class="hint">Put a band of fluorescent tape (neon green or pink) on the back of the club head, then tap it on screen once. Adds a club-path trace on your photos, club position at the top (face-on) and downswing plane (down-the-line). Near impact the club moves too fast to see every frame, so impact numbers are rough.</p>
+    <div style="margin-top:10px;font-size:13px;color:var(--muted)">Rough club speed at impact</div>
+    <div class="seg" data-key="clubSpeed" style="margin-top:6px"><button data-val="off">Off</button><button data-val="on">On</button></div>
+  </div>
+
+  <div class="card">
     <h3>Foam-ball tracker (beta)</h3>
     <div class="seg" data-key="ball"><button data-val="off">Off</button><button data-val="on">On</button></div>
     <p class="hint">Rough start line (down-the-line) or launch angle and speed (face-on) from the first frames after impact. Phone cameras are too slow for spin or carry. A white or bright ball against a darker background works best.</p>
@@ -189,10 +209,17 @@ ol.tips li{margin-bottom:4px}
   <div id="warn"></div>
   <div id="fps"></div>
   <button class="iconbtn" id="ballBtn" style="display:none">Set ball spot</button>
+  <button class="iconbtn" id="clubBtn" style="display:none">Set club tape</button>
   <button class="iconbtn" id="chip">Last swing</button>
   <div id="sheet"></div>
   <div class="loading" id="loading" style="display:none">Loading…</div>
 </section>
+
+<div id="viewer">
+  <div class="vtop"><button class="iconbtn" id="vClose">✕ Close</button><div id="vLabel"></div><span style="width:70px"></span></div>
+  <div class="vimg" id="vImgWrap"><img id="vImg" alt=""></div>
+  <div class="vbar"><button id="vPrev">‹ Prev</button><button id="vNext">Next ›</button></div>
+</div>
 
 <!-- ================= HISTORY ================= -->
 <section id="history" class="screen">
@@ -213,12 +240,12 @@ const MODELS = {
   full: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task"
 };
 const TORSO_IN = 19;        // assumed shoulder-to-hip length in inches, used to turn pixels into inches
-const RING = 72;            // recent small frames kept for key-position snapshots
+const RING = 64;            // recent small frames kept for key-position snapshots
 const $ = id => document.getElementById(id);
 
 /* ---------------- storage ---------------- */
 const STORE = "swinglab.v1";
-const DEFAULTS = { view:"face", hand:"R", cam:"back", model:"lite", voice:"on", ball:"off" };
+const DEFAULTS = { view:"face", hand:"R", cam:"back", model:"lite", voice:"on", ball:"off", club:"off", clubSpeed:"off" };
 let db;
 try { db = JSON.parse(localStorage.getItem(STORE)) || {}; } catch { db = {}; }
 db.settings = Object.assign({}, DEFAULTS, db.settings || {});
@@ -258,6 +285,10 @@ const CHECKS = {
     ["ee", "Early extension (hips toward ball)", "< 1.5\""],
     ["knee", "Knee flex at address", "145–165°"]
   ],
+  club: {
+    face: [["clubTop", "Club at the top", "0–40° short of parallel"]],
+    dtl: [["plane", "Downswing plane (club at hip height)", "on or just under the shaft line"]]
+  },
   ball: {
     face: ["ballFace", "Launch angle + rough ball speed", "info only"],
     dtl: ["ballDtl", "Start line (left / straight / right)", "info only"]
@@ -336,6 +367,16 @@ const INFO = {
     why: "A little flex makes you athletic and balanced. Too much makes you squat and lose your posture; too little makes you stiff.",
     drill: "Use the posture drill: hinge first, then just “unlock” your knees. You should feel your weight on the balls of your feet, not your heels."
   },
+  clubTop: {
+    what: "Where the shaft points at the top of your backswing (face-on view): short of parallel to the ground, parallel, or past it.",
+    why: "Going well past parallel (overswinging) usually comes with a bent lead arm or lifted body and costs control. A slightly short backswing is fine and common.",
+    drill: "Make slow backswings and stop when your lead arm can no longer stay fairly straight. Check the Top photo: the club trace should end at or just short of horizontal."
+  },
+  plane: {
+    what: "Down-the-line: when your hands are back at hip height in the downswing, is the club head above or below the line your shaft made at address? (Beta: measured from the tape and only when it's visible in that frame.)",
+    why: "Above the line is “over the top”, the classic cause of pulls and slices. On or slightly under it means the club shallowed and is coming from the inside.",
+    drill: "Slow-motion downswings: let the trail elbow drop toward your trail hip before the shoulders turn. Watch the yellow (backswing) and green (downswing) trace: the green should sit on or under the blue shaft line."
+  },
   ballFace: {
     what: "From the face-on view: the ball's launch angle and a rough speed, from the first frames after impact.",
     why: "Useful for seeing whether you're launching it low or high. A foam ball is much slower than a real ball, so compare only with your other foam-ball swings.",
@@ -364,6 +405,7 @@ function paintChecks(){
   $("checkList").innerHTML =
     `<li class="grp">Every swing</li>` + CHECKS.both.map(row).join("") +
     `<li class="grp">${v === "face" ? "Face-on view" : "Down-the-line view"}</li>` + CHECKS[v].map(row).join("") +
+    (db.settings.club === "on" ? `<li class="grp">Club tape</li>` + CHECKS.club[v].map(row).join("") : "") +
     (db.settings.ball === "on" ? `<li class="grp">Foam ball</li>` + row(CHECKS.ball[v]) : "");
 }
 function paintSegs(){
@@ -468,7 +510,7 @@ window.addEventListener("resize", layout);
 /* ring buffer of small frames, for key-position snapshots */
 let ring = [], ringIds = [];
 function setupRing(){
-  const w = 220, h = Math.round(w * vh / vw);
+  const w = 300, h = Math.round(w * vh / vw);
   ring = []; ringIds = new Array(RING).fill(-1);
   for (let i = 0; i < RING; i++){
     const c = document.createElement("canvas"); c.width = w; c.height = h;
@@ -646,6 +688,23 @@ function ballResult(addr, targetSign){
 stage.addEventListener("click", e => {
   // tapping the camera while reviewing a swing closes the review (same as Hide)
   if ($("sheet").classList.contains("open")){ collapseSheet(); return; }
+  if (C.setMode){
+    const r = frame.getBoundingClientRect();
+    let x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    if (frame.classList.contains("mirror")) x = 1 - x;
+    if (x < 0 || x > 1 || y < 0 || y > 1) return;
+    actx.drawImage(video, 0, 0, aw, ah);
+    const px = Math.round(x * aw), py = Math.round(y * ah), k = 2;
+    const d = actx.getImageData(Math.max(0, px - k), Math.max(0, py - k), 2 * k + 1, 2 * k + 1).data;
+    let r0 = 0, g0 = 0, b0 = 0, n = 0;
+    for (let i = 0; i < d.length; i += 4){ r0 += d[i]; g0 += d[i + 1]; b0 += d[i + 2]; n++; }
+    const hsv = rgb2hsv(r0 / n, g0 / n, b0 / n);
+    C.setMode = false; $("clubBtn").textContent = "Set club tape";
+    if (hsv[1] < 0.3){ setStatus("That spot isn't colourful enough. Tap the tape again", "go"); C.setMode = true; $("clubBtn").textContent = "Cancel"; return; }
+    C.hsv = hsv; db.clubHSV = hsv; save();
+    setStatus("Club tape saved. Get into address");
+    return;
+  }
   if (!B.setMode) return;
   const r = frame.getBoundingClientRect();
   let x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
@@ -661,12 +720,87 @@ stage.addEventListener("click", e => {
   B.setMode = false; $("ballBtn").textContent = "Set ball spot";
   setStatus("Ball spot saved. Get into address");
 });
+$("clubBtn").addEventListener("click", e => {
+  e.stopPropagation();
+  C.setMode = !C.setMode; B.setMode = false; $("ballBtn").textContent = "Set ball spot";
+  $("clubBtn").textContent = C.setMode ? "Cancel" : "Set club tape";
+  if (C.setMode) setStatus("Hold the club still and tap the tape", "go");
+});
 $("ballBtn").addEventListener("click", e => {
   e.stopPropagation();
   B.setMode = !B.setMode;
   $("ballBtn").textContent = B.setMode ? "Cancel" : "Set ball spot";
   if (B.setMode) setStatus("Tap the ball on screen", "go");
 });
+
+/* ---------------- club tape tracker ---------------- */
+const C = { hsv: null, setMode: false, track: [], cur: null, addrPt: null };
+const clubOn = () => db.settings.club === "on";
+try { if (db.clubHSV) C.hsv = db.clubHSV; } catch {}
+function rgb2hsv(r, g, b){
+  r /= 255; g /= 255; b /= 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; let h = 0;
+  if (d){ if (mx === r) h = ((g - b) / d) % 6; else if (mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4; h *= 60; if (h < 0) h += 360; }
+  return [h, mx ? d / mx : 0, mx];
+}
+function clubFrame(rec){
+  if (!clubOn() || !C.hsv || !aw) return null;
+  const sx = aw / vw, sy = ah / vh;
+  const cx = rec.hands.x * sx, cy = rec.hands.y * sy, R = 2.7 * rec.torso * sx;
+  const x0 = Math.max(0, Math.floor(cx - R)), y0 = Math.max(0, Math.floor(cy - R));
+  const x1 = Math.min(aw, Math.ceil(cx + R)), y1 = Math.min(ah, Math.ceil(cy + R));
+  const w = x1 - x0, h = y1 - y0; if (w < 4 || h < 4) return null;
+  const d = actx.getImageData(x0, y0, w, h).data;
+  const [H, S0, V0] = C.hsv, smin = Math.max(0.3, S0 * 0.55), vmin = Math.max(0.25, V0 * 0.4);
+  const cs = 6, gw = Math.ceil(w / cs), gh = Math.ceil(h / cs), grid = new Uint16Array(gw * gh);
+  for (let y = 0; y < h; y += 2){
+    for (let x = 0; x < w; x += 2){
+      const i = (y * w + x) * 4;
+      const [hh, ss, vv] = rgb2hsv(d[i], d[i + 1], d[i + 2]);
+      if (ss < smin || vv < vmin) continue;
+      const dh = Math.abs(hh - H); if (Math.min(dh, 360 - dh) > 22) continue;
+      grid[((y / cs) | 0) * gw + ((x / cs) | 0)]++;
+    }
+  }
+  let best = -1, bc = 0;
+  for (let gy = 0; gy < gh; gy++) for (let gx = 0; gx < gw; gx++){
+    let c = 0;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++){
+      const X = gx + dx, Y = gy + dy; if (X >= 0 && Y >= 0 && X < gw && Y < gh) c += grid[Y * gw + X];
+    }
+    if (c > bc){ bc = c; best = gy * gw + gx; }
+  }
+  if (bc < 3) return null;
+  const bx = (best % gw + 0.5) * cs + x0, by = (((best / gw) | 0) + 0.5) * cs + y0;
+  return { t: rec.t, x: bx / sx, y: by / sy, n: bc };
+}
+function clubNear(t, maxDt = 45){
+  let b = null, bd = Infinity;
+  for (const p of C.track){ const dd = Math.abs(p.t - t); if (dd < bd){ bd = dd; b = p; } }
+  return bd <= maxDt ? b : null;
+}
+function drawClub(ctx, pts, topT, sx, sy, lw, addr, addrPt, dtl){
+  if (dtl && addr && addrPt){
+    // shaft line at address, extended past the hands
+    const ax = addrPt.x, ay = addrPt.y, hx = addr.hands.x, hy = addr.hands.y;
+    ctx.setLineDash([lw * 3, lw * 3]); ctx.strokeStyle = "#38bdf8cc"; ctx.lineWidth = lw;
+    ctx.beginPath(); ctx.moveTo(ax * sx, ay * sy); ctx.lineTo((ax + (hx - ax) * 2.2) * sx, (ay + (hy - ay) * 2.2) * sy); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  if (pts.length < 2) return;
+  ctx.lineWidth = lw * 1.4; ctx.lineCap = "round"; ctx.lineJoin = "round";
+  for (let i = 1; i < pts.length; i++){
+    const p = pts[i - 1], q = pts[i];
+    if (q.t - p.t > 120) continue;   // gap: tape not seen, don't draw a fake line
+    ctx.strokeStyle = q.t <= topT ? "#facc15" : "#4ade80";
+    ctx.beginPath(); ctx.moveTo(p.x * sx, p.y * sy); ctx.lineTo(q.x * sx, q.y * sy); ctx.stroke();
+  }
+}
+function clubHTML(c){
+  if (!c) return "";
+  if (!c.ok) return `<div class="ballbox">🏌️ <span style="color:var(--muted)">${c.msg}</span></div>`;
+  return `<div class="ballbox">🏌️ Club tape seen in <b>${c.seen}%</b> of swing frames${c.speed ? ` · head speed ≈ <b>${c.speed} mph</b> <small style="color:var(--muted)">(rough)</small>` : ""}</div>`;
+}
 
 /* ---------------- swing state machine ---------------- */
 const S = { mode: "search", hist: [], addr: null, addrSnap: null, lastStill: null, sw: null, noPose: 0, frames: 0 };
@@ -676,7 +810,7 @@ function resetState(){
 }
 function setStatus(txt, cls = ""){ const s = $("status"); s.textContent = txt; s.className = cls; }
 function toSearch(msg){
-  S.mode = "search"; S.addr = null; S.sw = null; ballResetSwing();
+  S.mode = "search"; S.addr = null; S.sw = null; ballResetSwing(); C.track = [];
   setStatus(msg || "Get set at address and hold still");
 }
 let framingOK = false;
@@ -704,8 +838,9 @@ function step(r){
   S.hist.push(r);
   while (S.hist.length && r.t - S.hist[0].t > 1500) S.hist.shift();
   framingCheck(r);
-  if (S.mode === "swing") swingStep(r);
-  else addressStep(r);
+  const cp = clubFrame(r); C.cur = cp;
+  if (S.mode === "swing"){ if (cp) C.track.push(cp); swingStep(r); }
+  else { if (S.mode === "address" && cp) C.addrPt = cp; addressStep(r); }
 }
 
 function addressStep(r){
@@ -740,7 +875,7 @@ function addressStep(r){
     // takeaway: start = last frame where hands were still at the address position
     let start = S.lastStill;
     for (const h of S.hist) if (h.t > start.t && dist(h.hands, a.hands) < 0.1 * a.torso) start = h;
-    S.mode = "swing";
+    S.mode = "swing"; C.track = C.addrPt ? [C.addrPt] : [];
     S.sw = { start, frames: S.hist.filter(h => h.t >= start.t), phase: "back", peak: null, top: null, low: null,
              impact: null, finish: null, snaps: {} };
     setStatus("Swinging…", "go");
@@ -892,6 +1027,44 @@ function analyze(a, sw){
     }
   }
 
+  let club = null;
+  if (clubOn()){
+    if (!C.hsv) club = { ok: false, msg: "Club tape not set. Tap “Set club tape”, then tap the tape on the club head." };
+    else {
+      const seen = Math.round(100 * Math.min(1, C.track.length / Math.max(1, sw.frames.length)));
+      club = { ok: seen > 0, seen, msg: "Couldn't find the club tape. Re-set it in this light, or use brighter tape." };
+      const tp = clubNear(top.t);
+      if (view === "face" && tp){
+        const ang = deg(Math.atan2(top.hands.y - tp.y, Math.abs(tp.x - top.hands.x) || 0.001));
+        add("clubTop", "Club at the top", ang, v => v >= 0 ? v.toFixed(0) + "° short of parallel" : (-v).toFixed(0) + "° past parallel", [-8, 40], [-20, 60],
+            "Club well past parallel (overswing). Shorten the backswing; stop when the lead arm starts to bend.",
+            "Quite a short backswing. Fine for control, but you can turn a little more for distance.", "0–40° short");
+      }
+      if (view === "dtl" && C.addrPt){
+        const mids = sw.frames.filter(f => f.t > top.t && f.t < imp.t);
+        if (mids.length){
+          const hf = mids.reduce((b, f) => Math.abs(f.hands.y - a.hip.y) < Math.abs(b.hands.y - a.hip.y) ? f : b);
+          const cp = clubNear(hf.t, 35);
+          if (cp){
+            const L = { x: a.hands.x - C.addrPt.x, y: a.hands.y - C.addrPt.y }, len = Math.hypot(L.x, L.y) || 1;
+            const cross = (q) => (L.x * (q.y - C.addrPt.y) - L.y * (q.x - C.addrPt.x)) / len;
+            const bodySide = Math.sign(cross(a.hip)) || 1;
+            const over = -cross(cp) * bodySide / ppi;   // + = above the shaft line (over the top)
+            add("plane", "Downswing plane (beta)", over, v => inch(v) + (v > 0 ? " over the line" : " under the line"), [-14, 2], [-20, 6],
+                "Club far under the plane coming down. Can cause blocks and hooks; let the body keep turning.",
+                "Club above the shaft line in the downswing (over the top). Usually pulls and slices. Let the trail elbow drop first.", "on / under line");
+          }
+        }
+      }
+      if (db.settings.clubSpeed === "on"){
+        const near = C.track.filter(p => Math.abs(p.t - imp.t) < 60).sort((p, q) => p.t - q.t);
+        let sp = 0;
+        for (let i = 1; i < near.length; i++){ const dt = (near[i].t - near[i - 1].t) / 1000; if (dt > 0 && dt < 0.05) sp = Math.max(sp, dist(near[i], near[i - 1]) / ppi / dt * 0.0568); }
+        if (sp) club.speed = Math.round(sp);
+      }
+    }
+  }
+
   const pts = { good: 1, warn: 0.5, bad: 0 };
   const score = M.length ? Math.round(100 * M.reduce((s, m) => s + pts[m.status], 0) / M.length) : 0;
   const worst = M.find(m => m.status === "bad") || M.find(m => m.status === "warn");
@@ -899,6 +1072,7 @@ function analyze(a, sw){
     score, metrics: M, back, down, ratio,
     main: worst ? worst.tip : "Solid swing. Repeat it.",
     ball: ballResult(a, view === "face" ? (Math.sign(a.P[LD.hip].x - a.P[TR.hip].x) || (db.settings.hand === "R" ? 1 : -1)) : 0),
+    club, topT: top.t,
     impactRec: imp
   };
 }
@@ -930,6 +1104,10 @@ function drawOverlay(rec){
     octx.setLineDash([]);
   }
   if (rec) drawSkeleton(octx, rec, sx, sy, 3);
+  if (clubOn()){
+    if (S.mode === "swing") drawClub(octx, C.track, S.sw && S.sw.top ? S.sw.top.t : Infinity, sx, sy, 2, null, null, false);
+    if (C.cur){ octx.strokeStyle = "#f0abfc"; octx.lineWidth = 2.5; octx.beginPath(); octx.arc(C.cur.x * sx, C.cur.y * sy, 10, 0, 7); octx.stroke(); }
+  }
   if (ballOn() && B.spot){
     octx.strokeStyle = B.refCount >= 3 || S.mode === "search" ? "#38bdf8" : "#f87171"; octx.lineWidth = 2;
     octx.beginPath(); octx.arc(B.spot.x * w, B.spot.y * h, Math.max(8, B.r * 2.2 * (w / aw)), 0, 7); octx.stroke();
@@ -937,7 +1115,7 @@ function drawOverlay(rec){
     for (const p of lastBallTrack){ octx.beginPath(); octx.arc(p.x * w / aw, p.y * h / ah, 4, 0, 7); octx.fill(); }
   }
 }
-let lastBallTrack = [];
+let lastBallTrack = [], thumbClub = null;
 function thumb(snap, width){
   if (!snap) return "";
   const src = snap.c, c = document.createElement("canvas");
@@ -946,6 +1124,7 @@ function thumb(snap, width){
   if (frame.classList.contains("mirror")){ x.translate(c.width, 0); x.scale(-1, 1); }
   x.drawImage(src, 0, 0, c.width, c.height);
   drawSkeleton(x, snap.rec, c.width / vw, c.height / vh, Math.max(1.5, width / 110));
+  if (thumbClub) drawClub(x, thumbClub.pts.filter(p => p.t <= snap.rec.t + 1), thumbClub.topT, c.width / vw, c.height / vh, Math.max(1.5, width / 110), thumbClub.addr, thumbClub.addrPt, thumbClub.dtl);
   return c.toDataURL("image/jpeg", 0.7);
 }
 
@@ -957,15 +1136,17 @@ function finishSwing(){
   const res = analyze(a, sw);
   if (!sw.snaps.impact || res.impactRec.id !== sw.impact.id) sw.snaps.impact = grabSnap(res.impactRec.id, res.impactRec) || sw.snaps.impact;
   const snaps = [["Address", S.addrSnap], ["Backswing", sw.snaps.back], ["Top", sw.snaps.top], ["Impact", sw.snaps.impact], ["Finish", sw.snaps.finish]];
-  const big = snaps.map(([l, s]) => [l, thumb(s, 220)]);
-  const small = snaps.map(([l, s]) => [l, thumb(s, 100)]);
+  thumbClub = clubOn() && C.track.length ? { pts: C.track.slice(), topT: res.topT, addr: a, addrPt: C.addrPt, dtl: db.settings.view === "dtl" } : null;
+  const big = snaps.map(([l, s]) => [l, thumb(s, 300)]);
+  const small = snaps.map(([l, s]) => [l, thumb(s, 130)]);
+  thumbClub = null; C.track = [];
   lastBallTrack = B.track.slice();
 
   const rec = {
     id: Date.now(), ts: new Date().toISOString(), view: db.settings.view, hand: db.settings.hand,
     score: res.score, ratio: res.ratio, back: res.back, down: res.down, main: res.main,
     metrics: res.metrics.map(m => ({ key: m.key, label: m.label, disp: m.disp, status: m.status, tip: m.tip, target: m.target })),
-    ball: res.ball, thumbs: small
+    ball: res.ball, club: res.club, thumbs: small
   };
   db.swings.unshift(rec);
   if (db.swings.length > 60) db.swings.length = 60;
@@ -978,7 +1159,7 @@ function finishSwing(){
   beep(660, 90);
 
   S.mode = "search"; S.sw = null; S.addr = null; S.hist = []; ballResetSwing();
-  setStatus(`Score ${res.score}. Set up again for the next swing`);
+  setStatus(`${res.score} · set up again`, "ok");
 }
 
 function metricRows(r){
@@ -1001,8 +1182,8 @@ function renderSheet(r, open){
       <div class="score" style="border-color:${COLOR(r.score)}">${r.score}</div>
       <div class="headtxt"><div class="tempo">${tempo}</div><div class="main">${r.main}</div></div>
     </div>
-    <div class="thumbs">${(r.bigThumbs || r.thumbs).map(([l, src]) => `<figure>${src ? `<img src="${src}">` : `<img alt="">`}<figcaption>${l}</figcaption></figure>`).join("")}</div>
-    ${ballHTML(r.ball)}
+    <div class="thumbs">${(r.bigThumbs || r.thumbs).map(([l, src]) => `<figure>${src ? `<img src="${src}" data-l="${l}">` : `<img alt="">`}<figcaption>${l}</figcaption></figure>`).join("")}</div>
+    ${ballHTML(r.ball)}${clubHTML(r.club)}
     ${metricRows(r)}
     <div class="sheetbtns"><button id="bestBtn">★ Save as best</button><button class="pri" id="hideBtn">Hide</button></div>
     <p class="hint">Measured in 2D from one camera. Inches assume a ~19" shoulder-to-hip torso. Use it to spot trends, not as exact numbers.</p>`;
@@ -1021,6 +1202,31 @@ function collapseSheet(){ $("sheet").classList.remove("open"); }
 $("chip").addEventListener("click", e => { e.stopPropagation(); if (lastResult) $("sheet").classList.toggle("open"); });
 $("sheet").addEventListener("click", e => e.stopPropagation());
 bindInfo($("sheet"), ".met");
+
+/* full-screen photo viewer */
+let vSet = [], vIdx = 0;
+function vShow(){ const it = vSet[vIdx]; $("vImg").src = it.src; $("vLabel").textContent = `${it.l}  (${vIdx + 1}/${vSet.length})`; }
+function openViewer(img){
+  const imgs = [...img.closest(".thumbs").querySelectorAll("img[data-l]")];
+  vSet = imgs.map(i => ({ src: i.src, l: i.dataset.l })); vIdx = imgs.indexOf(img);
+  vShow(); $("viewer").classList.add("on");
+}
+const vStep = d => { vIdx = (vIdx + d + vSet.length) % vSet.length; vShow(); };
+document.addEventListener("click", e => {
+  const img = e.target.closest(".thumbs img[data-l]");
+  if (!img) return;
+  e.stopPropagation(); openViewer(img);
+}, true);
+$("vClose").onclick = () => $("viewer").classList.remove("on");
+$("vImgWrap").onclick = () => $("viewer").classList.remove("on");
+$("vPrev").onclick = () => vStep(-1);
+$("vNext").onclick = () => vStep(1);
+let vX = null;
+$("viewer").addEventListener("touchstart", e => { vX = e.touches[0].clientX; }, { passive: true });
+$("viewer").addEventListener("touchend", e => {
+  if (vX == null) return; const dx = e.changedTouches[0].clientX - vX; vX = null;
+  if (Math.abs(dx) > 50) vStep(dx < 0 ? 1 : -1);
+});
 bindInfo($("histList"), ".met");
 bindInfo($("checkList"), "li:not(.grp)");
 
@@ -1038,9 +1244,9 @@ function renderHistory(){
         <div class="meta"><div>${when}${isBest ? '<span class="badge">BEST</span>' : ""}</div>
           <div>${r.view === "face" ? "Face-on" : "Down-the-line"} · tempo ${r.ratio ? r.ratio.toFixed(1) + " : 1" : "—"}</div></div></div>
       <div class="detail">
-        <div class="thumbs">${r.thumbs.map(([l, s]) => `<figure>${s ? `<img src="${s}">` : `<img alt="">`}<figcaption>${l}</figcaption></figure>`).join("")}</div>
+        <div class="thumbs">${r.thumbs.map(([l, s]) => `<figure>${s ? `<img src="${s}" data-l="${l}">` : `<img alt="">`}<figcaption>${l}</figcaption></figure>`).join("")}</div>
         <div class="hint" style="margin-bottom:6px">${r.main}</div>
-        ${ballHTML(r.ball)}${metricRows(r)}
+        ${ballHTML(r.ball)}${clubHTML(r.club)}${metricRows(r)}
       </div></div>`;
   }).join("");
   list.querySelectorAll(".hitem").forEach(el => el.addEventListener("click", e => { if (!e.target.closest(".met")) el.classList.toggle("open"); }));
@@ -1064,7 +1270,7 @@ function onFrame(tMedia){
   frameId++;
   const slot = frameId % RING;
   ring[slot].ctx.drawImage(video, 0, 0, ring[slot].c.width, ring[slot].c.height); ringIds[slot] = frameId;
-  if (ballOn() && aw) actx.drawImage(video, 0, 0, aw, ah);
+  if ((ballOn() || clubOn()) && aw) actx.drawImage(video, 0, 0, aw, ah);
 
   let res;
   try { res = landmarker.detectForVideo(video, t); } catch { return; }
@@ -1091,6 +1297,7 @@ async function start(){
   keepAwake();
   show("live");
   $("ballBtn").style.display = ballOn() ? "block" : "none";
+  $("clubBtn").style.display = clubOn() ? "block" : "none";
   $("loading").style.display = "grid"; $("loading").textContent = "Starting camera…";
   setStatus("Starting…");
   try {
@@ -1105,7 +1312,8 @@ async function start(){
   }
   $("loading").style.display = "none";
   resetState();
-  if (ballOn() && !B.spot){ B.setMode = true; $("ballBtn").textContent = "Cancel"; setStatus("Tap the ball on screen", "go"); }
+  if (clubOn() && !C.hsv){ C.setMode = true; $("clubBtn").textContent = "Cancel"; setStatus("Hold the club still and tap the tape", "go"); }
+  else if (ballOn() && !B.spot){ B.setMode = true; $("ballBtn").textContent = "Cancel"; setStatus("Tap the ball on screen", "go"); }
   else setStatus("Get set at address and hold still");
   running = true; loop();
 }
