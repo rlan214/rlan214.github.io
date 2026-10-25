@@ -1,6 +1,6 @@
 /* Service worker: caches the app shell and all Tagalog audio clips.
    Bump CACHE_VERSION whenever you replace an MP3 or change index.html. */
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 const CACHE = "tagalog-adventure-" + CACHE_VERSION;
 
 const AUDIO = [
@@ -18,7 +18,7 @@ self.addEventListener("install", (event) => {
     // Each add is wrapped so one missing clip doesn't fail the whole install.
     await cache.add("./").catch(() => {});
     await Promise.all(
-      AUDIO.map((f) => cache.add("audio/" + f + ".mp3").catch(() => {}))
+      AUDIO.flatMap((f) => [f, "en_" + f]).map((f) => cache.add("audio/" + f + ".mp3").catch(() => {}))
     );
     await self.skipWaiting();
   })());

@@ -1,5 +1,5 @@
 {
-  "_note": "Source of truth for words. Add a unit or word here, then run make_audio.py to generate only the missing clips. Optional per-word field 'say' overrides the text sent to the voice (e.g. a respelling).",
+  "_note": "Source of truth for words. Add a word here, then run make_audio.py (Tagalog) and make_audio.py --english (English) to generate only the missing clips. Optional per-word fields: 'say' overrides the Tagalog text sent to the voice; 'en_say' overrides the English text.",
   "units": [
     {
       "unit": "Greetings",
@@ -8,39 +8,48 @@
           "file": "kumusta",
           "tag": "Kumusta",
           "en": "Hello / How are you",
-          "phon": "koo-MOOS-tah"
+          "phon": "koo-MOOS-tah",
+          "emoji": "😊",
+          "en_say": "Hello"
         },
         {
           "file": "magandang_umaga",
           "tag": "Magandang umaga",
           "en": "Good morning",
-          "phon": "mah-gahn-DAHNG oo-MAH-gah"
+          "phon": "mah-gahn-DAHNG oo-MAH-gah",
+          "emoji": "🌅"
         },
         {
           "file": "salamat",
           "tag": "Salamat",
           "en": "Thank you",
-          "phon": "sah-LAH-maht"
+          "phon": "sah-LAH-maht",
+          "emoji": "🙏"
         },
         {
           "file": "paalam",
           "tag": "Paalam",
           "en": "Goodbye",
-          "phon": "pah-AH-lahm"
+          "phon": "pah-AH-lahm",
+          "emoji": "👋"
         },
         {
           "file": "oo",
           "tag": "Oo",
           "en": "Yes",
-          "phon": "OH-oh"
+          "phon": "OH-oh",
+          "emoji": "✅"
         },
         {
           "file": "hindi",
           "tag": "Hindi",
           "en": "No",
-          "phon": "HIN-dee"
+          "phon": "HIN-dee",
+          "emoji": "❌"
         }
-      ]
+      ],
+      "emoji": "👋",
+      "color": "butter"
     },
     {
       "unit": "Family",
@@ -49,39 +58,47 @@
           "file": "nanay",
           "tag": "Nanay",
           "en": "Mom",
-          "phon": "NAH-nye"
+          "phon": "NAH-nye",
+          "emoji": "👩"
         },
         {
           "file": "tatay",
           "tag": "Tatay",
           "en": "Dad",
-          "phon": "tah-TYE"
+          "phon": "tah-TYE",
+          "emoji": "👨"
         },
         {
           "file": "kuya",
           "tag": "Kuya",
           "en": "Older brother",
-          "phon": "KOO-yah"
+          "phon": "KOO-yah",
+          "emoji": "👦"
         },
         {
           "file": "ate",
           "tag": "Ate",
           "en": "Older sister",
-          "phon": "AH-teh"
+          "phon": "AH-teh",
+          "emoji": "👧"
         },
         {
           "file": "lola",
           "tag": "Lola",
           "en": "Grandma",
-          "phon": "LOH-lah"
+          "phon": "LOH-lah",
+          "emoji": "👵"
         },
         {
           "file": "lolo",
           "tag": "Lolo",
           "en": "Grandpa",
-          "phon": "LOH-loh"
+          "phon": "LOH-loh",
+          "emoji": "👴"
         }
-      ]
+      ],
+      "emoji": "👨‍👩‍👧",
+      "color": "pink"
     },
     {
       "unit": "Numbers",
@@ -90,63 +107,75 @@
           "file": "isa",
           "tag": "Isa",
           "en": "One",
-          "phon": "EE-sah"
+          "phon": "EE-sah",
+          "emoji": "1️⃣"
         },
         {
           "file": "dalawa",
           "tag": "Dalawa",
           "en": "Two",
-          "phon": "dah-lah-WAH"
+          "phon": "dah-lah-WAH",
+          "emoji": "2️⃣"
         },
         {
           "file": "tatlo",
           "tag": "Tatlo",
           "en": "Three",
-          "phon": "taht-LOH"
+          "phon": "taht-LOH",
+          "emoji": "3️⃣"
         },
         {
           "file": "apat",
           "tag": "Apat",
           "en": "Four",
-          "phon": "AH-paht"
+          "phon": "AH-paht",
+          "emoji": "4️⃣"
         },
         {
           "file": "lima",
           "tag": "Lima",
           "en": "Five",
-          "phon": "LEE-mah"
+          "phon": "LEE-mah",
+          "emoji": "5️⃣"
         },
         {
           "file": "anim",
           "tag": "Anim",
           "en": "Six",
-          "phon": "AH-nim"
+          "phon": "AH-nim",
+          "emoji": "6️⃣"
         },
         {
           "file": "pito",
           "tag": "Pito",
           "en": "Seven",
-          "phon": "pee-TOH"
+          "phon": "pee-TOH",
+          "emoji": "7️⃣"
         },
         {
           "file": "walo",
           "tag": "Walo",
           "en": "Eight",
-          "phon": "wah-LOH"
+          "phon": "wah-LOH",
+          "emoji": "8️⃣"
         },
         {
           "file": "siyam",
           "tag": "Siyam",
           "en": "Nine",
-          "phon": "SHAHM"
+          "phon": "SHAHM",
+          "emoji": "9️⃣"
         },
         {
           "file": "sampu",
           "tag": "Sampu",
           "en": "Ten",
-          "phon": "sahm-POO"
+          "phon": "sahm-POO",
+          "emoji": "🔟"
         }
-      ]
+      ],
+      "emoji": "🔢",
+      "color": "blue"
     },
     {
       "unit": "Animals",
@@ -155,39 +184,47 @@
           "file": "aso",
           "tag": "Aso",
           "en": "Dog",
-          "phon": "AH-soh"
+          "phon": "AH-soh",
+          "emoji": "🐶"
         },
         {
           "file": "pusa",
           "tag": "Pusa",
           "en": "Cat",
-          "phon": "POO-sah"
+          "phon": "POO-sah",
+          "emoji": "🐱"
         },
         {
           "file": "ibon",
           "tag": "Ibon",
           "en": "Bird",
-          "phon": "EE-bon"
+          "phon": "EE-bon",
+          "emoji": "🐦"
         },
         {
           "file": "isda",
           "tag": "Isda",
           "en": "Fish",
-          "phon": "is-DAH"
+          "phon": "is-DAH",
+          "emoji": "🐟"
         },
         {
           "file": "baboy",
           "tag": "Baboy",
           "en": "Pig",
-          "phon": "BAH-boy"
+          "phon": "BAH-boy",
+          "emoji": "🐷"
         },
         {
           "file": "manok",
           "tag": "Manok",
           "en": "Chicken",
-          "phon": "mah-NOK"
+          "phon": "mah-NOK",
+          "emoji": "🐔"
         }
-      ]
+      ],
+      "emoji": "🐾",
+      "color": "mint"
     },
     {
       "unit": "Food",
@@ -196,39 +233,47 @@
           "file": "kanin",
           "tag": "Kanin",
           "en": "Rice",
-          "phon": "KAH-nin"
+          "phon": "KAH-nin",
+          "emoji": "🍚"
         },
         {
           "file": "tubig",
           "tag": "Tubig",
           "en": "Water",
-          "phon": "TOO-big"
+          "phon": "TOO-big",
+          "emoji": "💧"
         },
         {
           "file": "gulay",
           "tag": "Gulay",
           "en": "Vegetable",
-          "phon": "goo-LYE"
+          "phon": "goo-LYE",
+          "emoji": "🥦"
         },
         {
           "file": "prutas",
           "tag": "Prutas",
           "en": "Fruit",
-          "phon": "PROO-tahs"
+          "phon": "PROO-tahs",
+          "emoji": "🍎"
         },
         {
           "file": "itlog",
           "tag": "Itlog",
           "en": "Egg",
-          "phon": "it-LOG"
+          "phon": "it-LOG",
+          "emoji": "🥚"
         },
         {
           "file": "tinapay",
           "tag": "Tinapay",
           "en": "Bread",
-          "phon": "tee-nah-PYE"
+          "phon": "tee-nah-PYE",
+          "emoji": "🍞"
         }
-      ]
+      ],
+      "emoji": "🍚",
+      "color": "peach"
     },
     {
       "unit": "Colors",
@@ -237,39 +282,47 @@
           "file": "pula",
           "tag": "Pula",
           "en": "Red",
-          "phon": "POO-lah"
+          "phon": "POO-lah",
+          "emoji": "🔴"
         },
         {
           "file": "asul",
           "tag": "Asul",
           "en": "Blue",
-          "phon": "ah-SOOL"
+          "phon": "ah-SOOL",
+          "emoji": "🔵"
         },
         {
           "file": "dilaw",
           "tag": "Dilaw",
           "en": "Yellow",
-          "phon": "dee-LOW"
+          "phon": "dee-LOW",
+          "emoji": "🟡"
         },
         {
           "file": "berde",
           "tag": "Berde",
           "en": "Green",
-          "phon": "BEHR-deh"
+          "phon": "BEHR-deh",
+          "emoji": "🟢"
         },
         {
           "file": "puti",
           "tag": "Puti",
           "en": "White",
-          "phon": "poo-TEE"
+          "phon": "poo-TEE",
+          "emoji": "⚪"
         },
         {
           "file": "itim",
           "tag": "Itim",
           "en": "Black",
-          "phon": "ee-TEEM"
+          "phon": "ee-TEEM",
+          "emoji": "⚫"
         }
-      ]
+      ],
+      "emoji": "🎨",
+      "color": "lav"
     }
   ]
 }

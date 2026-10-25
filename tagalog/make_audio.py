@@ -1,17 +1,29 @@
 #!/usr/bin/env python3
-"""Generate Tagalog audio clips with ElevenLabs. Standard library only.
+"""Generate audio clips with ElevenLabs. Standard library only.
 
-Reads words.json (next to this script) and writes audio/<file>.mp3 for each word.
+Reads words.json (next to this script) and writes MP3s into audio/.
+  Tagalog clips:  audio/<file>.mp3      (default)
+  English clips:  audio/en_<file>.mp3   (with --english)
 Clips that already exist are skipped, so adding new words later only generates
-the new ones. Use --force to redo clips, --only to pick specific ones.
+the new ones. Use --force to redo clips and --only to pick specific ones.
 
 Setup (once per Terminal window):
     read -s "ELEVENLABS_API_KEY?ElevenLabs API key: "; export ELEVENLABS_API_KEY
 
-Usage:
-    python3 make_audio.py --only salamat      # test one clip first
-    python3 make_audio.py                     # generate everything missing
-    python3 make_audio.py --force --only salamat kumusta
+Examples:
+    ELEVEN_VOICE_ID="your-tagalog-voice-id" python3 make_audio.py
+    python3 make_audio.py --english
+    python3 make_audio.py --dry-run --english
+    ELEVEN_VOICE_ID="..." python3 make_audio.py --force --only salamat oo
+
+Environment overrides (all optional):
+    ELEVEN_VOICE_ID     voice ID for Tagalog clips (skips the name lookup)
+    ELEVEN_VOICE        voice name for Tagalog clips (default Roger)
+    ELEVEN_EN_VOICE_ID  voice ID for English clips
+    ELEVEN_EN_VOICE     voice name for English clips (default Roger)
+    ELEVEN_MODEL        model id (default eleven_v4)
+    ELEVEN_OUT          output folder name (default audio)
+    ELEVEN_STABILITY    stability value to send, for example 1.0
 """
 import argparse
 import json
@@ -22,15 +34,9 @@ import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# ---- settings you may want to change -------------------------------------
-VOICE_NAME = os.environ.get("ELEVEN_VOICE", "Roger")   # voice name as shown in My Voices
-MODEL_ID = os.environ.get("ELEVEN_MODEL", "eleven_v4")   # eleven_v3 and eleven_multilingual_v2 also list Filipino
-LANGUAGE_CODE = "fil"           # Filipino
+MODEL_ID = os.environ.get("ELEVEN_MODEL", "eleven_v4")
 OUTPUT_FORMAT = "mp3_44100_128"
-WORKERS = 2                     # free plan allows 2 concurrent requests; raise only on a higher plan
-# Optional: set ELEVEN_VOICE_ID to skip the name lookup,
-# and ELEVEN_STABILITY (for example 1.0) to send a stability value.
-# --------------------------------------------------------------------------
+WORKERS = 2  # the free plan allows 2 concurrent requests; raise only on a higher plan
 
 API = "https://api.elevenlabs.io"
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -59,42 +65,39 @@ def request(method, path, key, body=None, retries=3):
             raise RuntimeError("Network error: %s" % e.reason)
 
 
-def find_voice_id(key):
-    env_id = os.environ.get("ELEVEN_VOICE_ID", "").strip()
-    if env_id:
-        return env_id
+def find_voice_id(key, env_id, env_name):
+    voice_id = os.environ.get(env_id, "").strip()
+    if voice_id:
+        return voice_id, voice_id
+    name = os.environ.get(env_name, "Roger")
     voices = json.loads(request("GET", "/v1/voices", key))["voices"]
     for v in voices:
-        if v.get("name", "").lower().startswith(VOICE_NAME.lower()):
-            return v["voice_id"]
+        if v.get("name", "").lower().startswith(name.lower()):
+            return v["voice_id"], v["name"]
     names = ", ".join(sorted(v.get("name", "?") for v in voices))
     sys.exit("Voice '%s' not found. Voices on this account: %s\n"
-             "Set ELEVEN_VOICE_ID to the voice's ID, or change VOICE_NAME." % (VOICE_NAME, names))
+             "Set %s to a voice ID, or %s to a voice name." % (name, names, env_id, env_name))
 
 
-def make_clip(key, voice_id, word, out_dir):
-    text = word.get("say") or (word["tag"] + ".")
-    body = {"text": text, "model_id": MODEL_ID, "language_code": LANGUAGE_CODE}
+def make_clip(key, voice_id, text, language, out_path):
+    body = {"text": text, "model_id": MODEL_ID, "language_code": language}
     stab = os.environ.get("ELEVEN_STABILITY")
     if stab:
         body["voice_settings"] = {"stability": float(stab)}
     audio = request("POST", "/v1/text-to-speech/%s?output_format=%s" % (voice_id, OUTPUT_FORMAT), key, body)
-    path = os.path.join(out_dir, word["file"] + ".mp3")
-    with open(path, "wb") as f:
+    with open(out_path, "wb") as f:
         f.write(audio)
-    return word["file"], len(text), len(audio)
+    return len(text), len(audio)
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--only", nargs="*", help="only these file names (e.g. salamat kumusta)")
+    ap.add_argument("--english", action="store_true", help="make English clips (en_<file>.mp3)")
+    ap.add_argument("--only", nargs="*", help="only these file names (e.g. salamat oo)")
     ap.add_argument("--force", action="store_true", help="overwrite clips that already exist")
+    ap.add_argument("--dry-run", action="store_true", help="show what would be made, call nothing")
     ap.add_argument("--workers", type=int, default=WORKERS)
     args = ap.parse_args()
-
-    key = os.environ.get("ELEVENLABS_API_KEY", "").strip()
-    if not key:
-        sys.exit("ELEVENLABS_API_KEY is not set. See the setup line at the top of this file.")
 
     with open(os.path.join(HERE, "words.json"), encoding="utf-8") as f:
         units = json.load(f)["units"]
@@ -108,38 +111,65 @@ def main():
         words = [w for w in words if w["file"] in wanted]
 
     out_dir = os.path.join(HERE, os.environ.get("ELEVEN_OUT", "audio"))
-    os.makedirs(out_dir, exist_ok=True)
 
-    todo = [w for w in words
-            if args.force or not os.path.exists(os.path.join(out_dir, w["file"] + ".mp3"))]
-    skipped = len(words) - len(todo)
-    if not todo:
+    jobs = []  # (display name, text, output path)
+    for w in words:
+        if args.english:
+            name = "en_" + w["file"]
+            text = w.get("en_say") or (w["en"] + ".")
+        else:
+            name = w["file"]
+            text = w.get("say") or (w["tag"] + ".")
+        path = os.path.join(out_dir, name + ".mp3")
+        if args.force or not os.path.exists(path):
+            jobs.append((name, text, path))
+    skipped = len(words) - len(jobs)
+    language = "en" if args.english else "fil"
+
+    if args.dry_run:
+        print("Would make %d clips (%d already exist), language %s, model %s:" % (len(jobs), skipped, language, MODEL_ID))
+        for name, text, _ in jobs:
+            print("  %-22s %r" % (name + ".mp3", text))
+        return
+
+    if not jobs:
         print("Nothing to do: all %d clips already exist (use --force to redo)." % len(words))
         return
 
-    voice_id = find_voice_id(key)
+    key = os.environ.get("ELEVENLABS_API_KEY", "").strip()
+    if not key:
+        sys.exit("ELEVENLABS_API_KEY is not set. See the setup line at the top of this file.")
+
+    os.makedirs(out_dir, exist_ok=True)
+    if args.english:
+        voice_id, voice_label = find_voice_id(key, "ELEVEN_EN_VOICE_ID", "ELEVEN_EN_VOICE")
+    else:
+        voice_id, voice_label = find_voice_id(key, "ELEVEN_VOICE_ID", "ELEVEN_VOICE")
     print("Voice %s | model %s | language %s | %d clips to make, %d skipped"
-          % (VOICE_NAME, MODEL_ID, LANGUAGE_CODE, len(todo), skipped))
+          % (voice_label, MODEL_ID, language, len(jobs), skipped))
 
     done, failed, chars = 0, [], 0
     started = time.time()
     with ThreadPoolExecutor(max_workers=max(1, args.workers)) as pool:
-        futures = {pool.submit(make_clip, key, voice_id, w, out_dir): w for w in todo}
+        futures = {pool.submit(make_clip, key, voice_id, text, language, path): name
+                   for name, text, path in jobs}
         for fut in as_completed(futures):
-            w = futures[fut]
+            name = futures[fut]
             try:
-                name, n_chars, n_bytes = fut.result()
+                n_chars, n_bytes = fut.result()
                 done += 1
                 chars += n_chars
-                print("  ok  %-18s %5.1f KB  (%d/%d)" % (name, n_bytes / 1024, done, len(todo)))
+                print("  ok  %-22s %5.1f KB  (%d/%d)" % (name, n_bytes / 1024, done, len(jobs)))
             except Exception as e:
-                failed.append(w["file"])
-                print("  FAIL %-17s %s" % (w["file"], e))
+                failed.append(name)
+                print("  FAIL %-21s %s" % (name, e))
 
     print("\nDone in %.0fs: %d made, %d failed, about %d characters sent."
           % (time.time() - started, done, len(failed), chars))
     if failed:
-        print("Retry the failures with: python3 make_audio.py --only " + " ".join(failed))
+        base = [n[3:] if n.startswith("en_") else n for n in failed]
+        print("Retry the failures with: python3 make_audio.py %s--only %s"
+              % ("--english " if args.english else "", " ".join(base)))
         sys.exit(1)
 
 
