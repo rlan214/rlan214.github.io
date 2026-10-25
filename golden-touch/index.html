@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Golden Touch">
+<meta name="theme-color" content="#0a1a10">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<title>Golden Touch</title>
+<style>
+:root{--bg:#0a1a10;--panel:#11261a;--panel2:#183322;--line:#264a33;--text:#f2f7f1;--muted:#9db8a6;--green:#3ad06e;--ball:#ffe23a;--gold:#f6c531;--red:#ff6464;--blue:#7cc4ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Rounded","Segoe UI",Roboto,sans-serif;overscroll-behavior:none;-webkit-user-select:none;user-select:none}
+body{overflow:hidden}
+button,select,input{font:inherit;color:inherit}
+button{border:0;cursor:pointer;background:none}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;z-index:2}
+.screen.active{display:flex}
+.scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 28px);max-width:780px;width:100%;margin:0 auto;height:100%}
+h1,h2,h3{margin:0}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.brand img{width:54px;height:54px;border-radius:14px}
+.brand h1{font-size:28px;letter-spacing:1px;font-weight:900}
+.brand h1 span{color:var(--ball)}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.label{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin:20px 0 8px;font-weight:700}
+.row{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.pchip{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:var(--panel);border:2px solid var(--line);font-weight:700}
+.pchip.on{border-color:var(--ball);background:#2b2a0e}
+.pchip small{color:var(--muted);font-weight:600}
+.pchip.add{color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;display:block;width:100%;text-align:left}
+.card h3{font-size:19px;margin-bottom:4px}
+.card p{margin:0;color:var(--muted);font-size:14px;line-height:1.45}
+.today{background:linear-gradient(135deg,#1c4a2b,#123020);border:2px solid var(--ball)}
+.today h3{font-size:24px}
+.today .wk{color:var(--ball);font-weight:900;letter-spacing:1px;font-size:13px;text-transform:uppercase}
+.dlist{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px}
+.dlist span{font-size:13px;font-weight:700;padding:5px 9px;border-radius:9px;background:#0d2015;border:1px solid var(--line)}
+.meta{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.badge{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:4px 8px;border-radius:8px;background:var(--panel2);color:var(--muted)}
+.badge.y{background:var(--ball);color:#2a2400}
+.days{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.days i{width:18px;height:18px;border-radius:5px;background:var(--panel2);border:1px solid var(--line);display:block}
+.days i.on{background:var(--ball);border-color:var(--ball)}
+.days i.td{outline:2px solid #fff6;outline-offset:1px}
+.hist{font-size:14px;color:var(--muted);padding:10px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:14px;font-weight:800;font-size:17px;background:var(--panel2);border:1px solid var(--line)}
+.btn.main{background:var(--ball);color:#231e00;border:0}
+.btn.go{background:var(--green);color:#03230f;border:0}
+.btn.danger{background:#3a1515;color:#ffb3b3;border-color:#5a2222}
+.btn.sm{padding:9px 12px;font-size:14px;border-radius:11px}
+.btn.on{outline:2px solid var(--ball)}
+.btn.wide{width:100%}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:700}
+.field input[type=text]{width:100%;padding:12px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-size:17px}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.seg button{flex:1;padding:11px 6px;font-weight:700;font-size:14px;color:var(--muted)}
+.seg button.on{background:var(--ball);color:#231e00}
+input[type=range]{width:100%}
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.topbar h2{font-size:22px;flex:1}
+.note{font-size:13px;color:var(--muted);line-height:1.45}
+/* camera */
+#stage{position:fixed;inset:0;background:#000;display:none;z-index:1;align-items:center;justify-content:center}
+#stage.on{display:flex}
+#frame{position:relative;transform:scaleX(-1)}
+#frame video,#frame canvas{position:absolute;inset:0;width:100%;height:100%}
+#frame video{object-fit:fill}
+#mask{opacity:.7;image-rendering:pixelated;display:none}
+#mask.on{display:block}
+.overlay{background:transparent;pointer-events:none}
+.overlay .pe{pointer-events:auto}
+#setupPanel{position:absolute;left:0;right:0;bottom:0;padding:16px 16px calc(env(safe-area-inset-bottom) + 16px);background:linear-gradient(transparent,rgba(4,12,7,.93) 20%)}
+#setupPanel .inner{max-width:660px;margin:0 auto}
+#setupPanel h2{font-size:22px;margin-bottom:6px}
+#setupPanel ul{margin:6px 0 10px;padding-left:18px;color:#d6e6db;font-size:14px;line-height:1.5}
+.status{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+.pill{padding:7px 11px;border-radius:999px;font-size:13px;font-weight:800;background:rgba(0,0,0,.55);border:1px solid #3a4d42}
+.pill.ok{border-color:var(--ball);color:var(--ball)}
+.pill.warn{border-color:var(--gold);color:var(--gold)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.btnrow .btn{flex:1 1 auto}
+#tapHint{position:absolute;top:calc(env(safe-area-inset-top) + 12px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);padding:8px 14px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap}
+/* HUD */
+#hudTop{position:absolute;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top) + 8px) 14px 22px;background:linear-gradient(rgba(0,0,0,.78),rgba(0,0,0,.35) 75%,transparent);text-align:center}
+#hudPart{font-size:13px;font-weight:800;letter-spacing:2px;color:var(--ball)}
+#hudTime{font-size:46px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.05;text-shadow:0 2px 10px #000}
+#hudName{font-size:20px;font-weight:800;color:#eef5f0}
+#hudBall{position:absolute;top:calc(env(safe-area-inset-top) + 14px);right:14px;width:16px;height:16px;border-radius:50%;background:var(--ball);opacity:.2;border:2px solid #fff4}
+#hudBall.on{opacity:1}
+#hudBig{position:absolute;left:0;right:0;top:42%;transform:translateY(-50%);text-align:center;font-size:44px;font-weight:900;text-shadow:0 3px 16px #000;padding:0 16px}
+#hudBig small{display:block;font-size:18px;font-weight:700;color:#e2ece5;margin-top:8px;line-height:1.35;max-width:640px;margin-left:auto;margin-right:auto}
+#hudFeed{position:absolute;left:0;right:0;top:30%;text-align:center;font-size:34px;font-weight:900;text-shadow:0 3px 12px #000;transition:opacity .3s}
+#hudTap{position:absolute;left:0;right:0;top:36%;display:flex;justify-content:center;gap:18px}
+.tap{width:88px;height:88px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;background:#ffffff22;color:#fff8;transition:transform .08s}
+.tap.on{background:var(--ball);color:#2a2400;transform:scale(1.08)}
+#hudBottom{position:absolute;right:10px;bottom:calc(env(safe-area-inset-bottom) + 10px)}
+.stats{display:flex;justify-content:center;gap:28px;margin:6px auto 0}
+.stat{text-align:center}
+.stat b{display:block;font-size:26px;font-weight:900;font-variant-numeric:tabular-nums;text-shadow:0 2px 8px #000}
+.stat span{font-size:10px;color:#c5d6cb;letter-spacing:1px;font-weight:800;text-transform:uppercase}
+.goalbar{max-width:420px;margin:8px auto 0;height:8px;border-radius:4px;background:#ffffff22;overflow:hidden}
+.goalbar i{display:block;height:100%;width:0;background:var(--ball);transition:width .2s}
+.ctl{display:flex;gap:8px}
+.ctl .btn{padding:9px 12px;font-size:14px;border-radius:11px;background:rgba(10,20,14,.7)}
+#paused{position:absolute;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;pointer-events:auto}
+#paused.on{display:flex}
+#paused h2{font-size:40px}
+/* results */
+.stars{font-size:52px;text-align:center;letter-spacing:6px;margin:8px 0}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center}
+.tile b{display:block;font-size:30px;font-weight:900}
+.tile span{font-size:12px;color:var(--muted);font-weight:800;letter-spacing:1px;text-transform:uppercase}
+.dres{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:15px}
+.dres b{font-weight:800}
+.dres span{color:var(--muted)}
+.pb{color:var(--ball);font-weight:900;font-size:12px;margin-left:6px}
+/* drill guide */
+.mv{display:flex;gap:14px;align-items:flex-start}
+.mvstage{flex:0 0 170px;height:150px;border-radius:14px;background:linear-gradient(#1d5a30,#16472a);border:1px solid var(--line);position:relative;overflow:hidden}
+.mvstage .ft{position:absolute;bottom:6px;width:18px;height:28px;border-radius:8px 8px 5px 5px;background:#e9eef0cc}
+.mvstage .ft.l{left:56px}.mvstage .ft.r{right:56px}
+.mvstage .bl{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--ball);border:2px solid #0006;left:74px;top:58px}
+.mvstage .tg{position:absolute;width:20px;height:20px;border-radius:50%;border:2px dashed #fff6;transform:translate(-50%,-50%)}
+.mvtxt{flex:1;min-width:0}
+@media (max-width:520px){.mv{flex-direction:column}.mvstage{width:100%;flex-basis:150px}}
+.mvtxt h3{font-size:19px}
+.mvtxt ol{margin:6px 0 0;padding-left:18px;color:#d6e6db;font-size:14px;line-height:1.45}
+.tip{margin-top:6px;font-size:13px;color:var(--ball)}
+.kidline{font-size:16px;line-height:1.4;color:#eef5f0;margin:4px 0 0}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 30px);transform:translateX(-50%) translateY(30px);background:#000d;border:1px solid var(--ball);padding:10px 16px;border-radius:12px;font-weight:700;opacity:0;transition:.25s;z-index:9;pointer-events:none;max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div id="stage"><div id="frame"><video id="video" playsinline muted autoplay></video><canvas id="mask"></canvas><canvas id="ov"></canvas></div></div>
+
+<!-- HOME -->
+<section id="home" class="screen active"><div class="scroll">
+  <div class="brand"><img src="icon.png" alt="" onerror="this.style.display='none'"><div><h1>GOLDEN <span>TOUCH</span></h1><p>Daily soccer dribbling · move the yellow ball to the gold targets</p></div></div>
+  <div class="label">Who's training?</div>
+  <div class="row" id="profiles"></div>
+  <div class="label">Today</div>
+  <div id="today"></div>
+  <div class="label">Streak</div>
+  <div class="card" id="streak"></div>
+  <div class="label">Practice one drill</div>
+  <div id="library"></div>
+  <div class="label">Recent</div>
+  <div id="recent" class="card"></div>
+  <div class="label">How the daily session works</div>
+  <div class="card"><p>Every day follows the same pattern youth coaches use for at-home ball mastery: a <b>warm-up with toe taps</b>, then <b>this week's skill drills</b> (30 seconds of work, short rest, both feet), the <b>Box Challenge</b> (chase the targets and change direction), and a <b>quick stretch</b>. Each skill focus lasts 7 sessions, then moves on: Foot Familiarity → Directional Control → Change of Direction → Quick Feet &amp; Moves. After 4 weeks it starts over with harder targets. Missed a day? No restart, just pick up where you left off.</p></div>
+</div></section>
+
+<!-- PROFILE -->
+<section id="profile" class="screen"><div class="scroll">
+  <div class="topbar"><button class="btn sm" data-go="home">← Back</button><h2 id="pTitle">Player</h2></div>
+  <div class="field"><label>Name</label><input type="text" id="pName" maxlength="16"></div>
+  <div class="field"><label>Emoji</label><input type="text" id="pEmoji" maxlength="4"></div>
+  <div class="field"><label>Level (session length, drill speed, target size)</label><div class="seg" id="pLevel"></div></div>
+  <div class="field"><label>Strong foot</label><div class="seg" id="pFoot"></div></div>
+  <div class="field"><label>Target distance <span id="pReachV"></span></label><input type="range" id="pReach" min="0.6" max="1.6" step="0.05"><div class="note">How far the targets sit from the ball. Lower it for little legs or a tight space.</div></div>
+  <div class="field"><label>Target size <span id="pTolV"></span></label><input type="range" id="pTol" min="0.7" max="1.6" step="0.05"><div class="note">Bigger = easier to count a touch. Raise it if touches aren't counting.</div></div>
+  <div class="field"><label>Coach voice</label><div class="seg" id="pVoice"></div></div>
+  <div class="field"><label>Program</label><div class="note" id="pProg" style="margin-bottom:8px"></div><button class="btn sm" id="pResetProg">Restart at Week 1</button></div>
+  <div class="btnrow"><button class="btn main" id="pSave">Save</button><button class="btn danger" id="pDel">Delete player</button></div>
+  <div class="label">Ball color</div>
+  <div class="card"><p>The color tunes itself when you tap the ball on the camera screen. If tracking acts weird, reset it here.</p><div style="margin-top:10px"><button class="btn sm" id="resetColor">Reset ball color</button></div></div>
+</div></section>
+
+<!-- SETUP -->
+<section id="setup" class="screen overlay">
+  <div id="tapHint">Tap the ball on screen to tune its color</div>
+  <div id="setupPanel" class="pe"><div class="inner">
+    <h2 id="sTitle">Session</h2>
+    <ul>
+      <li>Lean the iPad (landscape) against a step or box on the floor, <b>5–6 ft away</b>, tilted so your <b>feet and the ball</b> sit in the middle-to-lower part of the screen.</li>
+      <li>Ball at your feet in the middle of the screen. Avoid yellow shoes or socks.</li>
+      <li>Hard floor? Use light touches. Keep pets and breakables clear.</li>
+    </ul>
+    <div class="status" id="sStatus"></div>
+    <div class="btnrow" style="margin-bottom:8px">
+      <button class="btn sm" id="tMask">Show color mask</button>
+      <button class="btn sm" id="tCam">Tracking: ON</button>
+    </div>
+    <div class="btnrow"><button class="btn" data-go="home">Back</button><button class="btn go" id="sStart">Start ▶</button></div>
+  </div></div>
+</section>
+
+<!-- SESSION -->
+<section id="session" class="screen overlay">
+  <div id="hudTop"><div id="hudPart"></div><div id="hudTime">0:00</div><div id="hudName"></div>
+    <div class="stats">
+      <div class="stat"><b id="stR">0</b><span>Touches</span></div>
+      <div class="stat"><b id="stG">–</b><span>Goal</span></div>
+      <div class="stat"><b id="stB">–</b><span>Best</span></div>
+      <div class="stat"><b id="stK">0</b><span>🔥 Streak</span></div>
+    </div>
+    <div class="goalbar"><i id="goalFill"></i></div></div>
+  <div id="hudBall"></div>
+  <div id="hudFeed"></div>
+  <div id="hudTap"></div>
+  <div id="hudBig"></div>
+  <div id="hudBottom" class="pe">
+    <div class="ctl"><button class="btn" id="bSkip">⏭ Skip</button><button class="btn" id="bPause">❚❚ Pause</button><button class="btn" id="bEnd">■ End</button></div>
+  </div>
+  <div id="paused"><h2>Paused</h2><button class="btn go" id="bResume">▶ Resume</button><button class="btn" id="bRecenter">⊕ Re-center targets</button><button class="btn" id="bQuit">End session</button></div>
+</section>
+
+<section id="guide" class="screen"><div class="scroll" id="guideBody"></div></section>
+<section id="results" class="screen"><div class="scroll" id="resBody"></div></section>
+<div id="toast"></div>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const now = () => performance.now() / 1000;
+const dayKey = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+
+/* ================= PROGRAM DATA ================= */
+const LEVELS = {kid:'Kid', beg:'Beginner', int:'Intermediate'};
+// work/rest seconds, target size + spacing, toe-tap tempo (s per tap), goal multiplier, streak window
+const LV = {
+  kid:{work:20, rest:20, first:12, sets:2, box:2, boxW:20, boxR:20, tol:1.05, reach:0.85, tempo:0.9, goal:0.55, gap:4.0, warm:[['Jog in place', 20]], cool:[['Shake out your legs', 15],['Calf stretch', 15]], every:5},
+  beg:{work:30, rest:15, first:12, sets:2, box:3, boxW:30, boxR:30, tol:0.9, reach:1.0, tempo:0.6, goal:0.8, gap:3.0, warm:[['Jog in place', 20],['High knees', 15]], cool:[['Quad stretch', 15],['Hamstring stretch', 15],['Calf stretch', 15]], every:10},
+  int:{work:40, rest:15, first:10, sets:2, box:3, boxW:30, boxR:20, tol:0.78, reach:1.15, tempo:0.42, goal:1.0, gap:2.4, warm:[['Jog in place', 20],['High knees', 20],['Side shuffles', 20]], cool:[['Quad stretch', 15],['Hamstring stretch', 15],['Calf stretch', 15]], every:10},
+};
+// pts are [x, y] in ball-widths from the home spot: +x = player's right, +y = away from the player
+const DRILLS = {
+  'toe-taps':{name:'Toe Taps', type:'tempo', goal:24,
+    how:['Stand just behind the ball on the balls of your feet.', 'Tap the top of the ball lightly with the bottom of one foot, then switch feet on the beat.', 'Little hop between taps. The ball stays still.', 'After 10 seconds, try to look up instead of down at the ball.'],
+    kid:'Tap tap on top of the ball, one foot then the other. Keep the ball still!', cue:'Light taps. Eyes up!', tip:'The ball should barely move. If it rolls away, slow down.'},
+  'tic-tocs':{name:'Tic-Tocs', type:'path', goal:24, pts:[[-0.55,0],[0.55,0]],
+    how:['Ball between your feet.', 'Knock it side to side with the inside of each foot (big toe side).', 'Tiny, quick touches. The ball barely leaves your feet.', 'Knees bent, stay on your toes.'],
+    kid:'Tick, tock! Bounce the ball between the insides of your feet like a clock.', cue:'Quick little touches!', tip:'Hit each gold target. They sit just outside each foot.'},
+  'sole-rolls':{name:'Sole Rolls', type:'path', goal:16, pts:[[-0.85,0],[0.85,0]],
+    how:['Put the bottom of one foot on top of the ball.', 'Roll it across in front of your body.', 'Stop it with the bottom of your other foot, then roll it back.', 'Use your sole, not your toes.'],
+    kid:'Foot on top of the ball and roll it across to your other foot. Stop it and roll it back!', cue:'Roll, stop, roll back.', tip:'Smooth and controlled beats fast and wild.'},
+  'io-R':{name:'Inside-Outside · Right', type:'path', goal:18, foot:'R', pts:[[0.15,0],[1.1,0]],
+    how:['Right foot only. Hop lightly on your left.', 'Push the ball out to the right with the outside of your foot (little toe).', 'Bring it back in with the inside of the same foot (big toe).', 'Keep it close, about a foot each way.'],
+    kid:'Right foot only! Push it out with your little toe, bring it back with your big toe.', cue:'Little toe out, big toe in.', tip:'Your weak foot gets the same time. That is how it gets strong.'},
+  'io-L':{name:'Inside-Outside · Left', type:'path', goal:18, foot:'L', pts:[[-0.15,0],[-1.1,0]],
+    how:['Left foot only. Hop lightly on your right.', 'Push the ball out to the left with the outside of your foot (little toe).', 'Bring it back in with the inside of the same foot (big toe).', 'Keep it close, about a foot each way.'],
+    kid:'Left foot only! Push it out with your little toe, bring it back with your big toe.', cue:'Little toe out, big toe in.', tip:'Your weak foot gets the same time. That is how it gets strong.'},
+  'pull-push':{name:'Pull-Push', type:'path', goal:14, pts:[[0,-0.55],[0,0.7]],
+    how:['Sole on top of the ball.', 'Pull it back toward you with the bottom of your foot.', 'Push it forward again with your laces or toes.', 'Switch feet every few reps.'],
+    kid:'Pull it back with the bottom of your foot, then push it away. Like a yo-yo!', cue:'Pull back, push out.', tip:'The back target is near your toes, the front one is a short step ahead.'},
+  'pp-R':{name:'Pull-Push · Right', type:'path', goal:14, foot:'R', pts:[[0.35,-0.55],[0.35,0.7]],
+    how:['Right foot only.', 'Sole on top, pull the ball back toward you.', 'Push it forward with your laces.', 'Hop on your left foot to stay balanced.'],
+    kid:'Right foot only! Pull it back, push it away.', cue:'Pull, push. Stay on your toes.', tip:'Push it just far enough to step and catch it with your sole.'},
+  'pp-L':{name:'Pull-Push · Left', type:'path', goal:14, foot:'L', pts:[[-0.35,-0.55],[-0.35,0.7]],
+    how:['Left foot only.', 'Sole on top, pull the ball back toward you.', 'Push it forward with your laces.', 'Hop on your right foot to stay balanced.'],
+    kid:'Left foot only! Pull it back, push it away.', cue:'Pull, push. Stay on your toes.', tip:'Push it just far enough to step and catch it with your sole.'},
+  'vee':{name:'V-Drags', type:'path', goal:12, pts:[[0.3,-0.55],[-0.9,0.45],[-0.3,-0.55],[0.9,0.45]],
+    how:['Sole on the ball, drag it back toward you.', 'Push it forward and out at an angle with the inside of the same foot, making a V.', 'Collect it with the other foot and do the V the other way.', 'Back target, then the far diagonal target, then switch.'],
+    kid:'Drag it back, then push it out to the side. You are drawing a V with the ball!', cue:'Drag back, push out!', tip:'The pull is with the sole, the push is with the inside.'},
+  'ell':{name:'L-Drags', type:'path', goal:12, pts:[[0.55,0.45],[0.55,-0.5],[-0.7,-0.5],[-0.55,0.45],[-0.55,-0.5],[0.7,-0.5]],
+    how:['Ball in front of your right foot.', 'Drag it back with your right sole.', 'Push it across behind your left leg with the inside of your right foot. That is the L.', 'Push it forward with the left and do the L the other way.'],
+    kid:'Pull it back, then push it behind your other foot. It makes an L!', cue:'Back, then behind!', tip:'Turn your hips a little so the ball can go behind your standing leg.'},
+  'pullback':{name:'Drag-Backs', type:'path', goal:10, pts:[[0,0.95],[0,-0.6]],
+    how:['Push the ball forward a short step.', 'Step up, sole on top, and drag it back hard toward you.', 'Let it roll past your standing foot, then push it forward again.', 'Use both feet.'],
+    kid:'Push it out, then step on top and pull it all the way back. Zoom!', cue:'Push, drag back!', tip:'This is the move for escaping a defender. Sell it with a quick drag.'},
+  'zigzag':{name:'Zig-Zag', type:'path', goal:12, pts:[[-0.95,0.65],[0.95,0.3],[-0.95,-0.05],[0.95,-0.4],[-0.95,-0.05],[0.95,0.3]],
+    how:['Dribble the ball side to side while moving back and then forward.', 'Inside of your foot to go across, outside to cut away.', 'Small touches. Keep it close.', 'Follow the gold target wherever it goes.'],
+    kid:'Follow the gold star back and forth, like a snake!', cue:'Small touches. Keep it close.', tip:'Look up at the next target before you get there.'},
+  'stepover':{name:'Step-Over Push', type:'path', goal:10, pts:[[-1.15,0],[1.15,0]],
+    how:['Ball in the middle.', 'Swing your right foot around the front of the ball without touching it.', 'Plant it, then push the ball away to the left with the outside of your left foot.', 'Mirror it: step over with the left, push right with the outside of your right.'],
+    kid:'Wave your foot around the ball like a rainbow, then push it the other way!', cue:'Step over, push away!', tip:'Drop your shoulder with the step-over to sell the fake.'},
+  'box':{name:'Box Challenge', type:'chase', goal:11,
+    how:['Keep the ball inside the box.', 'A gold target pops up. Get the ball there with any part of your foot.', 'Change direction every few touches and keep it close.', 'Go for your best total.'],
+    kid:'Chase the gold stars with the ball! Keep it in the box.', cue:'Change direction! Keep it close.', tip:'Tiny touches let you stop fast when the target moves.'},
+};
+const FOCUS = [
+  {name:'Foot Familiarity', check:'Toe taps, sole rolls and inside-outside with both feet for 30 seconds each, without looking down.',
+   drills:{kid:['sole-rolls','tic-tocs','pull-push'], beg:['sole-rolls','tic-tocs','io-R','io-L'], int:['sole-rolls','tic-tocs','io-R','io-L','pull-push']}},
+  {name:'Directional Control', check:'V-drags and L-drags both ways, smooth and in control.',
+   drills:{kid:['pull-push','sole-rolls','zigzag'], beg:['pp-R','pp-L','vee','ell'], int:['pp-R','pp-L','vee','ell','zigzag']}},
+  {name:'Change of Direction', check:'Drag-back and zig-zag at a steady pace, hitting most targets on the first try.',
+   drills:{kid:['zigzag','tic-tocs','pullback'], beg:['pullback','vee','zigzag'], int:['pullback','vee','ell','zigzag']}},
+  {name:'Quick Feet & Moves', check:'Step-over push both ways, and beat your best Box Challenge.',
+   drills:{kid:['tic-tocs','sole-rolls','zigzag'], beg:['stepover','io-R','io-L','zigzag'], int:['stepover','io-R','io-L','pullback','vee']}},
+];
+function weekInfo(p){
+  const d = p.days || 0, cycle = Math.floor(d / 28), wi = Math.floor(d / 7) % 4;
+  return {wi, cycle, day:(d % 7) + 1, f:FOCUS[wi], drills:FOCUS[wi].drills[p.level], hard:1 + Math.min(cycle, 3) * 0.1};
+}
+
+/* ================= STATE ================= */
+const DEFAULT_COLOR = {h:56, hr:14, smin:0.42, vmin:0.38};
+const newProfile = (o={}) => ({id:'p'+Math.random().toString(36).slice(2,8), name:'Player', emoji:'⚽', level:'beg', foot:'R', reach:1, tol:1, voice:true, days:0, lastCounted:'', ...o});
+const KEY = 'goldentouch.v1';
+let S;
+try { S = JSON.parse(localStorage.getItem(KEY)); } catch(e) { S = null; }
+if (!S || !S.profiles) S = {
+  profiles:[newProfile({id:'rico',name:'Rico',emoji:'🚀',level:'kid',reach:0.85,tol:1.2}), newProfile({id:'lana',name:'Lana',emoji:'👼',level:'beg'}), newProfile({id:'dad',name:'Dad',emoji:'⚽',level:'int'}), newProfile({id:'mom',name:'Mom',emoji:'💪',level:'beg'})],
+  active:'lana', color:{...DEFAULT_COLOR}, history:[], best:{}
+};
+if (!S.color) S.color = {...DEFAULT_COLOR};
+if (!S.best) S.best = {};
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} };
+const prof = () => S.profiles.find(p => p.id === S.active) || S.profiles[0];
+
+/* ================= UI ================= */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+  $('#stage').classList.toggle('on', (id === 'setup' || id === 'session') && camOn);
+  if (id === 'home') renderHome();
+}
+document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) { if (g.dataset.go === 'home') stopCamera(); show(g.dataset.go); } });
+let toastT;
+function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2300); }
+const fmt = s => { s = Math.max(0, Math.ceil(s)); return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); };
+
+function countedDays(pid){ return new Set(S.history.filter(h => h.pid === pid && h.counted).map(h => h.day)); }
+function streakOf(pid){
+  const set = countedDays(pid); let n = 0; const d = new Date();
+  if (!set.has(dayKey(d))) d.setDate(d.getDate() - 1); // streak still alive if today isn't done yet
+  while (set.has(dayKey(d))) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function renderHome(){
+  const p = prof(), wk = weekInfo(p), segs = buildSession(p), mins = Math.round(segs.reduce((a,s) => a + s.dur, 0) / 60);
+  $('#profiles').innerHTML = S.profiles.map(x => `<button class="pchip ${x.id===p.id?'on':''}" data-pid="${x.id}">${esc(x.emoji)} ${esc(x.name)} <small>${LEVELS[x.level]}</small></button>`).join('')
+    + `<button class="pchip" data-edit="1">⚙︎ Edit ${esc(p.name)}</button><button class="pchip add" data-add="1">＋ Add</button>`;
+  const doneToday = countedDays(p.id).has(dayKey());
+  $('#today').innerHTML = `<div class="card today">
+    <div class="wk">Week ${wk.wi + 1}${wk.cycle ? ' · Round ' + (wk.cycle + 1) + ' (harder targets)' : ''} · Day ${wk.day} of 7</div>
+    <h3>${esc(wk.f.name)}</h3>
+    <p>${mins} min for ${esc(p.name)} · warm-up + toe taps, ${wk.drills.length} skill drills, Box Challenge, stretch${doneToday ? ' · <b style="color:var(--ball)">✓ done today — extra reps welcome</b>' : ''}</p>
+    <div class="dlist"><span>Toe Taps</span>${wk.drills.map(id => `<span>${esc(DRILLS[id].name)}</span>`).join('')}<span>Box Challenge</span></div>
+    <button class="btn main wide" id="goToday">⚽ Start today's session</button>
+    <p class="note" style="margin-top:10px">Move up when: ${esc(wk.f.check)}</p></div>`;
+  $('#goToday').onclick = () => openSetup({kind:'daily'});
+  const st = streakOf(p.id), set = countedDays(p.id);
+  let cells = ''; for (let i = 13; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); const k = dayKey(d); cells += `<i class="${set.has(k)?'on':''} ${i===0?'td':''}" title="${k}"></i>`; }
+  $('#streak').innerHTML = `<h3>🔥 ${st} day${st === 1 ? '' : 's'} in a row</h3><p>${st >= 14 ? 'Two weeks straight. That is how players get good.' : st >= 7 ? 'A full week! Keep it rolling to 14.' : 'Train daily. 7 days in a row earns the week badge.'} · ${p.days || 0} sessions total</p><div class="days">${cells}</div>`;
+  $('#library').innerHTML = Object.entries(DRILLS).map(([id, d]) => `<button class="card" data-drill="${id}"><div class="meta"><span class="badge">${d.type === 'tempo' ? 'On the beat' : d.type === 'chase' ? 'Targets pop up' : 'Target pattern'}</span>${d.foot ? `<span class="badge">${d.foot === 'R' ? 'Right foot' : 'Left foot'}</span>` : ''}${bestFor(p, id) ? `<span class="badge y">Best ${bestFor(p, id)}</span>` : ''}</div><h3>${esc(d.name)}</h3><p>${esc(p.level === 'kid' ? d.kid : d.how[0] + ' ' + d.how[1])}</p></button>`).join('');
+  const hist = S.history.filter(h => h.pid === p.id).slice(-6).reverse();
+  $('#recent').innerHTML = hist.length ? hist.map(h => `<div class="hist"><span>${new Date(h.date).toLocaleDateString(undefined,{month:'short',day:'numeric'})} · ${esc(h.title)}</span><span>${h.cam ? '⭐'.repeat(h.stars) + ' · ' + h.reps + ' touches' : 'coach only'}</span></div>`).join('') : `<p>No sessions yet for ${esc(p.name)}.</p>`;
+}
+function bestFor(p, id){ const lv = LV[p.level]; const dur = id === 'box' ? lv.boxW : lv.work; return S.best[p.id + '|' + id + '|' + dur] || 0; }
+$('#profiles').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.pid) { S.active = b.dataset.pid; save(); renderHome(); }
+  else if (b.dataset.edit) openProfile(prof());
+  else if (b.dataset.add) { const np = newProfile(); S.profiles.push(np); S.active = np.id; save(); openProfile(np); }
+});
+$('#library').addEventListener('click', e => { const b = e.target.closest('[data-drill]'); if (b) openGuide(b.dataset.drill); });
+
+/* ----- drill guide ----- */
+function openGuide(id){
+  const p = prof(), d = DRILLS[id], kid = p.level === 'kid';
+  const pts = d.type === 'chase' ? [[-1,0.6],[0.9,-0.3],[-0.4,-0.5],[0.7,0.6]] : d.type === 'tempo' ? [[0,0]] : d.pts;
+  const toStage = ([x, y]) => [85 + x * 42, 69 - y * 42];
+  const tg = d.type === 'tempo' ? '' : pts.map(pt => { const [l, t] = toStage(pt); return `<div class="tg" style="left:${l}px;top:${t}px"></div>`; }).join('');
+  $('#guideBody').innerHTML = `
+    <div class="topbar"><button class="btn sm" data-go="home">← Back</button><h2>${esc(d.name)}</h2></div>
+    <div class="card"><div class="mv"><div class="mvstage" id="gStage">${tg}<div class="ft l"></div><div class="ft r"></div><div class="bl" id="gBall"></div></div>
+      <div class="mvtxt">${kid ? `<p class="kidline">${esc(d.kid)}</p>` : `<ol>${d.how.map(x => `<li>${esc(x)}</li>`).join('')}</ol>`}<div class="tip">💡 ${esc(d.tip)}</div>
+      <div class="btnrow" style="margin-top:12px"><button class="btn sm" id="gSay">🔊 Hear it</button></div></div></div></div>
+    <p class="note">The little picture is what you'll see on the iPad: dashed circles are where the gold targets show up. The camera is a mirror, so your right foot is on the right side of the screen.</p>
+    <div class="btnrow" style="margin-top:12px"><button class="btn main" id="gGo">Practice ${esc(d.name)} ▶</button></div>`;
+  const ball = $('#gBall');
+  if (d.type === 'tempo') ball.animate([{transform:'translateY(0)'},{transform:'translateY(-3px)'},{transform:'translateY(0)'}], {duration:600, iterations:Infinity});
+  else ball.animate(pts.concat([pts[0]]).map(pt => { const [l, t] = toStage(pt); return {left:(l - 11) + 'px', top:(t - 11) + 'px'}; }), {duration:pts.length * 700, iterations:Infinity, easing:'ease-in-out'});
+  $('#gSay').onclick = () => speak(d.name + '. ' + (kid ? d.kid : d.how.join(' ')), kid ? 0.95 : 1, true, true);
+  $('#gGo').onclick = () => openSetup({kind:'single', id});
+  show('guide');
+}
+
+/* ----- profile editor ----- */
+let editP = null;
+function segCtl(el, opts, val, cb){
+  el.innerHTML = opts.map(([v, l]) => `<button data-v="${v}" class="${String(v) === String(val) ? 'on' : ''}">${l}</button>`).join('');
+  el.onclick = e => { const b = e.target.closest('button'); if (!b) return; el.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); cb(b.dataset.v); };
+}
+function openProfile(p){
+  editP = {...p};
+  $('#pTitle').textContent = p.name; $('#pName').value = p.name; $('#pEmoji').value = p.emoji;
+  segCtl($('#pLevel'), Object.entries(LEVELS), p.level, v => editP.level = v);
+  segCtl($('#pFoot'), [['R','Right'],['L','Left']], p.foot, v => editP.foot = v);
+  segCtl($('#pVoice'), [['true','On'],['false','Off']], p.voice, v => editP.voice = v === 'true');
+  $('#pReach').value = p.reach; $('#pReachV').textContent = '×' + (+p.reach).toFixed(2);
+  $('#pTol').value = p.tol; $('#pTolV').textContent = '×' + (+p.tol).toFixed(2);
+  const wk = weekInfo(p); $('#pProg').textContent = `Week ${wk.wi + 1} (${wk.f.name}), day ${wk.day} of 7 · ${p.days || 0} sessions done.`;
+  $('#pDel').style.display = S.profiles.length > 1 ? '' : 'none';
+  show('profile');
+}
+$('#pReach').oninput = e => { editP.reach = +e.target.value; $('#pReachV').textContent = '×' + editP.reach.toFixed(2); };
+$('#pTol').oninput = e => { editP.tol = +e.target.value; $('#pTolV').textContent = '×' + editP.tol.toFixed(2); };
+$('#pResetProg').onclick = () => { if (confirm('Start ' + editP.name + ' back at Week 1? History and bests stay.')) { editP.days = 0; editP.lastCounted = ''; toast('Back to Week 1 — tap Save'); } };
+$('#pSave').onclick = () => {
+  editP.name = $('#pName').value.trim() || 'Player'; editP.emoji = $('#pEmoji').value.trim() || '⚽';
+  const i = S.profiles.findIndex(x => x.id === editP.id); S.profiles[i] = editP; save(); show('home');
+};
+$('#pDel').onclick = () => {
+  if (!confirm('Delete ' + editP.name + ' and their history?')) return;
+  S.profiles = S.profiles.filter(x => x.id !== editP.id); S.history = S.history.filter(h => h.pid !== editP.id);
+  S.active = S.profiles[0].id; save(); show('home');
+};
+$('#resetColor').onclick = () => { S.color = {...DEFAULT_COLOR}; save(); toast('Ball color reset'); };
+
+/* ================= AUDIO + VOICE ================= */
+let AC = null;
+function ac(){ if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} } if (AC && AC.state === 'suspended') AC.resume(); return AC; }
+function tone(f, dur, type='sine', vol=0.3, when=0, f2){
+  const a = ac(); if (!a) return;
+  const o = a.createOscillator(), g = a.createGain(), t0 = a.currentTime + when;
+  o.type = type; o.frequency.setValueAtTime(f, t0); if (f2) o.frequency.linearRampToValueAtTime(f2, t0 + dur);
+  g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+  o.connect(g); g.connect(a.destination); o.start(t0); o.stop(t0 + dur + 0.05);
+}
+function whistle(n){ // referee-style: warbled high tone
+  const a = ac(); if (!a) return;
+  for (let k = 0; k < n; k++) {
+    const t0 = a.currentTime + k * 0.42, len = n > 1 && k === n - 1 ? 0.6 : 0.3;
+    const o = a.createOscillator(), lfo = a.createOscillator(), lg = a.createGain(), g = a.createGain();
+    o.type = 'sine'; o.frequency.value = 2900; lfo.frequency.value = 38; lg.gain.value = 180;
+    lfo.connect(lg); lg.connect(o.frequency);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.22, t0 + 0.02); g.gain.setValueAtTime(0.22, t0 + len - 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t0 + len);
+    o.connect(g); g.connect(a.destination); o.start(t0); lfo.start(t0); o.stop(t0 + len + 0.05); lfo.stop(t0 + len + 0.05);
+  }
+}
+const beep = () => tone(880, 0.16, 'square', 0.12);
+const tick = hi => tone(hi ? 1500 : 1100, 0.05, 'triangle', 0.18);
+const ding = n => { tone(1320 + Math.min(n, 8) * 40, 0.09, 'triangle', 0.22); tone(1980 + Math.min(n, 8) * 60, 0.14, 'triangle', 0.14, 0.05); };
+
+let VOICE = null;
+function pickVoice(){
+  const vs = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+  VOICE = vs.find(v => /en-US/i.test(v.lang) && /Samantha|Aaron|Nicky|Evan|Siri/i.test(v.name)) || vs.find(v => /en-US/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
+}
+if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(text, rate, interrupt, force){
+  if (!window.speechSynthesis) return;
+  if (!force && E && !E.p.voice) return;
+  try {
+    if (interrupt && (speechSynthesis.speaking || speechSynthesis.pending)) speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text); if (VOICE) u.voice = VOICE; u.rate = rate || 1.05; speechSynthesis.speak(u);
+  } catch(e) {}
+}
+const talking = () => window.speechSynthesis && (speechSynthesis.speaking || speechSynthesis.pending);
+
+/* ================= CAMERA + BALL TRACKING ================= */
+const video = $('#video'), maskC = $('#mask'), ov = $('#ov'), frame = $('#frame');
+const proc = document.createElement('canvas');
+let pctx = null, octx = ov.getContext('2d'), mctx = maskC.getContext('2d');
+let stream = null, camOn = true, showMask = false, W = 0, H = 0, maskArr = null, maskImg = null, lastVT = -1, lastImg = null;
+const K = 3; // overlay scale vs processing resolution
+let ball = {found:false}, seenT = -9, smooth = null, diaAvg = 0, avgPos = null, lastFT = 0;
+
+async function startCamera(){
+  if (stream) return true;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('Camera needs Safari over https'); return false; }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user', width:{ideal:640}, height:{ideal:480}, frameRate:{ideal:30}}, audio:false});
+    video.srcObject = stream; await video.play().catch(() => {});
+    if (!video.videoWidth) await new Promise(r => video.addEventListener('loadedmetadata', r, {once:true}));
+    setupDims(); return true;
+  } catch(e) { toast('Camera blocked — allow camera access for this site'); return false; }
+}
+function stopCamera(){ if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } }
+function setupDims(){
+  const vw = video.videoWidth, vh = video.videoHeight, k = 240 / Math.max(vw, vh);
+  W = Math.round(vw * k); H = Math.round(vh * k);
+  proc.width = W; proc.height = H; pctx = proc.getContext('2d', {willReadFrequently:true});
+  maskC.width = W; maskC.height = H; maskImg = mctx.createImageData(W, H); maskArr = new Uint8Array(W * H);
+  ov.width = W * K; ov.height = H * K; fitFrame();
+}
+function fitFrame(){
+  if (!video.videoWidth) return;
+  const ar = video.videoWidth / video.videoHeight, sw = innerWidth, sh = innerHeight;
+  let fw = sw, fh = sw / ar; if (fh > sh) { fh = sh; fw = sh * ar; }
+  frame.style.width = fw + 'px'; frame.style.height = fh + 'px';
+}
+addEventListener('resize', fitFrame);
+
+const hueDist = (a, b) => { const d = Math.abs(a - b) % 360; return d > 180 ? 360 - d : d; };
+function rgb2hsv(r, g, b){
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  let h = 0;
+  if (d) { if (mx === r) h = 60 * (((g - b) / d) % 6); else if (mx === g) h = 60 * ((b - r) / d + 2); else h = 60 * ((r - g) / d + 4); if (h < 0) h += 360; }
+  return [h, mx ? d / mx : 0, mx / 255];
+}
+function detect(d, t){
+  const c = S.color, vmin = c.vmin * 255;
+  let n = 0, sx = 0, sy = 0;
+  for (let y = 0, i = 0, p = 0; y < H; y++) for (let x = 0; x < W; x++, i += 4, p++) {
+    maskArr[p] = 0;
+    const r = d[i], g = d[i+1], b = d[i+2];
+    if (Math.max(r, g, b) < vmin) continue;
+    const [h, s, v] = rgb2hsv(r, g, b);
+    if (s >= c.smin && v >= c.vmin && hueDist(h, c.h) <= c.hr) { maskArr[p] = 1; n++; sx += x; sy += y; }
+  }
+  const minPx = Math.max(14, W * H * 0.0006);
+  if (n < minPx) { ball = {found:false}; return; }
+  // start from the last known spot so a yellow shoe elsewhere doesn't pull the tracker away
+  const recent = t - seenT < 0.35 && smooth;
+  let cx = recent ? smooth.x : sx / n, cy = recent ? smooth.y : sy / n, cnt = n;
+  let rad = recent ? Math.max(smooth.d * 1.6, 8) : Math.min(Math.max(Math.sqrt(n) * 1.8, 8), Math.max(W, H) * 0.45);
+  for (let it = 0; it < 3; it++) {
+    const x0 = Math.max(0, cx - rad | 0), x1 = Math.min(W - 1, cx + rad | 0), y0 = Math.max(0, cy - rad | 0), y1 = Math.min(H - 1, cy + rad | 0);
+    let m = 0, mx = 0, my = 0;
+    for (let y = y0; y <= y1; y++) for (let x = x0, p = y * W + x0; x <= x1; x++, p++) if (maskArr[p]) { m++; mx += x; my += y; }
+    if (m < minPx) { if (recent && it === 0) { cx = sx / n; cy = sy / n; rad = Math.min(Math.max(Math.sqrt(n) * 1.8, 8), Math.max(W, H) * 0.45); continue; } ball = {found:false}; return; }
+    cx = mx / m; cy = my / m; cnt = m;
+    rad = Math.max(Math.sqrt(m / Math.PI) * 1.7, 6);
+  }
+  const dia = 2 * Math.sqrt(cnt / Math.PI) * 1.12; // ball panels/logos aren't yellow, so pad a little
+  ball = {found:true, x:cx, y:cy, d:dia};
+}
+function processFrame(t){
+  if (!pctx || video.readyState < 2 || video.currentTime === lastVT) return;
+  lastVT = video.currentTime;
+  pctx.drawImage(video, 0, 0, W, H);
+  lastImg = pctx.getImageData(0, 0, W, H);
+  detect(lastImg.data, t);
+  if (ball.found) {
+    if (!smooth || t - seenT > 0.35) smooth = {x:ball.x, y:ball.y, d:ball.d};
+    else { const a = 0.55; smooth.x += (ball.x - smooth.x) * a; smooth.y += (ball.y - smooth.y) * a; smooth.d += (ball.d - smooth.d) * 0.15; }
+    seenT = t; diaAvg = diaAvg ? diaAvg + (smooth.d - diaAvg) * 0.05 : smooth.d;
+    // ~1 s running average of where the ball is: the center of its motion
+    const k = Math.min(1, (t - lastFT) / 1.0);
+    if (!avgPos || k >= 1) avgPos = {x:smooth.x, y:smooth.y}; else { avgPos.x += (smooth.x - avgPos.x) * k; avgPos.y += (smooth.y - avgPos.y) * k; }
+    if (E && E.dr) { const D = E.dr; if (!D.mean) D.mean = {x:smooth.x, y:smooth.y}; else { const k2 = Math.min(1, (t - lastFT) / 2.5); D.mean.x += (smooth.x - D.mean.x) * k2; D.mean.y += (smooth.y - D.mean.y) * k2; } }
+    lastFT = t;
+  }
+  if (E && E.running && !E.paused) trackStep(t);
+  drawOverlay(t);
+  if (showMask) drawMask();
+  if ($('#setup').classList.contains('active')) setupStatus(t);
+  $('#hudBall').classList.toggle('on', t - seenT < 0.3);
+}
+const ballSeen = t => t - seenT < 0.3 && smooth;
+
+function drawOverlay(t){
+  octx.clearRect(0, 0, ov.width, ov.height);
+  const D = E && E.running && E.dr;
+  if (D && D.box) { const b = D.box; octx.setLineDash([10,8]); octx.lineWidth = 3; octx.strokeStyle = '#ffffff66'; octx.strokeRect(b.x0*K, b.y0*K, (b.x1-b.x0)*K, (b.y1-b.y0)*K); octx.setLineDash([]); }
+  if (D && D.home && D.type === 'tempo') {
+    octx.lineWidth = 3; octx.setLineDash([8,8]); octx.strokeStyle = D.inCtl ? '#ffe23aaa' : '#ff6464aa';
+    octx.beginPath(); octx.arc(D.home.x*K, D.home.y*K, D.ctlR*K, 0, Math.PI*2); octx.stroke(); octx.setLineDash([]);
+  }
+  if (D && D.target) {
+    const tg = D.target, r = (D.hitR || D.tolR) * K, pulse = 1 + 0.08 * Math.sin(t * 8);
+    if (D.next) { octx.setLineDash([6,8]); octx.lineWidth = 3; octx.strokeStyle = '#ffffff55'; octx.beginPath(); octx.arc(D.next.x*K, D.next.y*K, r*0.8, 0, Math.PI*2); octx.stroke(); octx.setLineDash([]); }
+    octx.fillStyle = 'rgba(246,197,49,.22)'; octx.strokeStyle = '#f6c531'; octx.lineWidth = 6;
+    octx.beginPath(); octx.arc(tg.x*K, tg.y*K, r*pulse, 0, Math.PI*2); octx.fill(); octx.stroke();
+    octx.save(); octx.translate(tg.x*K, tg.y*K + 11); octx.scale(-1, 1); octx.fillStyle = '#fff'; octx.font = '900 30px -apple-system,sans-serif'; octx.textAlign = 'center'; octx.fillText('★', 0, 0); octx.restore();
+  }
+  if (D && D.burst && t - D.burst.t < 0.35) {
+    const k = (t - D.burst.t) / 0.35; octx.strokeStyle = `rgba(255,226,58,${1 - k})`; octx.lineWidth = 8;
+    octx.beginPath(); octx.arc(D.burst.x*K, D.burst.y*K, (D.hitR || D.tolR)*K*(1 + k*1.2), 0, Math.PI*2); octx.stroke();
+  }
+  if (ballSeen(t)) {
+    octx.lineWidth = 5; octx.strokeStyle = '#ffe23a';
+    octx.beginPath(); octx.arc(smooth.x*K, smooth.y*K, smooth.d/2*K + 6, 0, Math.PI*2); octx.stroke();
+  }
+}
+function drawMask(){
+  const md = maskImg.data;
+  for (let p = 0, i = 0; p < maskArr.length; p++, i += 4) { if (maskArr[p]) { md[i]=255; md[i+1]=226; md[i+2]=0; md[i+3]=230; } else md[i+3] = 0; }
+  mctx.putImageData(maskImg, 0, 0);
+}
+frame.addEventListener('pointerdown', e => { // tap the ball to tune its color
+  if (!$('#setup').classList.contains('active') || !lastImg) return;
+  const rc = frame.getBoundingClientRect();
+  const rx = Math.round((1 - (e.clientX - rc.left) / rc.width) * W), ry = Math.round((e.clientY - rc.top) / rc.height * H);
+  const hs = [], ss = [], vs = [], d = lastImg.data;
+  for (let y = ry - 3; y <= ry + 3; y++) for (let x = rx - 3; x <= rx + 3; x++) {
+    if (x < 0 || y < 0 || x >= W || y >= H) continue;
+    const i = (y*W + x)*4, [h, s, v] = rgb2hsv(d[i], d[i+1], d[i+2]); hs.push(h); ss.push(s); vs.push(v);
+  }
+  if (!hs.length) return;
+  const med = a => a.slice().sort((p, q) => p - q)[a.length >> 1];
+  let sx = 0, sy = 0; hs.forEach(h => { sx += Math.cos(h*Math.PI/180); sy += Math.sin(h*Math.PI/180); });
+  let h = Math.atan2(sy, sx) * 180 / Math.PI; if (h < 0) h += 360;
+  const s = med(ss), v = med(vs);
+  if (s < 0.25) { toast("That spot isn't colorful enough — tap a yellow part of the ball"); return; }
+  S.color = {h:Math.round(h), hr:13, smin:+Math.max(0.25, s * 0.55).toFixed(2), vmin:+Math.max(0.2, v * 0.5).toFixed(2)};
+  save(); toast('🟡 Ball color tuned');
+});
+
+/* ================= SETUP ================= */
+let curPlan = null;
+async function openSetup(plan){
+  curPlan = plan; ac();
+  const p = prof(), segs = plan.kind === 'daily' ? buildSession(p) : buildSingle(p, plan.id);
+  $('#sTitle').textContent = (plan.kind === 'daily' ? weekInfo(p).f.name : DRILLS[plan.id].name) + ' · ' + esc(p.name) + ' · ' + Math.round(segs.reduce((a,s) => a + s.dur, 0) / 60) + ' min';
+  $('#tCam').textContent = 'Tracking: ' + (camOn ? 'ON' : 'OFF'); $('#tapHint').style.display = camOn ? '' : 'none';
+  show('setup');
+  if (camOn) { const ok = await startCamera(); if (!ok) { camOn = false; $('#tCam').textContent = 'Tracking: OFF'; show('setup'); } }
+  setupStatus(now());
+}
+function setupStatus(t){
+  if (!camOn) { $('#sStatus').innerHTML = '<span class="pill warn">Tracking off — coach + timer only, no touch counting</span>'; return; }
+  const ok = ballSeen(t);
+  let extra = '';
+  if (ok) {
+    const sz = smooth.d / W;
+    extra = sz > 0.2 ? '<span class="pill warn">Move the iPad back a bit</span>' : sz < 0.045 ? '<span class="pill warn">Move the iPad closer</span>' : '<span class="pill ok">Good distance ✓</span>';
+    const yr = smooth.y / H; if (yr < 0.4) extra += '<span class="pill warn">Tilt the iPad down — ball is high on screen</span>'; else if (yr > 0.8) extra += '<span class="pill warn">Tilt the iPad up — ball is too low</span>';
+  }
+  $('#sStatus').innerHTML = `<span class="pill ${ok ? 'ok' : ''}">${ok ? '✓ Ball found' : '… Looking for the yellow ball'}</span>${extra}`;
+}
+$('#tMask').onclick = () => { showMask = !showMask; maskC.classList.toggle('on', showMask); $('#tMask').textContent = showMask ? 'Hide color mask' : 'Show color mask'; };
+$('#tCam').onclick = async () => {
+  camOn = !camOn; $('#tCam').textContent = 'Tracking: ' + (camOn ? 'ON' : 'OFF'); $('#tapHint').style.display = camOn ? '' : 'none';
+  if (camOn) { if (!(await startCamera())) camOn = false; } else stopCamera();
+  $('#stage').classList.toggle('on', camOn); setupStatus(now());
+};
+$('#sStart').onclick = () => startSession();
+
+/* ================= SESSION BUILDER ================= */
+function buildSession(p){
+  const lv = LV[p.level], wk = weekInfo(p), segs = [{k:'prep', dur:8, part:'GET READY'}];
+  lv.warm.forEach(([name, dur]) => segs.push({k:'move', name, dur, part:'WARM-UP'}));
+  segs.push({k:'rest', dur:lv.first, next:'toe-taps', part:'WARM-UP'}, {k:'drill', id:'toe-taps', dur:lv.work, part:'WARM-UP'});
+  const tot = wk.drills.length * lv.sets; let n = 0;
+  for (let set = 1; set <= lv.sets; set++) wk.drills.forEach(id => { n++; segs.push({k:'rest', dur:lv.rest, next:id, set, part:'SKILLS'}, {k:'drill', id, dur:lv.work, set, part:'SKILLS · ' + n + '/' + tot}); });
+  for (let r = 0; r < lv.box; r++) segs.push({k:'rest', dur:r ? lv.boxR : lv.rest, next:'box', round:r + 1, part:'BOX CHALLENGE'}, {k:'drill', id:'box', dur:lv.boxW, round:r + 1, part:'BOX CHALLENGE · ' + (r + 1) + '/' + lv.box});
+  lv.cool.forEach(([name, dur]) => segs.push({k:'move', name, dur, part:'COOL-DOWN', cool:true}));
+  return segs;
+}
+function buildSingle(p, id){
+  const lv = LV[p.level], dur = id === 'box' ? lv.boxW : lv.work;
+  return [{k:'prep', dur:6, part:'GET READY'}, {k:'rest', dur:8, next:id, part:'PRACTICE'}, {k:'drill', id, dur, part:'PRACTICE · 1/2'}, {k:'rest', dur:lv.rest, next:id, part:'PRACTICE'}, {k:'drill', id, dur, part:'PRACTICE · 2/2'}];
+}
+
+/* ================= SESSION ENGINE ================= */
+let E = null, wakeLock = null;
+async function startSession(){
+  const p = prof();
+  ac(); speak(' ', 1, false, true); // unlock iOS audio inside the tap
+  try { if (navigator.wakeLock) wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+  const t = now();
+  E = {running:true, p, plan:curPlan, lv:LV[p.level], wk:weekInfo(p), segs:curPlan.kind === 'daily' ? buildSession(p) : buildSingle(p, curPlan.id),
+       i:-1, segStart:t, lastT:t, paused:false, cam:camOn, cd:-1, dr:null, results:[], reps:0};
+  show('session'); $('#paused').classList.remove('on');
+  nextSeg(t);
+}
+function big(a, b){ $('#hudBig').innerHTML = esc(a) + (b ? `<small>${esc(b)}</small>` : ''); }
+function goalFor(id, dur){ return Math.max(3, Math.round(DRILLS[id].goal * (dur / 30) * E.lv.goal * E.wk.hard)); }
+function endDrill(){
+  const D = E.dr; if (!D) return;
+  E.dr = null;
+  const stars = !E.cam ? 0 : D.reps >= D.goal ? 3 : D.reps >= D.goal * 0.6 ? 2 : D.reps >= D.goal * 0.25 ? 1 : 0;
+  const key = E.p.id + '|' + D.id + '|' + D.dur, pb = E.cam && D.reps > (S.best[key] || 0) && D.reps > 0;
+  if (pb) S.best[key] = D.reps;
+  E.results.push({id:D.id, reps:D.reps, goal:D.goal, stars, pb, streak:D.bestStreak, round:D.round || (D.set > 1 ? D.set : 0)});
+  E.reps += D.reps;
+}
+function nextSeg(t){
+  const prev = E.segs[E.i];
+  if (prev && prev.k === 'drill') { const skipped = t - E.segStart < prev.dur * 0.5; if (skipped) E.dr = null; else { endDrill(); whistle(2); } }
+  E.i++;
+  $('#hudBig').innerHTML = ''; $('#hudFeed').innerHTML = ''; $('#hudTap').innerHTML = '';
+  if (E.i >= E.segs.length) { finish(); return; }
+  const s = E.segs[E.i], p = E.p, kid = p.level === 'kid', rate = kid ? 0.95 : 1.05;
+  E.segStart = t; E.cd = -1;
+  $('#hudPart').textContent = s.part || '';
+  setStats(null);
+  if (s.k === 'prep') { big('GET READY', 'Ball at your feet in the middle of the screen'); speak('Ball at your feet. Get ready.', rate, true); $('#hudName').textContent = ''; }
+  else if (s.k === 'move') { big(s.name.toUpperCase(), s.cool ? 'Nice and easy. Breathe.' : 'Leave the ball for now'); speak(s.name + (s.cool ? '. Hold it.' : '!'), rate, true); $('#hudName').textContent = s.name; }
+  else if (s.k === 'rest') {
+    const d = DRILLS[s.next], footSay = d.foot ? (d.foot === p.foot ? ' Strong foot.' : ' Weak foot. Take your time.') : '';
+    const title = s.next === 'box' ? (s.round > 1 ? 'Box Challenge · round ' + s.round : 'Box Challenge') : d.name + (s.set > 1 ? ' · set ' + s.set : '');
+    big('UP NEXT: ' + title.toUpperCase(), kid ? d.kid : d.how[0] + ' ' + d.how[1]);
+    $('#hudName').textContent = 'Rest';
+    const saying = (E.i > 1 && E.segs[E.i - 1].k === 'drill' ? 'Rest. ' : '') + 'Next up, ' + title + '.' + footSay + ' ' + (kid ? d.kid : d.how.slice(1, 3).join(' ')) + ' Ball back to the middle.';
+    speak(saying, rate, true);
+  }
+  else if (s.k === 'drill') { startDrill(s, t); }
+}
+function startDrill(s, t){
+  const d = DRILLS[s.id], p = E.p, lv = E.lv;
+  whistle(1);
+  const dia = (ballSeen(t) ? smooth.d : diaAvg) || W * 0.1 || 24;
+  const home = ballSeen(t) && avgPos ? {x:avgPos.x, y:avgPos.y} : {x:W / 2, y:H * 0.65};
+  const D = E.dr = {id:s.id, type:d.type, dur:s.dur, round:s.round, set:s.set, reps:0, streak:0, bestStreak:0, lastHit:t, home, dia,
+    reach:lv.reach * (p.reach || 1) * E.wk.hard, tolR:dia * 0.75 * lv.tol * (p.tol || 1) / Math.sqrt(E.wk.hard), idx:0, target:null, next:null,
+    goal:goalFor(s.id, s.dur), saidCue:false, lastSaid:0, nextTick:t + 1.2, tickN:0, inCtl:false, ctlR:dia * 1.0 * (p.tol || 1), box:null};
+  if (d.type === 'path') placeTargets(D);
+  if (d.type === 'chase') recenter(D, home, t);
+  if (d.type === 'tempo') $('#hudTap').innerHTML = '<div class="tap" id="tapL">L</div><div class="tap" id="tapR">R</div>';
+  const best = bestFor(p, s.id);
+  setStats(D, best);
+  $('#hudName').textContent = d.name + (s.round > 1 ? ' · round ' + s.round : '');
+  speak(d.name + '. Go!', p.level === 'kid' ? 0.95 : 1.1, true);
+  if (!E.cam) big(d.name.toUpperCase(), (p.level === 'kid' ? d.kid : d.cue) + (d.type === 'tempo' ? '' : ' (tracking off)'));
+}
+// convert ball-width offsets to processing pixels; the view is mirrored, so the player's right is screen right = lower x
+const toPx = (D, [ox, oy]) => clampPt({x:D.home.x - ox * D.reach * D.dia, y:D.home.y - oy * D.reach * D.dia}, D.tolR);
+function clampPt(pt, r){ const m = r + 2; return {x:Math.min(W - m, Math.max(m, pt.x)), y:Math.min(H - m, Math.max(m, pt.y))}; }
+function clampBox(b){ return {x0:Math.max(2, b.x0), x1:Math.min(W - 2, b.x1), y0:Math.max(2, b.y0), y1:Math.min(H - 2, b.y1)}; }
+function placeTargets(D, from){ const pts = DRILLS[D.id].pts; D.target = toPx(D, pts[D.idx % pts.length]); D.next = toPx(D, pts[(D.idx + 1) % pts.length]);
+  const f = from || toPx(D, pts[(D.idx + pts.length - 1) % pts.length]); D.hitR = Math.min(D.tolR, 0.45 * Math.hypot(D.target.x - f.x, D.target.y - f.y)); }
+function newChase(D, t){
+  const b = D.box, m = D.tolR + 2, from = D.target || D.home;
+  let pt, tries = 0;
+  do { pt = {x:b.x0 + m + Math.random() * Math.max(1, b.x1 - b.x0 - 2*m), y:b.y0 + m + Math.random() * Math.max(1, b.y1 - b.y0 - 2*m)}; }
+  while (Math.hypot(pt.x - from.x, pt.y - from.y) < D.dia * 1.1 * D.reach && ++tries < 30);
+  D.target = pt; D.next = null; D.spawnT = t; D.hitR = Math.min(D.tolR, 0.45 * Math.hypot(pt.x - from.x, pt.y - from.y));
+}
+function onHit(D, t, pt){
+  D.reps++;
+  D.streak = (t - D.lastHit <= E.lv.gap || D.reps === 1) ? D.streak + 1 : 1;
+  D.bestStreak = Math.max(D.bestStreak, D.streak); D.lastHit = t;
+  D.burst = {x:pt.x, y:pt.y, t}; ding(D.streak);
+  const every = E.lv.every;
+  if (D.reps % every === 0 && !talking()) speak(String(D.reps) + (D.reps === D.goal ? '! Goal!' : '!'), 1.15, false);
+  else if (D.reps === D.goal && !talking()) speak('Goal reached!', 1.1, false);
+  if (D.reps === D.goal) { $('#hudFeed').innerHTML = '<span style="color:var(--ball)">🎯 GOAL!</span>'; setTimeout(() => { if ($('#hudFeed').textContent.includes('GOAL')) $('#hudFeed').innerHTML = ''; }, 1400); }
+  setStats(D);
+}
+function trackStep(t){
+  const D = E.dr; if (!D || !E.cam) return;
+  if (D.type === 'tempo') {
+    const seenNow = ballSeen(t);
+    D.inCtl = !!seenNow && Math.hypot(smooth.x - D.home.x, smooth.y - D.home.y) <= D.ctlR;
+    if (D.inCtl) { D.home.x += (smooth.x - D.home.x) * 0.02; D.home.y += (smooth.y - D.home.y) * 0.02; }
+    return;
+  }
+  if (!ballSeen(t) || !D.target) return;
+  const dx = smooth.x - D.target.x, dy = smooth.y - D.target.y;
+  if (Math.hypot(dx, dy) <= D.hitR && (D.reps === 0 || t - D.lastHit > 0.12)) {
+    const hit = {...D.target};
+    // follow the player if they drift: nudge home by part of the miss
+    D.home.x += (smooth.x - D.target.x) * 0.3; D.home.y += (smooth.y - D.target.y) * 0.3;
+    onHit(D, t, hit);
+    if (D.type === 'path') { D.idx++; placeTargets(D, hit); }
+    else newChase(D, t);
+  }
+}
+function setStats(D, best){
+  if (!D) { $('#stR').textContent = '–'; $('#stG').textContent = '–'; $('#stB').textContent = '–'; $('#stK').textContent = '–'; $('#goalFill').style.width = '0'; return; }
+  $('#stR').textContent = E.cam ? D.reps : '–';
+  $('#stG').textContent = E.cam ? D.goal : '–';
+  if (best !== undefined) $('#stB').textContent = E.cam && best ? best : '–';
+  $('#stK').textContent = E.cam ? D.streak : '–';
+  $('#goalFill').style.width = E.cam ? Math.min(100, D.reps / D.goal * 100) + '%' : '0';
+}
+function tickEngine(t){
+  if (!E || !E.running) return;
+  E.lastT = t;
+  if (E.paused) return;
+  const s = E.segs[E.i], el = t - E.segStart, left = s.dur - el;
+  $('#hudTime').textContent = fmt(left);
+  if ((s.k === 'prep' || s.k === 'rest' || (s.k === 'move' && !s.cool)) && left <= 3 && left > 0) { const c = Math.ceil(left); if (c !== E.cd) { E.cd = c; beep(); } }
+  const D = E.dr;
+  if (s.k === 'drill' && D) {
+    if (D.type === 'tempo' && t >= D.nextTick) { // metronome for toe taps
+      const step = E.lv.tempo / E.wk.hard; D.nextTick += step; D.tickN++;
+      const side = D.tickN % 2 ? 'L' : 'R';
+      tick(side === 'L');
+      const a = $('#tapL'), b = $('#tapR'); if (a && b) { a.classList.toggle('on', side === 'L'); b.classList.toggle('on', side === 'R'); }
+      if (E.cam && D.inCtl) { D.reps++; D.streak++; D.bestStreak = Math.max(D.bestStreak, D.streak); }
+      else if (E.cam) D.streak = 0;
+      setStats(D);
+    }
+    if (D.type === 'chase' && D.target && t - D.spawnT > 6) newChase(D, t); // stuck target? move it
+    if (E.cam && D.type !== 'tempo' && D.mean && ballSeen(t) && t - D.lastHit > 4 && Math.hypot(D.mean.x - D.home.x, D.mean.y - D.home.y) > D.dia * 0.35) {
+      recenter(D, D.mean, t); D.lastHit = t; $('#hudFeed').innerHTML = '<span style="color:var(--ball);font-size:22px">Targets moved to you</span>'; setTimeout(() => { if ($('#hudFeed').textContent.startsWith('Targets')) $('#hudFeed').innerHTML = ''; }, 1500);
+    }
+    if (!D.saidCue && el > 9 && left > 6 && !talking()) { D.saidCue = true; speak(E.p.level === 'kid' ? (D.reps ? 'Great job! Keep it close!' : 'Move the ball to the gold star!') : DRILLS[D.id].cue, 1.05, false); }
+    if (E.cam && D.type !== 'tempo' && t - seenT > 1.5 && t - (D.lostSaid || -9) > 6) { D.lostSaid = t; $('#hudFeed').innerHTML = '<span style="color:var(--red);font-size:22px">Can\'t see the ball</span>'; }
+    else if (E.cam && t - seenT < 0.3 && $('#hudFeed').textContent.startsWith('Can')) $('#hudFeed').innerHTML = '';
+  }
+  if (left <= 0) nextSeg(t);
+}
+function pause(){ if (!E || E.paused) return; E.paused = true; E.pauseAt = now(); try { speechSynthesis.cancel(); } catch(e) {} $('#paused').classList.add('on'); }
+function resume(){
+  if (!E || !E.paused) return; const sh = now() - E.pauseAt;
+  E.segStart += sh; if (E.dr) { E.dr.nextTick += sh; E.dr.lastHit += sh; if (E.dr.spawnT) E.dr.spawnT += sh; }
+  E.paused = false; $('#paused').classList.remove('on');
+}
+$('#bPause').onclick = pause; $('#bResume').onclick = resume;
+$('#bEnd').onclick = pause;
+$('#bSkip').onclick = () => { if (E && !E.paused) nextSeg(now()); };
+function recenter(D, pos, t, dia){
+  D.home = {x:pos.x, y:pos.y}; if (dia) D.dia = dia;
+  if (D.type === 'path') placeTargets(D);
+  if (D.type === 'chase') { const bx = 1.7*D.reach*D.dia, by = 1.05*D.reach*D.dia; D.box = clampBox({x0:D.home.x-bx-D.dia*0.6, x1:D.home.x+bx+D.dia*0.6, y0:D.home.y-by-D.dia*0.6, y1:D.home.y+by+D.dia*0.6}); D.target = null; newChase(D, t); }
+}
+$('#bRecenter').onclick = () => {
+  const t = now(), D = E && E.dr;
+  if (D && ballSeen(t)) { recenter(D, smooth, t, smooth.d); toast('Targets re-centered on the ball'); }
+  else toast(D ? "Can't see the ball right now" : 'Re-center works during a drill');
+};
+$('#bQuit').onclick = () => { if (E) { E.paused = false; finish(true); } };
+document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+
+function finish(early){
+  if (!E) return;
+  if (E.dr && now() - E.segStart >= E.dr.dur * 0.5) endDrill();
+  E.dr = null; E.running = false;
+  try { speechSynthesis.cancel(); } catch(e) {}
+  if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+  stopCamera();
+  const p = E.p, daily = E.plan.kind === 'daily', today = dayKey();
+  const drillSegs = E.segs.filter(s => s.k === 'drill').length, doneFrac = E.results.length / Math.max(1, drillSegs);
+  const counted = daily && doneFrac >= 0.7 && p.lastCounted !== today;
+  const prevStreak = streakOf(p.id);
+  if (counted) { p.days = (p.days || 0) + 1; p.lastCounted = today; }
+  const scored = E.results.filter(r => E.cam);
+  const avgStars = scored.length ? scored.reduce((a, r) => a + r.stars, 0) / scored.length : 0;
+  const stars = !E.cam ? 0 : avgStars >= 2.5 ? 3 : avgStars >= 1.5 ? 2 : avgStars > 0 ? 1 : 0;
+  const title = daily ? 'Week ' + (E.wk.wi + 1) + ' · ' + E.wk.f.name : DRILLS[E.plan.id].name + ' practice';
+  if (E.results.length) {
+    S.history.push({date:Date.now(), day:today, pid:p.id, title, reps:E.reps, stars, cam:E.cam, counted, drills:E.results.map(r => ({id:r.id, reps:r.reps, goal:r.goal}))});
+    if (S.history.length > 500) S.history = S.history.slice(-500);
+  }
+  save();
+  const st = streakOf(p.id), wkNow = weekInfo(p);
+  let badge = '';
+  if (counted && st > prevStreak && (st === 7 || st === 14 || st === 30)) badge = `🏅 ${st}-day streak!`;
+  else if (counted && p.days % 7 === 0) badge = `🎉 Week ${E.wk.wi + 1} complete! Next up: ${wkNow.f.name}`;
+  if (!early) speak(badge ? badge.replace(/[^\w\s!-]/g, '') : stars === 3 ? 'Golden touch! Great session.' : 'Session done. Nice work.', 1.05, true, false);
+  const rows = E.results.map(r => `<div class="dres"><b>${esc(DRILLS[r.id].name)}${r.round ? (r.id === 'box' ? ' · round ' : ' · set ') + r.round : ''}${r.pb ? '<span class="pb">NEW BEST</span>' : ''}</b><span>${E.cam ? `${r.reps} / ${r.goal} · ${'⭐'.repeat(r.stars) || '–'}` : 'done'}</span></div>`).join('');
+  const boxTotal = E.results.filter(r => r.id === 'box').reduce((a, r) => a + r.reps, 0);
+  $('#resBody').innerHTML = `
+    <div class="topbar"><h2>${esc(p.emoji)} ${esc(p.name)} · ${esc(title)}</h2></div>
+    ${E.cam ? `<div class="stars">${'⭐'.repeat(stars)}<span style="opacity:.2">${'⭐'.repeat(3 - stars)}</span></div>` : ''}
+    ${badge ? `<p style="text-align:center;color:var(--ball);font-weight:900;font-size:22px;margin:0 0 6px">${esc(badge)}</p>` : ''}
+    ${early ? '<p class="note" style="text-align:center">Ended early' + (daily && !counted && p.lastCounted !== today ? ' — finish most of the session for it to count toward the week' : '') + '</p>' : ''}
+    <div class="grid">
+      <div class="tile"><b>${E.cam ? E.reps : '–'}</b><span>Touches on target</span></div>
+      <div class="tile"><b>🔥 ${st}</b><span>Day streak</span></div>
+      ${daily ? `<div class="tile"><b>${E.cam ? boxTotal : '–'}</b><span>Box Challenge total</span></div><div class="tile"><b>${(wkNow.day === 1 && counted) ? '✓' : wkNow.day - 1}/7</b><span>${esc(E.wk.f.name)}</span></div>` : ''}
+    </div>
+    <div class="card"><div class="label" style="margin-top:0">Drills</div>${rows || '<p>No drills finished.</p>'}
+    ${E.cam ? '<p class="note" style="margin-top:8px">Touches = times the ball reached a gold target (toe taps: beats where the ball stayed in control). Goals grow as the weeks go on.</p>' : ''}</div>
+    ${daily && counted ? `<p class="note">Tomorrow: Week ${wkNow.wi + 1} · ${esc(wkNow.f.name)}, day ${wkNow.day} of 7.</p>` : ''}
+    <div class="btnrow" style="margin-top:12px">${!daily ? '<button class="btn main" id="rAgain">Go again</button>' : ''}<button class="btn ${daily ? 'main' : ''}" data-go="home">Home</button></div>`;
+  const ra = $('#rAgain'); if (ra) ra.onclick = () => openSetup(E.plan);
+  show('results');
+}
+
+/* ================= MAIN LOOP ================= */
+function loop(){
+  requestAnimationFrame(loop);
+  const t = now();
+  if (stream && camOn) processFrame(t);
+  tickEngine(t);
+}
+renderHome();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
