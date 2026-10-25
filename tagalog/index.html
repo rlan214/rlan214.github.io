@@ -88,7 +88,7 @@
   .daily-sub{font-size:14px;font-weight:700;opacity:.92;}
   .daily-go{background:#fff;color:var(--blue-d);border-radius:999px;padding:8px 16px;font-weight:900;font-size:14px;}
   .daily.done{background:linear-gradient(135deg,#6FBF9F,#3E9272);}
-  .btn-parent{background:var(--card);color:var(--blue-d);border:2px solid var(--blue);margin-bottom:12px;box-shadow:var(--shadow-sm);}
+
   .reset-link{display:block;margin:22px auto 28px;font-size:13px;color:#9690B3;font-weight:700;background:none;border:none;cursor:pointer;text-decoration:underline;}
 
   /* ---------- lesson ---------- */
@@ -196,6 +196,8 @@
   .m-btn.done{border-color:var(--mint-d);background:#E9F8F1;opacity:.75;}
   .m-btn.bad{border-color:var(--coral-d);background:#FDECEC;animation:shake .4s;}
   @keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .btn.btn-parent small{display:block;font-size:13px;font-weight:800;letter-spacing:.03em;text-transform:none;opacity:.85;margin-top:3px;}
+  .btn.btn-parent{background:#fff;color:var(--blue-d);border:2px solid var(--blue);margin-bottom:12px;box-shadow:var(--shadow-sm);}
   @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
 </style>
 </head>
@@ -269,7 +271,7 @@
     </div>
     <div class="result-sub hidden" id="new-sticker-title">🎁 New snack sticker!</div>
     <div class="new-stickers" id="new-stickers"></div>
-    <button class="btn btn-parent hidden" id="parent-btn">📤 SEND TO PARENT</button>
+    <button class="btn btn-parent hidden" id="parent-btn">📤 SEND TO PARENT<small>Padala sa magulang</small></button>
     <button class="btn btn-continue" id="result-btn">CONTINUE</button>
   </div>
 
@@ -843,9 +845,13 @@ function finishLesson(passed){
 
   const pb = $("parent-btn");
   pb.classList.toggle("hidden", !passed);
-  const msg = "⭐ Tagalog Adventure: finished the " + session.title + " today! " +
+  const en = "⭐ Tagalog Adventure: finished the " + session.title + " today! " +
     session.correct + " of " + total + " correct (" + acc + "%), " + stars + " stars earned. 🔥 " + progress.streak + "-day streak." +
     (gained.length ? " New snack sticker: " + gained.map(s=>s.emoji+" "+s.tag).join(", ") + "." : "");
+  const tl = "⭐ Tagalog Adventure: Natapos ko ang " + session.title + " ngayon! " +
+    session.correct + " sa " + total + " ang tama (" + acc + "%), " + stars + " bituin. 🔥 " + progress.streak + " araw na magkakasunod." +
+    (gained.length ? " Bagong sticker: " + gained.map(s=>s.emoji+" "+s.tag).join(", ") + "." : "");
+  const msg = tl + "\n\n" + en;
   pb.onclick = ()=>sendToParent(msg);
   showScreen("result");
 }
