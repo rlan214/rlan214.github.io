@@ -23,8 +23,8 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # ---- settings you may want to change -------------------------------------
-VOICE_NAME = "Roger"            # voice name as shown in ElevenLabs
-MODEL_ID = "eleven_v4"          # per ElevenLabs docs; eleven_v3 and eleven_multilingual_v2 also list Filipino
+VOICE_NAME = os.environ.get("ELEVEN_VOICE", "Roger")   # voice name as shown in My Voices
+MODEL_ID = os.environ.get("ELEVEN_MODEL", "eleven_v4")   # eleven_v3 and eleven_multilingual_v2 also list Filipino
 LANGUAGE_CODE = "fil"           # Filipino
 OUTPUT_FORMAT = "mp3_44100_128"
 WORKERS = 2                     # free plan allows 2 concurrent requests; raise only on a higher plan
@@ -107,7 +107,7 @@ def main():
             sys.exit("Not in words.json: " + ", ".join(sorted(unknown)))
         words = [w for w in words if w["file"] in wanted]
 
-    out_dir = os.path.join(HERE, "audio")
+    out_dir = os.path.join(HERE, os.environ.get("ELEVEN_OUT", "audio"))
     os.makedirs(out_dir, exist_ok=True)
 
     todo = [w for w in words
