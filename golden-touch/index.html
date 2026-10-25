@@ -689,7 +689,8 @@ function startDrill(s, t){
   const D = E.dr = {id:s.id, type:d.type, dur:s.dur, round:s.round, set:s.set, reps:0, streak:0, bestStreak:0, lastHit:t, home, dia,
     reach:lv.reach * (p.reach || 1) * E.wk.hard, tolR:dia * 0.75 * lv.tol * (p.tol || 1) / Math.sqrt(E.wk.hard), idx:0, target:null, next:null,
     goal:goalFor(s.id, s.dur), saidCue:false, lastSaid:0, nextTick:t + 1.2, tickN:0, inCtl:false, ctlR:dia * 1.0 * (p.tol || 1), box:null};
-  if (d.type === 'path') placeTargets(D);
+  if (d.type === 'path') { placeTargets(D); // never start on a target the ball is already sitting on
+    for (let n = 0; n < DRILLS[s.id].pts.length && Math.hypot(D.target.x - home.x, D.target.y - home.y) < D.tolR * 1.2; n++) { D.idx++; placeTargets(D); } }
   if (d.type === 'chase') recenter(D, home, t);
   if (d.type === 'tempo') $('#hudTap').innerHTML = '<div class="tap" id="tapL">L</div><div class="tap" id="tapR">R</div>';
   const best = bestFor(p, s.id);
