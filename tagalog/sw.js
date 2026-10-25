@@ -12,7 +12,7 @@ self.addEventListener("install", (event) => {
     // Each add is wrapped so one missing clip doesn't fail the whole install.
     await cache.add("./").catch(() => {});
     await Promise.all(
-      AUDIO.flatMap((f) => [f, "en_" + f, "slow_" + f]).concat(SNACKS).map((f) => cache.add("audio/" + f + ".mp3").catch(() => {}))
+      AUDIO.flatMap((f) => [f, "en_" + f]).concat(SNACKS).map((f) => cache.add("audio/" + f + ".mp3").catch(() => {}))
     );
     await self.skipWaiting();
   })());
