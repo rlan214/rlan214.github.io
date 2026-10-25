@@ -1,16 +1,10 @@
 /* Service worker: caches the app shell and all Tagalog audio clips.
    Bump CACHE_VERSION whenever you replace an MP3 or change index.html. */
-const CACHE_VERSION = "v3";
+const CACHE_VERSION = "v4";
 const CACHE = "tagalog-adventure-" + CACHE_VERSION;
 
-const AUDIO = [
-  "kumusta","magandang_umaga","salamat","paalam","oo","hindi",
-  "nanay","tatay","kuya","ate","lola","lolo",
-  "isa","dalawa","tatlo","apat","lima","anim","pito","walo","siyam","sampu",
-  "aso","pusa","ibon","isda","baboy","manok",
-  "kanin","tubig","gulay","prutas","itlog","tinapay",
-  "pula","asul","dilaw","berde","puti","itim"
-];
+const AUDIO = ["kumusta", "magandang_umaga", "salamat", "paalam", "oo", "hindi", "nanay", "tatay", "kuya", "ate", "lola", "lolo", "isa", "dalawa", "tatlo", "apat", "lima", "anim", "pito", "walo", "siyam", "sampu", "aso", "pusa", "ibon", "isda", "baboy", "manok", "kanin", "tubig", "gulay", "prutas", "itlog", "tinapay", "pula", "asul", "dilaw", "berde", "puti", "itim", "kumusta_ka", "mabuti_ako", "salamat_po", "walang_anuman", "ano_pangalan", "mahal_kita", "gutom_na_ako", "kain_na_tayo", "magandang_gabi", "ingat_ka"];
+const SNACKS = ["snack_pandesal", "snack_halo_halo", "snack_turon", "snack_lumpia", "snack_bibingka", "snack_taho", "snack_ube", "snack_buko", "snack_mangga", "snack_leche_flan", "snack_puto", "snack_siopao", "snack_banana_cue", "snack_fishball", "snack_sorbetes", "snack_polvoron", "snack_chicharon", "snack_mais"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
@@ -18,7 +12,7 @@ self.addEventListener("install", (event) => {
     // Each add is wrapped so one missing clip doesn't fail the whole install.
     await cache.add("./").catch(() => {});
     await Promise.all(
-      AUDIO.flatMap((f) => [f, "en_" + f]).map((f) => cache.add("audio/" + f + ".mp3").catch(() => {}))
+      AUDIO.flatMap((f) => [f, "en_" + f]).concat(SNACKS).map((f) => cache.add("audio/" + f + ".mp3").catch(() => {}))
     );
     await self.skipWaiting();
   })());

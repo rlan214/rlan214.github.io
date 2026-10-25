@@ -1,328 +1,571 @@
 {
-  "_note": "Source of truth for words. Add a word here, then run make_audio.py (Tagalog) and make_audio.py --english (English) to generate only the missing clips. Optional per-word fields: 'say' overrides the Tagalog text sent to the voice; 'en_say' overrides the English text.",
-  "units": [
+ "_note": "Source of truth for words. Add a word here, then run make_audio.py (Tagalog) and make_audio.py --english (English) to generate only the missing clips. Optional per-word fields: 'say' overrides the Tagalog text sent to the voice; 'en_say' overrides the English text.",
+ "units": [
+  {
+   "unit": "Greetings",
+   "words": [
     {
-      "unit": "Greetings",
-      "words": [
-        {
-          "file": "kumusta",
-          "tag": "Kumusta",
-          "en": "Hello / How are you",
-          "phon": "koo-MOOS-tah",
-          "emoji": "😊",
-          "en_say": "Hello"
-        },
-        {
-          "file": "magandang_umaga",
-          "tag": "Magandang umaga",
-          "en": "Good morning",
-          "phon": "mah-gahn-DAHNG oo-MAH-gah",
-          "emoji": "🌅"
-        },
-        {
-          "file": "salamat",
-          "tag": "Salamat",
-          "en": "Thank you",
-          "phon": "sah-LAH-maht",
-          "emoji": "🙏"
-        },
-        {
-          "file": "paalam",
-          "tag": "Paalam",
-          "en": "Goodbye",
-          "phon": "pah-AH-lahm",
-          "emoji": "👋"
-        },
-        {
-          "file": "oo",
-          "tag": "Oo",
-          "en": "Yes",
-          "phon": "OH-oh",
-          "emoji": "✅"
-        },
-        {
-          "file": "hindi",
-          "tag": "Hindi",
-          "en": "No",
-          "phon": "HIN-dee",
-          "emoji": "❌"
-        }
-      ],
-      "emoji": "👋",
-      "color": "butter"
+     "file": "kumusta",
+     "tag": "Kumusta",
+     "en": "Hello / How are you",
+     "phon": "koo-MOOS-tah",
+     "emoji": "😊",
+     "en_say": "Hello"
     },
     {
-      "unit": "Family",
-      "words": [
-        {
-          "file": "nanay",
-          "tag": "Nanay",
-          "en": "Mom",
-          "phon": "NAH-nye",
-          "emoji": "👩"
-        },
-        {
-          "file": "tatay",
-          "tag": "Tatay",
-          "en": "Dad",
-          "phon": "tah-TYE",
-          "emoji": "👨"
-        },
-        {
-          "file": "kuya",
-          "tag": "Kuya",
-          "en": "Older brother",
-          "phon": "KOO-yah",
-          "emoji": "👦"
-        },
-        {
-          "file": "ate",
-          "tag": "Ate",
-          "en": "Older sister",
-          "phon": "AH-teh",
-          "emoji": "👧"
-        },
-        {
-          "file": "lola",
-          "tag": "Lola",
-          "en": "Grandma",
-          "phon": "LOH-lah",
-          "emoji": "👵"
-        },
-        {
-          "file": "lolo",
-          "tag": "Lolo",
-          "en": "Grandpa",
-          "phon": "LOH-loh",
-          "emoji": "👴"
-        }
-      ],
-      "emoji": "👨‍👩‍👧",
-      "color": "pink"
+     "file": "magandang_umaga",
+     "tag": "Magandang umaga",
+     "en": "Good morning",
+     "phon": "mah-gahn-DAHNG oo-MAH-gah",
+     "emoji": "🌅"
     },
     {
-      "unit": "Numbers",
-      "words": [
-        {
-          "file": "isa",
-          "tag": "Isa",
-          "en": "One",
-          "phon": "EE-sah",
-          "emoji": "1️⃣"
-        },
-        {
-          "file": "dalawa",
-          "tag": "Dalawa",
-          "en": "Two",
-          "phon": "dah-lah-WAH",
-          "emoji": "2️⃣"
-        },
-        {
-          "file": "tatlo",
-          "tag": "Tatlo",
-          "en": "Three",
-          "phon": "taht-LOH",
-          "emoji": "3️⃣"
-        },
-        {
-          "file": "apat",
-          "tag": "Apat",
-          "en": "Four",
-          "phon": "AH-paht",
-          "emoji": "4️⃣"
-        },
-        {
-          "file": "lima",
-          "tag": "Lima",
-          "en": "Five",
-          "phon": "LEE-mah",
-          "emoji": "5️⃣"
-        },
-        {
-          "file": "anim",
-          "tag": "Anim",
-          "en": "Six",
-          "phon": "AH-nim",
-          "emoji": "6️⃣"
-        },
-        {
-          "file": "pito",
-          "tag": "Pito",
-          "en": "Seven",
-          "phon": "pee-TOH",
-          "emoji": "7️⃣"
-        },
-        {
-          "file": "walo",
-          "tag": "Walo",
-          "en": "Eight",
-          "phon": "wah-LOH",
-          "emoji": "8️⃣"
-        },
-        {
-          "file": "siyam",
-          "tag": "Siyam",
-          "en": "Nine",
-          "phon": "SHAHM",
-          "emoji": "9️⃣"
-        },
-        {
-          "file": "sampu",
-          "tag": "Sampu",
-          "en": "Ten",
-          "phon": "sahm-POO",
-          "emoji": "🔟"
-        }
-      ],
-      "emoji": "🔢",
-      "color": "blue"
+     "file": "salamat",
+     "tag": "Salamat",
+     "en": "Thank you",
+     "phon": "sah-LAH-maht",
+     "emoji": "🙏"
     },
     {
-      "unit": "Animals",
-      "words": [
-        {
-          "file": "aso",
-          "tag": "Aso",
-          "en": "Dog",
-          "phon": "AH-soh",
-          "emoji": "🐶"
-        },
-        {
-          "file": "pusa",
-          "tag": "Pusa",
-          "en": "Cat",
-          "phon": "POO-sah",
-          "emoji": "🐱"
-        },
-        {
-          "file": "ibon",
-          "tag": "Ibon",
-          "en": "Bird",
-          "phon": "EE-bon",
-          "emoji": "🐦"
-        },
-        {
-          "file": "isda",
-          "tag": "Isda",
-          "en": "Fish",
-          "phon": "is-DAH",
-          "emoji": "🐟"
-        },
-        {
-          "file": "baboy",
-          "tag": "Baboy",
-          "en": "Pig",
-          "phon": "BAH-boy",
-          "emoji": "🐷"
-        },
-        {
-          "file": "manok",
-          "tag": "Manok",
-          "en": "Chicken",
-          "phon": "mah-NOK",
-          "emoji": "🐔"
-        }
-      ],
-      "emoji": "🐾",
-      "color": "mint"
+     "file": "paalam",
+     "tag": "Paalam",
+     "en": "Goodbye",
+     "phon": "pah-AH-lahm",
+     "emoji": "👋"
     },
     {
-      "unit": "Food",
-      "words": [
-        {
-          "file": "kanin",
-          "tag": "Kanin",
-          "en": "Rice",
-          "phon": "KAH-nin",
-          "emoji": "🍚"
-        },
-        {
-          "file": "tubig",
-          "tag": "Tubig",
-          "en": "Water",
-          "phon": "TOO-big",
-          "emoji": "💧"
-        },
-        {
-          "file": "gulay",
-          "tag": "Gulay",
-          "en": "Vegetable",
-          "phon": "goo-LYE",
-          "emoji": "🥦"
-        },
-        {
-          "file": "prutas",
-          "tag": "Prutas",
-          "en": "Fruit",
-          "phon": "PROO-tahs",
-          "emoji": "🍎"
-        },
-        {
-          "file": "itlog",
-          "tag": "Itlog",
-          "en": "Egg",
-          "phon": "it-LOG",
-          "emoji": "🥚"
-        },
-        {
-          "file": "tinapay",
-          "tag": "Tinapay",
-          "en": "Bread",
-          "phon": "tee-nah-PYE",
-          "emoji": "🍞"
-        }
-      ],
-      "emoji": "🍚",
-      "color": "peach"
+     "file": "oo",
+     "tag": "Oo",
+     "en": "Yes",
+     "phon": "OH-oh",
+     "emoji": "✅"
     },
     {
-      "unit": "Colors",
-      "words": [
-        {
-          "file": "pula",
-          "tag": "Pula",
-          "en": "Red",
-          "phon": "POO-lah",
-          "emoji": "🔴"
-        },
-        {
-          "file": "asul",
-          "tag": "Asul",
-          "en": "Blue",
-          "phon": "ah-SOOL",
-          "emoji": "🔵"
-        },
-        {
-          "file": "dilaw",
-          "tag": "Dilaw",
-          "en": "Yellow",
-          "phon": "dee-LOW",
-          "emoji": "🟡"
-        },
-        {
-          "file": "berde",
-          "tag": "Berde",
-          "en": "Green",
-          "phon": "BEHR-deh",
-          "emoji": "🟢"
-        },
-        {
-          "file": "puti",
-          "tag": "Puti",
-          "en": "White",
-          "phon": "poo-TEE",
-          "emoji": "⚪"
-        },
-        {
-          "file": "itim",
-          "tag": "Itim",
-          "en": "Black",
-          "phon": "ee-TEEM",
-          "emoji": "⚫"
-        }
-      ],
-      "emoji": "🎨",
-      "color": "lav"
+     "file": "hindi",
+     "tag": "Hindi",
+     "en": "No",
+     "phon": "HIN-dee",
+     "emoji": "❌"
     }
-  ]
+   ],
+   "emoji": "👋",
+   "color": "butter"
+  },
+  {
+   "unit": "Family",
+   "words": [
+    {
+     "file": "nanay",
+     "tag": "Nanay",
+     "en": "Mom",
+     "phon": "NAH-nye",
+     "emoji": "👩"
+    },
+    {
+     "file": "tatay",
+     "tag": "Tatay",
+     "en": "Dad",
+     "phon": "tah-TYE",
+     "emoji": "👨"
+    },
+    {
+     "file": "kuya",
+     "tag": "Kuya",
+     "en": "Older brother",
+     "phon": "KOO-yah",
+     "emoji": "👦"
+    },
+    {
+     "file": "ate",
+     "tag": "Ate",
+     "en": "Older sister",
+     "phon": "AH-teh",
+     "emoji": "👧"
+    },
+    {
+     "file": "lola",
+     "tag": "Lola",
+     "en": "Grandma",
+     "phon": "LOH-lah",
+     "emoji": "👵"
+    },
+    {
+     "file": "lolo",
+     "tag": "Lolo",
+     "en": "Grandpa",
+     "phon": "LOH-loh",
+     "emoji": "👴"
+    }
+   ],
+   "emoji": "👨‍👩‍👧",
+   "color": "pink"
+  },
+  {
+   "unit": "Numbers",
+   "words": [
+    {
+     "file": "isa",
+     "tag": "Isa",
+     "en": "One",
+     "phon": "EE-sah",
+     "emoji": "1️⃣"
+    },
+    {
+     "file": "dalawa",
+     "tag": "Dalawa",
+     "en": "Two",
+     "phon": "dah-lah-WAH",
+     "emoji": "2️⃣"
+    },
+    {
+     "file": "tatlo",
+     "tag": "Tatlo",
+     "en": "Three",
+     "phon": "taht-LOH",
+     "emoji": "3️⃣"
+    },
+    {
+     "file": "apat",
+     "tag": "Apat",
+     "en": "Four",
+     "phon": "AH-paht",
+     "emoji": "4️⃣"
+    },
+    {
+     "file": "lima",
+     "tag": "Lima",
+     "en": "Five",
+     "phon": "LEE-mah",
+     "emoji": "5️⃣"
+    },
+    {
+     "file": "anim",
+     "tag": "Anim",
+     "en": "Six",
+     "phon": "AH-nim",
+     "emoji": "6️⃣"
+    },
+    {
+     "file": "pito",
+     "tag": "Pito",
+     "en": "Seven",
+     "phon": "pee-TOH",
+     "emoji": "7️⃣"
+    },
+    {
+     "file": "walo",
+     "tag": "Walo",
+     "en": "Eight",
+     "phon": "wah-LOH",
+     "emoji": "8️⃣"
+    },
+    {
+     "file": "siyam",
+     "tag": "Siyam",
+     "en": "Nine",
+     "phon": "SHAHM",
+     "emoji": "9️⃣"
+    },
+    {
+     "file": "sampu",
+     "tag": "Sampu",
+     "en": "Ten",
+     "phon": "sahm-POO",
+     "emoji": "🔟"
+    }
+   ],
+   "emoji": "🔢",
+   "color": "blue"
+  },
+  {
+   "unit": "Animals",
+   "words": [
+    {
+     "file": "aso",
+     "tag": "Aso",
+     "en": "Dog",
+     "phon": "AH-soh",
+     "emoji": "🐶"
+    },
+    {
+     "file": "pusa",
+     "tag": "Pusa",
+     "en": "Cat",
+     "phon": "POO-sah",
+     "emoji": "🐱"
+    },
+    {
+     "file": "ibon",
+     "tag": "Ibon",
+     "en": "Bird",
+     "phon": "EE-bon",
+     "emoji": "🐦"
+    },
+    {
+     "file": "isda",
+     "tag": "Isda",
+     "en": "Fish",
+     "phon": "is-DAH",
+     "emoji": "🐟"
+    },
+    {
+     "file": "baboy",
+     "tag": "Baboy",
+     "en": "Pig",
+     "phon": "BAH-boy",
+     "emoji": "🐷"
+    },
+    {
+     "file": "manok",
+     "tag": "Manok",
+     "en": "Chicken",
+     "phon": "mah-NOK",
+     "emoji": "🐔"
+    }
+   ],
+   "emoji": "🐾",
+   "color": "mint"
+  },
+  {
+   "unit": "Food",
+   "words": [
+    {
+     "file": "kanin",
+     "tag": "Kanin",
+     "en": "Rice",
+     "phon": "KAH-nin",
+     "emoji": "🍚"
+    },
+    {
+     "file": "tubig",
+     "tag": "Tubig",
+     "en": "Water",
+     "phon": "TOO-big",
+     "emoji": "💧"
+    },
+    {
+     "file": "gulay",
+     "tag": "Gulay",
+     "en": "Vegetable",
+     "phon": "goo-LYE",
+     "emoji": "🥦"
+    },
+    {
+     "file": "prutas",
+     "tag": "Prutas",
+     "en": "Fruit",
+     "phon": "PROO-tahs",
+     "emoji": "🍎"
+    },
+    {
+     "file": "itlog",
+     "tag": "Itlog",
+     "en": "Egg",
+     "phon": "it-LOG",
+     "emoji": "🥚"
+    },
+    {
+     "file": "tinapay",
+     "tag": "Tinapay",
+     "en": "Bread",
+     "phon": "tee-nah-PYE",
+     "emoji": "🍞"
+    }
+   ],
+   "emoji": "🍚",
+   "color": "peach"
+  },
+  {
+   "unit": "Colors",
+   "words": [
+    {
+     "file": "pula",
+     "tag": "Pula",
+     "en": "Red",
+     "phon": "POO-lah",
+     "emoji": "🔴"
+    },
+    {
+     "file": "asul",
+     "tag": "Asul",
+     "en": "Blue",
+     "phon": "ah-SOOL",
+     "emoji": "🔵"
+    },
+    {
+     "file": "dilaw",
+     "tag": "Dilaw",
+     "en": "Yellow",
+     "phon": "dee-LOW",
+     "emoji": "🟡"
+    },
+    {
+     "file": "berde",
+     "tag": "Berde",
+     "en": "Green",
+     "phon": "BEHR-deh",
+     "emoji": "🟢"
+    },
+    {
+     "file": "puti",
+     "tag": "Puti",
+     "en": "White",
+     "phon": "poo-TEE",
+     "emoji": "⚪"
+    },
+    {
+     "file": "itim",
+     "tag": "Itim",
+     "en": "Black",
+     "phon": "ee-TEEM",
+     "emoji": "⚫"
+    }
+   ],
+   "emoji": "🎨",
+   "color": "lav"
+  },
+  {
+   "unit": "Phrases",
+   "emoji": "💬",
+   "color": "sage",
+   "words": [
+    {
+     "file": "kumusta_ka",
+     "tag": "Kumusta ka?",
+     "en": "How are you?",
+     "phon": "koo-moos-TAH kah",
+     "emoji": "💬",
+     "say": "Kumusta ka?",
+     "en_say": "How are you?"
+    },
+    {
+     "file": "mabuti_ako",
+     "tag": "Mabuti ako.",
+     "en": "I'm fine.",
+     "phon": "mah-BOO-tee AH-ko",
+     "emoji": "🙂",
+     "say": "Mabuti ako.",
+     "en_say": "I'm fine."
+    },
+    {
+     "file": "salamat_po",
+     "tag": "Salamat po.",
+     "en": "Thank you (polite)",
+     "phon": "sah-LAH-mat po",
+     "emoji": "🙏",
+     "say": "Salamat po.",
+     "en_say": "Thank you"
+    },
+    {
+     "file": "walang_anuman",
+     "tag": "Walang anuman.",
+     "en": "You're welcome.",
+     "phon": "WAH-lang ah-NOO-mahn",
+     "emoji": "😊",
+     "say": "Walang anuman.",
+     "en_say": "You're welcome."
+    },
+    {
+     "file": "ano_pangalan",
+     "tag": "Ano ang pangalan mo?",
+     "en": "What's your name?",
+     "phon": "AH-no ahng pah-NGAH-lan moh",
+     "emoji": "🏷️",
+     "say": "Ano ang pangalan mo?",
+     "en_say": "What's your name?"
+    },
+    {
+     "file": "mahal_kita",
+     "tag": "Mahal kita.",
+     "en": "I love you.",
+     "phon": "mah-HAL kee-TAH",
+     "emoji": "❤️",
+     "say": "Mahal kita.",
+     "en_say": "I love you."
+    },
+    {
+     "file": "gutom_na_ako",
+     "tag": "Gutom na ako.",
+     "en": "I'm hungry.",
+     "phon": "GOO-tom nah AH-ko",
+     "emoji": "😋",
+     "say": "Gutom na ako.",
+     "en_say": "I'm hungry."
+    },
+    {
+     "file": "kain_na_tayo",
+     "tag": "Kain na tayo!",
+     "en": "Let's eat!",
+     "phon": "kah-EEN nah tah-YOH",
+     "emoji": "🍽️",
+     "say": "Kain na tayo!",
+     "en_say": "Let's eat!"
+    },
+    {
+     "file": "magandang_gabi",
+     "tag": "Magandang gabi.",
+     "en": "Good evening.",
+     "phon": "mah-gan-DAHNG gah-BEE",
+     "emoji": "🌙",
+     "say": "Magandang gabi.",
+     "en_say": "Good evening."
+    },
+    {
+     "file": "ingat_ka",
+     "tag": "Ingat ka.",
+     "en": "Take care.",
+     "phon": "EE-ngaht KAH",
+     "emoji": "🤗",
+     "say": "Ingat ka.",
+     "en_say": "Take care."
+    }
+   ]
+  }
+ ],
+ "stickers": [
+  {
+   "file": "snack_pandesal",
+   "tag": "Pandesal",
+   "en": "Bread roll",
+   "phon": "pan-deh-SAL",
+   "emoji": "🥖",
+   "say": "Pandesal"
+  },
+  {
+   "file": "snack_halo_halo",
+   "tag": "Halo-halo",
+   "en": "Shaved ice dessert",
+   "phon": "HAH-lo HAH-lo",
+   "emoji": "🍧",
+   "say": "Halo-halo"
+  },
+  {
+   "file": "snack_turon",
+   "tag": "Turon",
+   "en": "Fried banana roll",
+   "phon": "too-RON",
+   "emoji": "🌯",
+   "say": "Turon"
+  },
+  {
+   "file": "snack_lumpia",
+   "tag": "Lumpia",
+   "en": "Spring roll",
+   "phon": "LOOM-pyah",
+   "emoji": "🥟",
+   "say": "Lumpia"
+  },
+  {
+   "file": "snack_bibingka",
+   "tag": "Bibingka",
+   "en": "Rice cake",
+   "phon": "bee-BING-kah",
+   "emoji": "🥞",
+   "say": "Bibingka"
+  },
+  {
+   "file": "snack_taho",
+   "tag": "Taho",
+   "en": "Warm tofu drink",
+   "phon": "tah-HO",
+   "emoji": "🥤",
+   "say": "Taho"
+  },
+  {
+   "file": "snack_ube",
+   "tag": "Ube",
+   "en": "Purple yam",
+   "phon": "OO-beh",
+   "emoji": "🍠",
+   "say": "Ube"
+  },
+  {
+   "file": "snack_buko",
+   "tag": "Buko",
+   "en": "Young coconut",
+   "phon": "BOO-ko",
+   "emoji": "🥥",
+   "say": "Buko"
+  },
+  {
+   "file": "snack_mangga",
+   "tag": "Mangga",
+   "en": "Mango",
+   "phon": "mang-GAH",
+   "emoji": "🥭",
+   "say": "Mangga"
+  },
+  {
+   "file": "snack_leche_flan",
+   "tag": "Leche flan",
+   "en": "Caramel custard",
+   "phon": "LEH-cheh flan",
+   "emoji": "🍮",
+   "say": "Leche flan"
+  },
+  {
+   "file": "snack_puto",
+   "tag": "Puto",
+   "en": "Steamed rice cake",
+   "phon": "POO-to",
+   "emoji": "🧁",
+   "say": "Puto"
+  },
+  {
+   "file": "snack_siopao",
+   "tag": "Siopao",
+   "en": "Steamed bun",
+   "phon": "SYOH-pow",
+   "emoji": "🥯",
+   "say": "Siopao"
+  },
+  {
+   "file": "snack_banana_cue",
+   "tag": "Banana cue",
+   "en": "Caramel banana skewer",
+   "phon": "bah-NAH-nah kyoo",
+   "emoji": "🍌",
+   "say": "Banana cue"
+  },
+  {
+   "file": "snack_fishball",
+   "tag": "Fishball",
+   "en": "Street food fishball",
+   "phon": "FISH-bawl",
+   "emoji": "🍢",
+   "say": "Fishball"
+  },
+  {
+   "file": "snack_sorbetes",
+   "tag": "Sorbetes",
+   "en": "Ice cream",
+   "phon": "sor-BEH-tes",
+   "emoji": "🍦",
+   "say": "Sorbetes"
+  },
+  {
+   "file": "snack_polvoron",
+   "tag": "Polvoron",
+   "en": "Milk candy",
+   "phon": "pol-vor-ON",
+   "emoji": "🍬",
+   "say": "Polvoron"
+  },
+  {
+   "file": "snack_chicharon",
+   "tag": "Chicharon",
+   "en": "Crispy pork rinds",
+   "phon": "chee-chah-RON",
+   "emoji": "🥓",
+   "say": "Chicharon"
+  },
+  {
+   "file": "snack_mais",
+   "tag": "Mais",
+   "en": "Corn",
+   "phon": "mah-EES",
+   "emoji": "🌽",
+   "say": "Mais"
+  }
+ ]
 }

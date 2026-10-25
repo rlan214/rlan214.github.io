@@ -100,8 +100,12 @@ def main():
     args = ap.parse_args()
 
     with open(os.path.join(HERE, "words.json"), encoding="utf-8") as f:
-        units = json.load(f)["units"]
+        data = json.load(f)
+    units = data["units"]
+    stickers = data.get("stickers", [])
     words = [w for u in units for w in u["words"]]
+    if not args.english:
+        words += stickers  # snack sticker names (Tagalog only)
 
     if args.only:
         wanted = set(args.only)

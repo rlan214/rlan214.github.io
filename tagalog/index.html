@@ -154,6 +154,46 @@
   .result-stat{background:var(--card);border-radius:22px;padding:16px 24px;min-width:110px;box-shadow:var(--shadow-sm);font-weight:800;color:var(--muted);}
   .result-stat b{display:block;font-size:26px;color:var(--ink);}
 
+
+  .tint-sage{background:#E4F1D6;}
+  .snackbtn{width:100%;border:0;border-radius:26px;padding:14px 18px;margin-top:12px;display:flex;align-items:center;gap:14px;text-align:left;cursor:pointer;background:#FFE5D4;color:var(--ink);box-shadow:var(--shadow-sm);font-size:16px;}
+  .snackbtn:active{transform:scale(.98);}
+  .snack-emoji{width:52px;height:52px;border-radius:18px;background:rgba(255,255,255,.7);display:grid;place-items:center;font-size:30px;flex-shrink:0;}
+  .snack-sub{font-size:14px;font-weight:700;color:var(--muted);}
+  .snack-go{background:#fff;color:#C0714A;border-radius:999px;padding:8px 16px;font-weight:900;font-size:14px;}
+  .sticker-hint{color:var(--muted);font-weight:700;font-size:15px;margin:6px 2px 0;}
+  .sticker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin:16px 0 30px;}
+  .sticker,.new-sticker{border:0;border-radius:22px;background:#fff;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;box-shadow:var(--shadow-sm);font-weight:900;font-size:16px;color:var(--ink);cursor:pointer;}
+  .sticker:active,.new-sticker:active{transform:scale(.96);}
+  .s-emoji{font-size:48px;line-height:1.1;}
+  .sticker small,.new-sticker small{font-weight:700;color:var(--muted);font-size:12px;text-align:center;}
+  .sticker.locked{opacity:.5;filter:grayscale(1);cursor:default;}
+  .new-stickers{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:20px;}
+  .new-sticker{min-width:140px;animation:pop .5s ease;}
+  @keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+  .options.one{grid-template-columns:1fr;}
+  .speak-btn.big{width:96px;height:96px;font-size:42px;}
+  .listen-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0;}
+  .listen-hint{color:var(--muted);font-weight:800;font-size:15px;}
+  .type-input{width:100%;font:inherit;font-size:30px;font-weight:800;text-align:center;padding:16px;border-radius:20px;border:2px solid var(--line);background:#fff;color:var(--ink);box-shadow:var(--shadow-sm);}
+  .type-input:focus{outline:none;border-color:var(--blue-d);box-shadow:0 0 0 3px rgba(79,120,189,.22);}
+  .type-input.correct{border-color:var(--mint-d);background:#E9F8F1;}
+  .type-input.incorrect{border-color:var(--coral-d);background:#FDECEC;}
+  .hint-btn{align-self:center;border:0;background:none;color:var(--blue-d);font-weight:900;font-size:15px;padding:8px 14px;cursor:pointer;}
+  .answer-line{min-height:72px;border-radius:20px;background:#fff;border:2px dashed #CFC8EA;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .answer-line.correct{border:2px solid var(--mint-d);background:#E9F8F1;}
+  .answer-line.incorrect{border:2px solid var(--coral-d);background:#FDECEC;}
+  .bank{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+  .tile-word{border:2px solid var(--line);background:#fff;border-radius:16px;padding:12px 18px;font-size:21px;font-weight:800;color:var(--ink);box-shadow:var(--shadow-sm);cursor:pointer;}
+  .tile-word.used{opacity:.25;}
+  .answer-line .tile-word{background:#F1F6FF;border-color:var(--blue);}
+  .match-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .match-col{display:flex;flex-direction:column;gap:12px;}
+  .m-btn{min-height:68px;border:2px solid var(--line);background:#fff;border-radius:18px;padding:10px 12px;font-size:19px;font-weight:800;color:var(--ink);box-shadow:var(--shadow-sm);cursor:pointer;}
+  .m-btn.sel{border-color:var(--blue-d);background:#F1F6FF;box-shadow:0 0 0 3px rgba(79,120,189,.22);}
+  .m-btn.done{border-color:var(--mint-d);background:#E9F8F1;opacity:.75;}
+  .m-btn.bad{border-color:var(--coral-d);background:#FDECEC;animation:shake .4s;}
+  @keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
   @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
 </style>
 </head>
@@ -182,8 +222,20 @@
       <div class="meter-label" id="meter-label"></div>
     </div>
     <button class="daily" id="daily-btn"></button>
+    <button class="snackbtn" id="snack-btn"></button>
     <div class="tiles" id="tiles"></div>
     <button class="reset-link" id="reset-btn">Start over from scratch</button>
+  </div>
+
+  <!-- STICKER BOOK -->
+  <div id="stickers-screen" style="display:none">
+    <div class="topbar">
+      <button class="exit-btn" id="stickers-back" aria-label="Back">←</button>
+      <div class="brand">My snacks</div>
+      <div class="stats"><div class="pill">🍽️ <span id="sticker-count">0/0</span></div></div>
+    </div>
+    <p class="sticker-hint">Tap a snack to hear its Tagalog name. Finish lessons and keep your streak to collect them all!</p>
+    <div class="sticker-grid" id="sticker-grid"></div>
   </div>
 
   <!-- LESSON -->
@@ -213,6 +265,8 @@
       <div class="result-stat">⭐<b id="result-xp">0</b>stars</div>
       <div class="result-stat">✅<b id="result-acc">0%</b>correct</div>
     </div>
+    <div class="result-sub hidden" id="new-sticker-title">🎁 New snack sticker!</div>
+    <div class="new-stickers" id="new-stickers"></div>
     <button class="btn btn-parent hidden" id="parent-btn">📤 SEND TO PARENT</button>
     <button class="btn btn-continue" id="result-btn">CONTINUE</button>
   </div>
@@ -221,7 +275,8 @@
 
 <script>
 /* ============ CONTENT (generated from words.json) ============ */
-const UNITS = [{"title": "Greetings", "emoji": "👋", "color": "butter", "words": [{"file": "kumusta", "tag": "Kumusta", "en": "Hello / How are you", "phon": "koo-MOOS-tah", "emoji": "😊", "enSay": "Hello"}, {"file": "magandang_umaga", "tag": "Magandang umaga", "en": "Good morning", "phon": "mah-gahn-DAHNG oo-MAH-gah", "emoji": "🌅", "enSay": null}, {"file": "salamat", "tag": "Salamat", "en": "Thank you", "phon": "sah-LAH-maht", "emoji": "🙏", "enSay": null}, {"file": "paalam", "tag": "Paalam", "en": "Goodbye", "phon": "pah-AH-lahm", "emoji": "👋", "enSay": null}, {"file": "oo", "tag": "Oo", "en": "Yes", "phon": "OH-oh", "emoji": "✅", "enSay": null}, {"file": "hindi", "tag": "Hindi", "en": "No", "phon": "HIN-dee", "emoji": "❌", "enSay": null}]}, {"title": "Family", "emoji": "👨‍👩‍👧", "color": "pink", "words": [{"file": "nanay", "tag": "Nanay", "en": "Mom", "phon": "NAH-nye", "emoji": "👩", "enSay": null}, {"file": "tatay", "tag": "Tatay", "en": "Dad", "phon": "tah-TYE", "emoji": "👨", "enSay": null}, {"file": "kuya", "tag": "Kuya", "en": "Older brother", "phon": "KOO-yah", "emoji": "👦", "enSay": null}, {"file": "ate", "tag": "Ate", "en": "Older sister", "phon": "AH-teh", "emoji": "👧", "enSay": null}, {"file": "lola", "tag": "Lola", "en": "Grandma", "phon": "LOH-lah", "emoji": "👵", "enSay": null}, {"file": "lolo", "tag": "Lolo", "en": "Grandpa", "phon": "LOH-loh", "emoji": "👴", "enSay": null}]}, {"title": "Numbers", "emoji": "🔢", "color": "blue", "words": [{"file": "isa", "tag": "Isa", "en": "One", "phon": "EE-sah", "emoji": "1️⃣", "enSay": null}, {"file": "dalawa", "tag": "Dalawa", "en": "Two", "phon": "dah-lah-WAH", "emoji": "2️⃣", "enSay": null}, {"file": "tatlo", "tag": "Tatlo", "en": "Three", "phon": "taht-LOH", "emoji": "3️⃣", "enSay": null}, {"file": "apat", "tag": "Apat", "en": "Four", "phon": "AH-paht", "emoji": "4️⃣", "enSay": null}, {"file": "lima", "tag": "Lima", "en": "Five", "phon": "LEE-mah", "emoji": "5️⃣", "enSay": null}, {"file": "anim", "tag": "Anim", "en": "Six", "phon": "AH-nim", "emoji": "6️⃣", "enSay": null}, {"file": "pito", "tag": "Pito", "en": "Seven", "phon": "pee-TOH", "emoji": "7️⃣", "enSay": null}, {"file": "walo", "tag": "Walo", "en": "Eight", "phon": "wah-LOH", "emoji": "8️⃣", "enSay": null}, {"file": "siyam", "tag": "Siyam", "en": "Nine", "phon": "SHAHM", "emoji": "9️⃣", "enSay": null}, {"file": "sampu", "tag": "Sampu", "en": "Ten", "phon": "sahm-POO", "emoji": "🔟", "enSay": null}]}, {"title": "Animals", "emoji": "🐾", "color": "mint", "words": [{"file": "aso", "tag": "Aso", "en": "Dog", "phon": "AH-soh", "emoji": "🐶", "enSay": null}, {"file": "pusa", "tag": "Pusa", "en": "Cat", "phon": "POO-sah", "emoji": "🐱", "enSay": null}, {"file": "ibon", "tag": "Ibon", "en": "Bird", "phon": "EE-bon", "emoji": "🐦", "enSay": null}, {"file": "isda", "tag": "Isda", "en": "Fish", "phon": "is-DAH", "emoji": "🐟", "enSay": null}, {"file": "baboy", "tag": "Baboy", "en": "Pig", "phon": "BAH-boy", "emoji": "🐷", "enSay": null}, {"file": "manok", "tag": "Manok", "en": "Chicken", "phon": "mah-NOK", "emoji": "🐔", "enSay": null}]}, {"title": "Food", "emoji": "🍚", "color": "peach", "words": [{"file": "kanin", "tag": "Kanin", "en": "Rice", "phon": "KAH-nin", "emoji": "🍚", "enSay": null}, {"file": "tubig", "tag": "Tubig", "en": "Water", "phon": "TOO-big", "emoji": "💧", "enSay": null}, {"file": "gulay", "tag": "Gulay", "en": "Vegetable", "phon": "goo-LYE", "emoji": "🥦", "enSay": null}, {"file": "prutas", "tag": "Prutas", "en": "Fruit", "phon": "PROO-tahs", "emoji": "🍎", "enSay": null}, {"file": "itlog", "tag": "Itlog", "en": "Egg", "phon": "it-LOG", "emoji": "🥚", "enSay": null}, {"file": "tinapay", "tag": "Tinapay", "en": "Bread", "phon": "tee-nah-PYE", "emoji": "🍞", "enSay": null}]}, {"title": "Colors", "emoji": "🎨", "color": "lav", "words": [{"file": "pula", "tag": "Pula", "en": "Red", "phon": "POO-lah", "emoji": "🔴", "enSay": null}, {"file": "asul", "tag": "Asul", "en": "Blue", "phon": "ah-SOOL", "emoji": "🔵", "enSay": null}, {"file": "dilaw", "tag": "Dilaw", "en": "Yellow", "phon": "dee-LOW", "emoji": "🟡", "enSay": null}, {"file": "berde", "tag": "Berde", "en": "Green", "phon": "BEHR-deh", "emoji": "🟢", "enSay": null}, {"file": "puti", "tag": "Puti", "en": "White", "phon": "poo-TEE", "emoji": "⚪", "enSay": null}, {"file": "itim", "tag": "Itim", "en": "Black", "phon": "ee-TEEM", "emoji": "⚫", "enSay": null}]}];
+const UNITS = [{"title": "Greetings", "emoji": "👋", "color": "butter", "words": [{"file": "kumusta", "tag": "Kumusta", "en": "Hello / How are you", "phon": "koo-MOOS-tah", "emoji": "😊", "enSay": "Hello"}, {"file": "magandang_umaga", "tag": "Magandang umaga", "en": "Good morning", "phon": "mah-gahn-DAHNG oo-MAH-gah", "emoji": "🌅", "enSay": null}, {"file": "salamat", "tag": "Salamat", "en": "Thank you", "phon": "sah-LAH-maht", "emoji": "🙏", "enSay": null}, {"file": "paalam", "tag": "Paalam", "en": "Goodbye", "phon": "pah-AH-lahm", "emoji": "👋", "enSay": null}, {"file": "oo", "tag": "Oo", "en": "Yes", "phon": "OH-oh", "emoji": "✅", "enSay": null}, {"file": "hindi", "tag": "Hindi", "en": "No", "phon": "HIN-dee", "emoji": "❌", "enSay": null}]}, {"title": "Family", "emoji": "👨‍👩‍👧", "color": "pink", "words": [{"file": "nanay", "tag": "Nanay", "en": "Mom", "phon": "NAH-nye", "emoji": "👩", "enSay": null}, {"file": "tatay", "tag": "Tatay", "en": "Dad", "phon": "tah-TYE", "emoji": "👨", "enSay": null}, {"file": "kuya", "tag": "Kuya", "en": "Older brother", "phon": "KOO-yah", "emoji": "👦", "enSay": null}, {"file": "ate", "tag": "Ate", "en": "Older sister", "phon": "AH-teh", "emoji": "👧", "enSay": null}, {"file": "lola", "tag": "Lola", "en": "Grandma", "phon": "LOH-lah", "emoji": "👵", "enSay": null}, {"file": "lolo", "tag": "Lolo", "en": "Grandpa", "phon": "LOH-loh", "emoji": "👴", "enSay": null}]}, {"title": "Numbers", "emoji": "🔢", "color": "blue", "words": [{"file": "isa", "tag": "Isa", "en": "One", "phon": "EE-sah", "emoji": "1️⃣", "enSay": null}, {"file": "dalawa", "tag": "Dalawa", "en": "Two", "phon": "dah-lah-WAH", "emoji": "2️⃣", "enSay": null}, {"file": "tatlo", "tag": "Tatlo", "en": "Three", "phon": "taht-LOH", "emoji": "3️⃣", "enSay": null}, {"file": "apat", "tag": "Apat", "en": "Four", "phon": "AH-paht", "emoji": "4️⃣", "enSay": null}, {"file": "lima", "tag": "Lima", "en": "Five", "phon": "LEE-mah", "emoji": "5️⃣", "enSay": null}, {"file": "anim", "tag": "Anim", "en": "Six", "phon": "AH-nim", "emoji": "6️⃣", "enSay": null}, {"file": "pito", "tag": "Pito", "en": "Seven", "phon": "pee-TOH", "emoji": "7️⃣", "enSay": null}, {"file": "walo", "tag": "Walo", "en": "Eight", "phon": "wah-LOH", "emoji": "8️⃣", "enSay": null}, {"file": "siyam", "tag": "Siyam", "en": "Nine", "phon": "SHAHM", "emoji": "9️⃣", "enSay": null}, {"file": "sampu", "tag": "Sampu", "en": "Ten", "phon": "sahm-POO", "emoji": "🔟", "enSay": null}]}, {"title": "Animals", "emoji": "🐾", "color": "mint", "words": [{"file": "aso", "tag": "Aso", "en": "Dog", "phon": "AH-soh", "emoji": "🐶", "enSay": null}, {"file": "pusa", "tag": "Pusa", "en": "Cat", "phon": "POO-sah", "emoji": "🐱", "enSay": null}, {"file": "ibon", "tag": "Ibon", "en": "Bird", "phon": "EE-bon", "emoji": "🐦", "enSay": null}, {"file": "isda", "tag": "Isda", "en": "Fish", "phon": "is-DAH", "emoji": "🐟", "enSay": null}, {"file": "baboy", "tag": "Baboy", "en": "Pig", "phon": "BAH-boy", "emoji": "🐷", "enSay": null}, {"file": "manok", "tag": "Manok", "en": "Chicken", "phon": "mah-NOK", "emoji": "🐔", "enSay": null}]}, {"title": "Food", "emoji": "🍚", "color": "peach", "words": [{"file": "kanin", "tag": "Kanin", "en": "Rice", "phon": "KAH-nin", "emoji": "🍚", "enSay": null}, {"file": "tubig", "tag": "Tubig", "en": "Water", "phon": "TOO-big", "emoji": "💧", "enSay": null}, {"file": "gulay", "tag": "Gulay", "en": "Vegetable", "phon": "goo-LYE", "emoji": "🥦", "enSay": null}, {"file": "prutas", "tag": "Prutas", "en": "Fruit", "phon": "PROO-tahs", "emoji": "🍎", "enSay": null}, {"file": "itlog", "tag": "Itlog", "en": "Egg", "phon": "it-LOG", "emoji": "🥚", "enSay": null}, {"file": "tinapay", "tag": "Tinapay", "en": "Bread", "phon": "tee-nah-PYE", "emoji": "🍞", "enSay": null}]}, {"title": "Colors", "emoji": "🎨", "color": "lav", "words": [{"file": "pula", "tag": "Pula", "en": "Red", "phon": "POO-lah", "emoji": "🔴", "enSay": null}, {"file": "asul", "tag": "Asul", "en": "Blue", "phon": "ah-SOOL", "emoji": "🔵", "enSay": null}, {"file": "dilaw", "tag": "Dilaw", "en": "Yellow", "phon": "dee-LOW", "emoji": "🟡", "enSay": null}, {"file": "berde", "tag": "Berde", "en": "Green", "phon": "BEHR-deh", "emoji": "🟢", "enSay": null}, {"file": "puti", "tag": "Puti", "en": "White", "phon": "poo-TEE", "emoji": "⚪", "enSay": null}, {"file": "itim", "tag": "Itim", "en": "Black", "phon": "ee-TEEM", "emoji": "⚫", "enSay": null}]}, {"title": "Phrases", "emoji": "💬", "color": "sage", "words": [{"file": "kumusta_ka", "tag": "Kumusta ka?", "en": "How are you?", "phon": "koo-moos-TAH kah", "emoji": "💬", "enSay": "How are you?"}, {"file": "mabuti_ako", "tag": "Mabuti ako.", "en": "I'm fine.", "phon": "mah-BOO-tee AH-ko", "emoji": "🙂", "enSay": "I'm fine."}, {"file": "salamat_po", "tag": "Salamat po.", "en": "Thank you (polite)", "phon": "sah-LAH-mat po", "emoji": "🙏", "enSay": "Thank you"}, {"file": "walang_anuman", "tag": "Walang anuman.", "en": "You're welcome.", "phon": "WAH-lang ah-NOO-mahn", "emoji": "😊", "enSay": "You're welcome."}, {"file": "ano_pangalan", "tag": "Ano ang pangalan mo?", "en": "What's your name?", "phon": "AH-no ahng pah-NGAH-lan moh", "emoji": "🏷️", "enSay": "What's your name?"}, {"file": "mahal_kita", "tag": "Mahal kita.", "en": "I love you.", "phon": "mah-HAL kee-TAH", "emoji": "❤️", "enSay": "I love you."}, {"file": "gutom_na_ako", "tag": "Gutom na ako.", "en": "I'm hungry.", "phon": "GOO-tom nah AH-ko", "emoji": "😋", "enSay": "I'm hungry."}, {"file": "kain_na_tayo", "tag": "Kain na tayo!", "en": "Let's eat!", "phon": "kah-EEN nah tah-YOH", "emoji": "🍽️", "enSay": "Let's eat!"}, {"file": "magandang_gabi", "tag": "Magandang gabi.", "en": "Good evening.", "phon": "mah-gan-DAHNG gah-BEE", "emoji": "🌙", "enSay": "Good evening."}, {"file": "ingat_ka", "tag": "Ingat ka.", "en": "Take care.", "phon": "EE-ngaht KAH", "emoji": "🤗", "enSay": "Take care."}]}];
+const STICKERS = [{"file": "snack_pandesal", "tag": "Pandesal", "en": "Bread roll", "phon": "pan-deh-SAL", "emoji": "🥖"}, {"file": "snack_halo_halo", "tag": "Halo-halo", "en": "Shaved ice dessert", "phon": "HAH-lo HAH-lo", "emoji": "🍧"}, {"file": "snack_turon", "tag": "Turon", "en": "Fried banana roll", "phon": "too-RON", "emoji": "🌯"}, {"file": "snack_lumpia", "tag": "Lumpia", "en": "Spring roll", "phon": "LOOM-pyah", "emoji": "🥟"}, {"file": "snack_bibingka", "tag": "Bibingka", "en": "Rice cake", "phon": "bee-BING-kah", "emoji": "🥞"}, {"file": "snack_taho", "tag": "Taho", "en": "Warm tofu drink", "phon": "tah-HO", "emoji": "🥤"}, {"file": "snack_ube", "tag": "Ube", "en": "Purple yam", "phon": "OO-beh", "emoji": "🍠"}, {"file": "snack_buko", "tag": "Buko", "en": "Young coconut", "phon": "BOO-ko", "emoji": "🥥"}, {"file": "snack_mangga", "tag": "Mangga", "en": "Mango", "phon": "mang-GAH", "emoji": "🥭"}, {"file": "snack_leche_flan", "tag": "Leche flan", "en": "Caramel custard", "phon": "LEH-cheh flan", "emoji": "🍮"}, {"file": "snack_puto", "tag": "Puto", "en": "Steamed rice cake", "phon": "POO-to", "emoji": "🧁"}, {"file": "snack_siopao", "tag": "Siopao", "en": "Steamed bun", "phon": "SYOH-pow", "emoji": "🥯"}, {"file": "snack_banana_cue", "tag": "Banana cue", "en": "Caramel banana skewer", "phon": "bah-NAH-nah kyoo", "emoji": "🍌"}, {"file": "snack_fishball", "tag": "Fishball", "en": "Street food fishball", "phon": "FISH-bawl", "emoji": "🍢"}, {"file": "snack_sorbetes", "tag": "Sorbetes", "en": "Ice cream", "phon": "sor-BEH-tes", "emoji": "🍦"}, {"file": "snack_polvoron", "tag": "Polvoron", "en": "Milk candy", "phon": "pol-vor-ON", "emoji": "🍬"}, {"file": "snack_chicharon", "tag": "Chicharon", "en": "Crispy pork rinds", "phon": "chee-chah-RON", "emoji": "🥓"}, {"file": "snack_mais", "tag": "Mais", "en": "Corn", "phon": "mah-EES", "emoji": "🌽"}];
 
 /* ============ HELPERS ============ */
 const $ = (id) => document.getElementById(id);
@@ -233,16 +288,27 @@ function shuffle(arr){
 function dayStr(d){
   return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 }
+function norm(s){
+  return String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
+    .replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
+}
+function isPhrase(w){ return w.tag.trim().indexOf(" ") > -1; }
+const ALL_WORDS = UNITS.flatMap(u=>u.words);
+function wordByFile(f){ return ALL_WORDS.find(w=>w.file===f); }
 
 /* ============ PROGRESS (saved in this browser) ============ */
 const STORAGE_KEY = "tagalog-progress-v1";
-let progress = { completedUnits:{}, xp:0, streak:0, lastActiveDate:null, dailyDone:null };
+function freshProgress(){
+  return { completedUnits:{}, xp:0, streak:0, lastActiveDate:null, dailyDone:null,
+           stickers:[], streakRewards:{}, missed:{}, dailyPlan:null };
+}
+let progress = freshProgress();
 let session = null;
 
 function loadProgress(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) progress = Object.assign(progress, JSON.parse(raw));
+    if(raw) progress = Object.assign(freshProgress(), JSON.parse(raw));
   }catch(e){}
   const today = dayStr(new Date());
   const y = new Date(); y.setDate(y.getDate()-1);
@@ -261,6 +327,16 @@ function markActiveToday(){
     progress.streak = (progress.lastActiveDate === dayStr(y)) ? progress.streak + 1 : 1;
     progress.lastActiveDate = today;
   }
+}
+function noteMissed(w){ progress.missed[w.file] = (progress.missed[w.file]||0) + 1; saveProgress(); }
+function noteCorrect(w){
+  if(progress.missed[w.file]){ progress.missed[w.file]--; if(progress.missed[w.file] <= 0) delete progress.missed[w.file]; saveProgress(); }
+}
+function awardSticker(){
+  const have = new Set(progress.stickers);
+  const next = STICKERS.find(s=>!have.has(s.file));
+  if(next) progress.stickers.push(next.file);
+  return next || null;
 }
 
 /* ============ AUDIO ============ */
@@ -299,7 +375,8 @@ function sayEnglish(w){
 }
 
 /* ============ HOME ============ */
-function isLocked(i){ return i > 0 && !progress.completedUnits[i-1]; }
+function isLocked(i){ return false; } /* every lesson is open */
+function seenUnit(i){ return !!progress.completedUnits[i] || i === 0 || !!progress.completedUnits[i-1]; }
 
 function renderHome(){
   $("xp-count").textContent = progress.xp;
@@ -317,6 +394,14 @@ function renderHome(){
     '<span class="daily-go">'+(dailyDone?"Practice":"Start")+'</span>';
   db.onclick = startDaily;
 
+  const sb = $("snack-btn");
+  const earned = progress.stickers.map(f=>STICKERS.find(s=>s.file===f)).filter(Boolean);
+  sb.innerHTML = '<span class="snack-emoji">🍽️</span>'+
+    '<span class="daily-text"><span class="daily-title">My snack stickers</span>'+
+    '<span class="snack-sub">'+(earned.length ? earned.slice(-6).map(s=>s.emoji).join(" ") + "  " : "Finish a lesson to win your first snack! ")+
+    '· '+earned.length+' of '+STICKERS.length+'</span></span><span class="snack-go">Open</span>';
+  sb.onclick = ()=>{ renderStickers(); showScreen("stickers"); };
+
   const tiles = $("tiles");
   tiles.innerHTML = "";
   let current = null;
@@ -325,104 +410,169 @@ function renderHome(){
     if(!locked && !done && current === null) current = i;
     const t = document.createElement("button");
     t.className = "tile tint-" + u.color + (locked?" locked":"") + (i===current?" current":"");
-    if(locked) t.setAttribute("aria-disabled","true");
     t.innerHTML =
       '<span class="tile-emoji">'+u.emoji+'</span>'+
-      '<span class="tile-badge '+(done?"done":locked?"lock":"")+'">'+(done?"✓ Done":locked?"🔒":"Start")+'</span>'+
+      '<span class="tile-badge '+(done?"done":"")+'">'+(done?"✓ Done":"Start")+'</span>'+
       '<span class="tile-title">'+u.title+'</span>'+
-      '<span class="tile-sub">'+u.words.length+' words</span>';
-    if(!locked) t.addEventListener("click", ()=>startLesson(i));
+      '<span class="tile-sub">'+u.words.length+' '+(u.title==="Phrases"?"phrases":"words")+'</span>';
+    t.addEventListener("click", ()=>startLesson(i));
     tiles.appendChild(t);
   });
 }
 
-/* ============ LESSON ============ */
-function makeQuestion(word, all, tagToEn){
-  const wrong = shuffle(all.filter(w=>w.file!==word.file)).slice(0,3);
-  return { word, tagToEn, options: shuffle([word, ...wrong]) };
+function renderStickers(){
+  const have = new Set(progress.stickers);
+  $("sticker-count").textContent = have.size + "/" + STICKERS.length;
+  const grid = $("sticker-grid");
+  grid.innerHTML = "";
+  STICKERS.forEach(s=>{
+    const b = document.createElement("button");
+    const got = have.has(s.file);
+    b.className = "sticker" + (got ? "" : " locked");
+    b.innerHTML = got
+      ? '<span class="s-emoji">'+s.emoji+'</span><span>'+s.tag+'</span><small>'+s.en+'</small>'
+      : '<span class="s-emoji">❓</span><span>Mystery snack</span><small>Keep learning!</small>';
+    if(got) b.addEventListener("click", ()=>sayTagalog(s));
+    grid.appendChild(b);
+  });
+}
+
+/* ============ QUESTIONS ============ */
+function distractors(word, pool){
+  const same = pool.filter(w=>w.file!==word.file && isPhrase(w)===isPhrase(word));
+  const base = same.length >= 3 ? same : pool.filter(w=>w.file!==word.file);
+  return shuffle(base).slice(0,3);
+}
+function mkQ(word, pool, type){
+  const q = { type, word, pool };
+  if(type==="tag2en" || type==="en2tag" || type==="listen"){
+    q.options = shuffle([word, ...distractors(word, pool)]);
+  }
+  if(type==="build"){
+    const toks = word.tag.split(" ");
+    const bank = toks.slice();
+    const others = pool.filter(w=>w.file!==word.file && isPhrase(w));
+    if(others.length){
+      const extra = shuffle(others).flatMap(w=>w.tag.split(" ")).filter(t=>!toks.some(x=>norm(x)===norm(t)));
+      if(extra.length) bank.push(extra[Math.floor(Math.random()*extra.length)]);
+    }
+    q.tokens = shuffle(bank);
+  }
+  return q;
+}
+function variantType(t){
+  return ({tag2en:"listen", listen:"tag2en", en2tag:"tag2en", type:"en2tag", build:"en2tag"})[t] || "tag2en";
 }
 function buildQuestions(unit){
+  const pool = unit.words;
+  const A = [], B = [];
+  shuffle(pool).forEach(w=>{
+    A.push(mkQ(w, pool, Math.random()<0.5 ? "tag2en" : "listen"));
+    const second = isPhrase(w) ? (Math.random()<0.65 ? "build" : "en2tag") : (Math.random()<0.5 ? "en2tag" : "type");
+    B.push(mkQ(w, pool, second));
+  });
   const qs = [];
-  unit.words.forEach(w=>{ qs.push(makeQuestion(w, unit.words, true)); qs.push(makeQuestion(w, unit.words, false)); });
-  return shuffle(qs);
+  A.forEach((q,k)=>{ qs.push(q); if(k>=2) qs.push(B[k-2]); });
+  for(let k=Math.max(0,A.length-2); k<B.length; k++) qs.push(B[k]);
+  if(pool.length >= 4 && !isPhrase(pool[0])){
+    qs.splice(Math.floor(qs.length/2), 0, { type:"match", words:shuffle(pool).slice(0,4), pool, word:pool[0] });
+  }
+  return qs;
 }
 function startLesson(i){
-  session = { unitIdx:i, daily:false, title:UNITS[i].title, questions:buildQuestions(UNITS[i]), current:0, hearts:3, correct:0, selected:null, answered:false };
+  session = { unitIdx:i, daily:false, title:UNITS[i].title, questions:buildQuestions(UNITS[i]),
+              current:0, hearts:3, correct:0, selected:null, answered:false, requeued:new Set() };
   showScreen("lesson");
   renderQuestion();
 }
-/* Daily lesson: same 8 words all day (seeded by date), drawn from unlocked units */
+
+/* Daily lesson: same 8 questions all day, includes words they've missed before */
 function seededRand(seed){
   let a = seed >>> 0;
   return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
     t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 }
-function startDaily(){
+function pickType(w, rand, avoid){
+  let list = isPhrase(w) ? ["tag2en","en2tag","listen","build"] : ["tag2en","en2tag","listen","type"];
+  const f = list.filter(t=>t!==avoid);
+  return f[Math.floor(rand()*f.length)];
+}
+function getDailyPlan(pool){
   const today = dayStr(new Date());
+  if(progress.dailyPlan && progress.dailyPlan.date === today){
+    const ok = progress.dailyPlan.entries.every(e=>pool.some(w=>w.file===e.file) || wordByFile(e.file));
+    if(ok) return progress.dailyPlan.entries;
+  }
   let seed = 0; for(const c of today) seed = (seed*31 + c.charCodeAt(0)) | 0;
   const rand = seededRand(seed);
-  const open = UNITS.filter((u,i)=>!isLocked(i));
-  const pool = open.flatMap(u=>u.words);
-  const picked = pool.map(w=>[rand(),w]).sort((a,b)=>a[0]-b[0]).slice(0,8).map(x=>x[1]);
-  const dirs = picked.map(()=>rand() < 0.5);
-  const qs = picked.map((w,k)=>makeQuestion(w, pool, dirs[k]));
-  for(let k=0; qs.length < 8; k++){ const j = k % picked.length; qs.push(makeQuestion(picked[j], pool, !dirs[j])); }
-  session = { unitIdx:-1, daily:true, title:"Daily lesson", questions:qs, current:0, hearts:3, correct:0, selected:null, answered:false };
+  const missed = Object.entries(progress.missed).filter(([f,c])=>c>0 && pool.some(w=>w.file===f))
+    .sort((a,b)=>b[1]-a[1]).slice(0,4).map(([f])=>pool.find(w=>w.file===f));
+  const rest = pool.filter(w=>!missed.includes(w)).map(w=>[rand(),w]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+  const picked = [...missed, ...rest].slice(0,8);
+  const entries = picked.map(w=>({file:w.file, type:pickType(w, rand, null)}));
+  for(let k=0; entries.length < 8; k++){
+    const j = k % picked.length;
+    entries.push({file:picked[j].file, type:pickType(picked[j], rand, entries[j].type)});
+  }
+  const mixed = entries.map(e=>[rand(),e]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+  progress.dailyPlan = { date:today, entries:mixed };
+  saveProgress();
+  return mixed;
+}
+function startDaily(){
+  const pool = UNITS.filter((u,i)=>seenUnit(i)).flatMap(u=>u.words);
+  const entries = getDailyPlan(pool);
+  const qs = entries.map(e=>mkQ(wordByFile(e.file), pool, e.type));
+  session = { unitIdx:-1, daily:true, title:"Daily lesson", questions:qs,
+              current:0, hearts:3, correct:0, selected:null, answered:false, requeued:new Set() };
   showScreen("lesson");
   renderQuestion();
 }
+
+/* ============ LESSON SCREEN ============ */
 function renderHearts(){
-  $("hearts-display").textContent = "❤️".repeat(session.hearts) + "🩶".repeat(3-session.hearts);
+  $("hearts-display").textContent = "❤️".repeat(Math.max(0,session.hearts)) + "🩶".repeat(Math.max(0,3-session.hearts));
 }
-function speakButton(label, onTap){
+function speakButton(label, onTap, big){
   const b = document.createElement("button");
-  b.className = "speak-btn"; b.textContent = "🔊"; b.setAttribute("aria-label", label);
+  b.className = "speak-btn" + (big ? " big" : ""); b.textContent = "🔊"; b.setAttribute("aria-label", label);
   b.addEventListener("click", onTap);
   return b;
 }
+function wordRow(text, btn){
+  const row = document.createElement("div");
+  row.className = "stage-word";
+  const span = document.createElement("span"); span.textContent = text;
+  row.appendChild(span);
+  if(btn) row.appendChild(btn);
+  return row;
+}
+function emojiEl(e){ const d = document.createElement("div"); d.className = "stage-emoji"; d.textContent = e; return d; }
+
 function renderQuestion(){
   const q = session.questions[session.current];
-  const w = q.word;
   $("progress-fill").style.width = (session.current/session.questions.length*100) + "%";
   renderHearts();
-
-  $("eyebrow").textContent = q.tagToEn ? "What does this mean?" : "How do you say this in Tagalog?";
-
-  const stage = $("stage");
-  stage.innerHTML = "";
-  if(q.tagToEn){
-    const row = document.createElement("div");
-    row.className = "stage-word";
-    const span = document.createElement("span"); span.textContent = w.tag;
-    row.appendChild(span);
-    row.appendChild(speakButton("Hear "+w.tag, ()=>sayTagalog(w)));
-    stage.appendChild(row);
-    const ph = document.createElement("div");
-    ph.className = "stage-phon"; ph.textContent = "Say it: " + w.phon;
-    stage.appendChild(ph);
-  } else {
-    const em = document.createElement("div"); em.className = "stage-emoji"; em.textContent = w.emoji;
-    stage.appendChild(em);
-    const row = document.createElement("div"); row.className = "stage-word";
-    const span = document.createElement("span"); span.textContent = w.en;
-    row.appendChild(span);
-    row.appendChild(speakButton("Hear "+w.en, ()=>sayEnglish(w)));
-    stage.appendChild(row);
-  }
-
-  const opts = $("options");
-  opts.innerHTML = "";
+  session.selected = null; session.answered = false;
+  const check = $("check-btn");
+  check.disabled = true; check.textContent = "CHECK"; check.className = "btn btn-check"; check.onclick = handleCheck;
+  $("feedback-msg").className = "feedback-msg hidden";
+  $("footer-bar").className = "footer-bar";
+  const stage = $("stage"), opts = $("options");
+  stage.innerHTML = ""; stage.classList.remove("hidden");
+  opts.innerHTML = ""; opts.className = "options";
+  ({tag2en:rTag2En, en2tag:rEn2Tag, listen:rListen, type:rType, build:rBuild, match:rMatch})[q.type](q, stage, opts);
+}
+function fillChoices(q, opts, valueKey, showEmoji, showPhon){
   q.options.forEach(o=>{
-    const value = q.tagToEn ? o.en : o.tag;
+    const value = o[valueKey];
     const btn = document.createElement("button");
     btn.className = "option"; btn.dataset.value = value;
     const text = document.createElement("span"); text.className = "opt-text";
-    const main = document.createElement("span"); main.textContent = value; text.appendChild(main);
-    if(!q.tagToEn){
-      const ph = document.createElement("span"); ph.className = "opt-phon"; ph.textContent = o.phon; text.appendChild(ph);
-    }
+    const main = document.createElement("span"); main.textContent = (showEmoji ? o.emoji + "  " : "") + value; text.appendChild(main);
+    if(showPhon){ const ph = document.createElement("span"); ph.className = "opt-phon"; ph.textContent = o.phon; text.appendChild(ph); }
     btn.appendChild(text);
-    if(!q.tagToEn){
+    if(showPhon){
       const sp = document.createElement("span");
       sp.className = "opt-speak"; sp.textContent = "🔊"; sp.setAttribute("role","button"); sp.setAttribute("aria-label","Hear "+o.tag);
       sp.addEventListener("click", (e)=>{ e.stopPropagation(); sayTagalog(o); });
@@ -431,12 +581,127 @@ function renderQuestion(){
     btn.addEventListener("click", ()=>selectOption(btn, value));
     opts.appendChild(btn);
   });
-
-  session.selected = null; session.answered = false;
-  const check = $("check-btn");
-  check.disabled = true; check.textContent = "CHECK"; check.className = "btn btn-check"; check.onclick = handleCheck;
-  $("feedback-msg").className = "feedback-msg hidden";
-  $("footer-bar").className = "footer-bar";
+}
+function rTag2En(q, stage, opts){
+  const w = q.word;
+  $("eyebrow").textContent = "What does this mean?";
+  stage.appendChild(wordRow(w.tag, speakButton("Hear "+w.tag, ()=>sayTagalog(w))));
+  const ph = document.createElement("div"); ph.className = "stage-phon"; ph.textContent = "Say it: " + w.phon;
+  stage.appendChild(ph);
+  fillChoices(q, opts, "en", false, false);
+}
+function rEn2Tag(q, stage, opts){
+  const w = q.word;
+  $("eyebrow").textContent = "How do you say this in Tagalog?";
+  stage.appendChild(emojiEl(w.emoji));
+  stage.appendChild(wordRow(w.en, speakButton("Hear "+w.en, ()=>sayEnglish(w))));
+  fillChoices(q, opts, "tag", false, true);
+}
+function rListen(q, stage, opts){
+  const w = q.word;
+  $("eyebrow").textContent = "Listen and pick the meaning";
+  const wrap = document.createElement("div"); wrap.className = "listen-wrap";
+  wrap.appendChild(speakButton("Hear the word", ()=>sayTagalog(w), true));
+  const hint = document.createElement("div"); hint.className = "listen-hint"; hint.textContent = "Tap to listen again";
+  wrap.appendChild(hint);
+  stage.appendChild(wrap);
+  fillChoices(q, opts, "en", true, false);
+  setTimeout(()=>{ if(session && session.questions[session.current]===q) sayTagalog(w); }, 250);
+}
+function rType(q, stage, opts){
+  const w = q.word;
+  $("eyebrow").textContent = "Type it in Tagalog";
+  stage.appendChild(emojiEl(w.emoji));
+  stage.appendChild(wordRow(w.en, speakButton("Hear "+w.en, ()=>sayEnglish(w))));
+  opts.className = "options one";
+  const input = document.createElement("input");
+  input.id = "type-input"; input.className = "type-input"; input.type = "text";
+  input.setAttribute("autocapitalize","off"); input.setAttribute("autocorrect","off");
+  input.setAttribute("autocomplete","off"); input.setAttribute("spellcheck","false");
+  input.setAttribute("enterkeyhint","go"); input.setAttribute("aria-label","Type the Tagalog word");
+  input.placeholder = "Type here";
+  input.addEventListener("input", ()=>{ if(!session.answered) $("check-btn").disabled = !input.value.trim(); });
+  input.addEventListener("keydown", (e)=>{ if(e.key==="Enter" && !$("check-btn").disabled){ e.preventDefault(); $("check-btn").click(); } });
+  opts.appendChild(input);
+  const hint = document.createElement("button");
+  hint.className = "hint-btn"; hint.textContent = "🔊 Hear it in Tagalog (hint)";
+  hint.addEventListener("click", ()=>sayTagalog(w));
+  opts.appendChild(hint);
+}
+function rBuild(q, stage, opts){
+  const w = q.word;
+  $("eyebrow").textContent = "Build it in Tagalog";
+  stage.appendChild(emojiEl(w.emoji));
+  stage.appendChild(wordRow(w.en, speakButton("Hear "+w.en, ()=>sayEnglish(w))));
+  opts.className = "options one";
+  const line = document.createElement("div"); line.className = "answer-line"; line.id = "answer-line";
+  const bank = document.createElement("div"); bank.className = "bank";
+  const placed = []; session.placed = placed;
+  const btns = q.tokens.map((t,i)=>{
+    const b = document.createElement("button"); b.className = "tile-word"; b.textContent = t;
+    b.addEventListener("click", ()=>{ if(session.answered) return; placed.push(i); redraw(); });
+    bank.appendChild(b); return b;
+  });
+  function redraw(){
+    line.innerHTML = "";
+    placed.forEach(i=>{
+      const b = document.createElement("button"); b.className = "tile-word"; b.textContent = q.tokens[i];
+      b.addEventListener("click", ()=>{ if(session.answered) return; placed.splice(placed.indexOf(i),1); redraw(); });
+      line.appendChild(b);
+    });
+    btns.forEach((b,i)=>{ const used = placed.includes(i); b.classList.toggle("used", used); b.disabled = used; });
+    $("check-btn").disabled = placed.length === 0;
+  }
+  opts.appendChild(line); opts.appendChild(bank);
+}
+function rMatch(q, stage, opts){
+  $("eyebrow").textContent = "Match the pairs";
+  stage.classList.add("hidden");
+  opts.className = "options one";
+  const grid = document.createElement("div"); grid.className = "match-grid";
+  const colL = document.createElement("div"), colR = document.createElement("div");
+  colL.className = colR.className = "match-col";
+  let sel = null, matched = 0, errors = 0;
+  function finishMatch(failed){
+    session.answered = true;
+    if(!failed && errors === 0) session.correct++;
+    const fb = $("feedback-msg"); fb.classList.remove("hidden");
+    fb.className = "feedback-msg " + (failed ? "wrong-text" : "correct-text");
+    fb.innerHTML = failed ? "Mali. 😅<span class=\"feedback-sub\">Out of hearts</span>"
+                          : "Tama! 🎉<span class=\"feedback-sub\">"+(errors ? "You got them all matched" : "Perfect matching!")+"</span>";
+    $("footer-bar").className = "footer-bar " + (failed ? "feedback-wrong" : "feedback-correct");
+    const c = $("check-btn");
+    c.disabled = false; c.textContent = session.hearts <= 0 ? "SEE RESULTS" : "CONTINUE"; c.className = "btn btn-continue";
+  }
+  function mk(w, side){
+    const b = document.createElement("button"); b.className = "m-btn";
+    b.textContent = side === "L" ? w.tag : (w.emoji + " " + w.en);
+    b.addEventListener("click", ()=>{
+      if(session.answered || b.classList.contains("done")) return;
+      if(side === "L") sayTagalog(w);
+      if(!sel || sel.side === side){
+        if(sel) sel.b.classList.remove("sel");
+        sel = { w, side, b }; b.classList.add("sel"); return;
+      }
+      const L = side === "L" ? { w, b } : sel, R = side === "R" ? { w, b } : sel;
+      sel.b.classList.remove("sel"); sel = null;
+      if(L.w.file === R.w.file){
+        [L.b, R.b].forEach(x=>{ x.classList.add("done"); x.disabled = true; });
+        noteCorrect(L.w); matched++;
+        if(matched === q.words.length) finishMatch(false);
+      } else {
+        errors++; noteMissed(L.w);
+        [L.b, R.b].forEach(x=>{ x.classList.add("bad"); setTimeout(()=>x.classList.remove("bad"), 450); });
+        if(errors === 1){ session.hearts--; renderHearts(); }
+        if(session.hearts <= 0) finishMatch(true);
+      }
+    });
+    return b;
+  }
+  shuffle(q.words).forEach(w=>colL.appendChild(mk(w,"L")));
+  shuffle(q.words).forEach(w=>colR.appendChild(mk(w,"R")));
+  grid.appendChild(colL); grid.appendChild(colR);
+  opts.appendChild(grid);
 }
 function selectOption(btn, value){
   if(session.answered) return;
@@ -447,31 +712,48 @@ function selectOption(btn, value){
 }
 function handleCheck(){
   if(session.answered){ nextStep(); return; }
-  const q = session.questions[session.current];
-  const w = q.word;
-  const answer = q.tagToEn ? w.en : w.tag;
-  const ok = session.selected.value === answer;
+  const q = session.questions[session.current], w = q.word;
+  let ok = false, wrongSub = "";
+  if(q.type === "tag2en" || q.type === "listen" || q.type === "en2tag"){
+    const answer = q.type === "en2tag" ? w.tag : w.en;
+    ok = session.selected.value === answer;
+    document.querySelectorAll(".option").forEach(o=>{
+      o.disabled = true;
+      if(o.dataset.value === answer) o.classList.add("correct");
+    });
+    if(!ok) session.selected.btn.classList.add("incorrect");
+  } else if(q.type === "type"){
+    const input = $("type-input");
+    ok = norm(input.value) === norm(w.tag);
+    input.disabled = true; input.classList.add(ok ? "correct" : "incorrect");
+    if(!ok) wrongSub = "The answer is " + w.tag;
+  } else if(q.type === "build"){
+    const got = session.placed.map(i=>q.tokens[i]).join(" ");
+    ok = norm(got) === norm(w.tag);
+    $("answer-line").classList.add(ok ? "correct" : "incorrect");
+    document.querySelectorAll(".tile-word").forEach(b=>b.disabled = true);
+    if(!ok) wrongSub = "The answer is " + w.tag;
+  }
   session.answered = true;
-
-  document.querySelectorAll(".option").forEach(o=>{
-    o.disabled = true;
-    if(o.dataset.value === answer) o.classList.add("correct");
-  });
-  if(ok){ session.correct++; }
-  else { session.selected.btn.classList.add("incorrect"); session.hearts--; renderHearts(); }
-
+  if(ok){ session.correct++; noteCorrect(w); }
+  else {
+    session.hearts--; renderHearts(); noteMissed(w);
+    if(!session.requeued.has(w.file)){
+      session.requeued.add(w.file);
+      const at = Math.min(session.current + 3, session.questions.length);
+      session.questions.splice(at, 0, mkQ(w, q.pool, variantType(q.type)));
+    }
+  }
   const fb = $("feedback-msg");
   fb.classList.remove("hidden");
   fb.className = "feedback-msg " + (ok ? "correct-text" : "wrong-text");
   fb.innerHTML = (ok ? "Tama! " : "Mali. ") + w.emoji +
-    '<span class="feedback-sub">'+w.tag+' means “'+w.en+'”</span>';
+    '<span class="feedback-sub">'+(wrongSub ? wrongSub + " — " : "")+w.tag+' means “'+w.en+'”</span>';
   $("footer-bar").className = "footer-bar " + (ok ? "feedback-correct" : "feedback-wrong");
-
   const check = $("check-btn");
   check.disabled = false;
   check.textContent = session.hearts <= 0 ? "SEE RESULTS" : "CONTINUE";
   check.className = "btn btn-continue";
-
   sayTagalog(w);
 }
 function nextStep(){
@@ -482,14 +764,24 @@ function nextStep(){
 }
 function finishLesson(passed){
   const total = session.questions.length;
-  const acc = Math.round(session.correct/total*100);
+  const acc = Math.round(Math.min(session.correct, total)/total*100);
   let stars = 0;
+  const gained = [];
   if(passed){
+    const today = dayStr(new Date());
     stars = 10 + session.correct;
-    if(session.daily){ progress.dailyDone = dayStr(new Date()); }
-    else { progress.completedUnits[session.unitIdx] = true; }
+    let first = false;
+    if(session.daily){ first = progress.dailyDone !== today; progress.dailyDone = today; }
+    else { first = !progress.completedUnits[session.unitIdx]; progress.completedUnits[session.unitIdx] = true; }
     progress.xp += stars;
     markActiveToday();
+    if(first){ const s = awardSticker(); if(s) gained.push(s); }
+    [3,7,14].forEach(t=>{
+      if(progress.streak >= t && !progress.streakRewards[t]){
+        progress.streakRewards[t] = true;
+        const s = awardSticker(); if(s) gained.push(s);
+      }
+    });
     saveProgress();
   }
   $("result-icon").textContent = passed ? "🎉" : "😅";
@@ -497,6 +789,17 @@ function finishLesson(passed){
   $("result-sub").textContent = passed ? "You finished the " + session.title + "." : "No worries. Try this lesson again!";
   $("result-xp").textContent = stars;
   $("result-acc").textContent = acc + "%";
+
+  const box = $("new-stickers"); box.innerHTML = "";
+  $("new-sticker-title").classList.toggle("hidden", !gained.length);
+  gained.forEach(s=>{
+    const b = document.createElement("button"); b.className = "new-sticker";
+    b.innerHTML = '<span class="s-emoji">'+s.emoji+'</span><span>'+s.tag+'</span><small>'+s.en+'</small>';
+    b.addEventListener("click", ()=>sayTagalog(s));
+    box.appendChild(b);
+  });
+  if(gained.length) setTimeout(()=>sayTagalog(gained[0]), 700);
+
   const btn = $("result-btn");
   btn.textContent = passed ? "CONTINUE" : "TRY AGAIN";
   btn.className = "btn " + (passed ? "btn-continue" : "btn-retry");
@@ -506,7 +809,8 @@ function finishLesson(passed){
   const pb = $("parent-btn");
   pb.classList.toggle("hidden", !passed);
   const msg = "⭐ Tagalog Adventure: finished the " + session.title + " today! " +
-    session.correct + " of " + total + " correct (" + acc + "%), " + stars + " stars earned. 🔥 " + progress.streak + "-day streak.";
+    session.correct + " of " + total + " correct (" + acc + "%), " + stars + " stars earned. 🔥 " + progress.streak + "-day streak." +
+    (gained.length ? " New snack sticker: " + gained.map(s=>s.emoji+" "+s.tag).join(", ") + "." : "");
   pb.onclick = ()=>sendToParent(msg);
   showScreen("result");
 }
@@ -529,14 +833,16 @@ async function sendToParent(text){
 function showScreen(name){
   stopAudio();
   $("home-screen").style.display = name==="home" ? "block" : "none";
+  $("stickers-screen").style.display = name==="stickers" ? "block" : "none";
   $("lesson-screen").classList.toggle("active", name==="lesson");
   $("result-screen").classList.toggle("active", name==="result");
   window.scrollTo(0,0);
 }
 $("exit-btn").addEventListener("click", ()=>{ showScreen("home"); renderHome(); });
+$("stickers-back").addEventListener("click", ()=>{ showScreen("home"); renderHome(); });
 $("reset-btn").addEventListener("click", ()=>{
   if(!confirm("Reset all progress? This can't be undone.")) return;
-  progress = { completedUnits:{}, xp:0, streak:0, lastActiveDate:null, dailyDone:null };
+  progress = freshProgress();
   saveProgress(); renderHome();
 });
 
