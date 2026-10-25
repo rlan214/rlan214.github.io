@@ -644,7 +644,8 @@
      "tag": "Ngayon",
      "en": "today / now",
      "phon": "NGAH-yon",
-     "emoji": "📍"
+     "emoji": "📍",
+     "en_say": "Today."
     },
     {
      "file": "bukas",
@@ -900,14 +901,16 @@
      "tag": "Araw",
      "en": "sun / day",
      "phon": "AH-row",
-     "emoji": "☀️"
+     "emoji": "☀️",
+     "en_say": "Sun."
     },
     {
      "file": "buwan",
      "tag": "Buwan",
      "en": "moon / month",
      "phon": "boo-WAHN",
-     "emoji": "🌙"
+     "emoji": "🌙",
+     "en_say": "Moon."
     },
     {
      "file": "bituin",
