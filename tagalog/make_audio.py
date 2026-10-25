@@ -13,6 +13,7 @@ Setup (once per Terminal window):
 Examples:
     ELEVEN_VOICE_ID="your-tagalog-voice-id" python3 make_audio.py
     python3 make_audio.py --english
+    python3 make_audio.py --slow
     python3 make_audio.py --dry-run --english
     ELEVEN_VOICE_ID="..." python3 make_audio.py --force --only salamat oo
 
@@ -36,6 +37,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 MODEL_ID = os.environ.get("ELEVEN_MODEL", "eleven_v4")
 OUTPUT_FORMAT = "mp3_44100_128"
+SLOW_SPEED = float(os.environ.get("ELEVEN_SLOW_SPEED", "0.7"))  # 0.7 is the slowest the API allows
 WORKERS = 2  # the free plan allows 2 concurrent requests; raise only on a higher plan
 
 API = "https://api.elevenlabs.io"
@@ -79,11 +81,16 @@ def find_voice_id(key, env_id, env_name):
              "Set %s to a voice ID, or %s to a voice name." % (name, names, env_id, env_name))
 
 
-def make_clip(key, voice_id, text, language, out_path):
+def make_clip(key, voice_id, text, language, out_path, speed=None):
     body = {"text": text, "model_id": MODEL_ID, "language_code": language}
+    settings = {}
     stab = os.environ.get("ELEVEN_STABILITY")
     if stab:
-        body["voice_settings"] = {"stability": float(stab)}
+        settings["stability"] = float(stab)
+    if speed:
+        settings["speed"] = speed
+    if settings:
+        body["voice_settings"] = settings
     audio = request("POST", "/v1/text-to-speech/%s?output_format=%s" % (voice_id, OUTPUT_FORMAT), key, body)
     with open(out_path, "wb") as f:
         f.write(audio)
@@ -93,6 +100,7 @@ def make_clip(key, voice_id, text, language, out_path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--english", action="store_true", help="make English clips (en_<file>.mp3)")
+    ap.add_argument("--slow", action="store_true", help="make slow Tagalog clips (slow_<file>.mp3), speed %.2f" % SLOW_SPEED)
     ap.add_argument("--only", nargs="*", help="only these file names (e.g. salamat oo)")
     ap.add_argument("--force", action="store_true", help="overwrite clips that already exist")
     ap.add_argument("--dry-run", action="store_true", help="show what would be made, call nothing")
@@ -104,7 +112,7 @@ def main():
     units = data["units"]
     stickers = data.get("stickers", [])
     words = [w for u in units for w in u["words"]]
-    if not args.english:
+    if not args.english and not args.slow:
         words += stickers  # snack sticker names (Tagalog only)
 
     if args.only:
@@ -121,6 +129,9 @@ def main():
         if args.english:
             name = "en_" + w["file"]
             text = w.get("en_say") or (w["en"] + ".")
+        elif args.slow:
+            name = "slow_" + w["file"]
+            text = w.get("say") or (w["tag"] + ".")
         else:
             name = w["file"]
             text = w.get("say") or (w["tag"] + ".")
@@ -129,6 +140,7 @@ def main():
             jobs.append((name, text, path))
     skipped = len(words) - len(jobs)
     language = "en" if args.english else "fil"
+    speed = SLOW_SPEED if args.slow else None
 
     if args.dry_run:
         print("Would make %d clips (%d already exist), language %s, model %s:" % (len(jobs), skipped, language, MODEL_ID))
@@ -155,7 +167,7 @@ def main():
     done, failed, chars = 0, [], 0
     started = time.time()
     with ThreadPoolExecutor(max_workers=max(1, args.workers)) as pool:
-        futures = {pool.submit(make_clip, key, voice_id, text, language, path): name
+        futures = {pool.submit(make_clip, key, voice_id, text, language, path, speed): name
                    for name, text, path in jobs}
         for fut in as_completed(futures):
             name = futures[fut]
@@ -171,9 +183,9 @@ def main():
     print("\nDone in %.0fs: %d made, %d failed, about %d characters sent."
           % (time.time() - started, done, len(failed), chars))
     if failed:
-        base = [n[3:] if n.startswith("en_") else n for n in failed]
+        base = [n[3:] if n.startswith("en_") else (n[5:] if n.startswith("slow_") else n) for n in failed]
         print("Retry the failures with: python3 make_audio.py %s--only %s"
-              % ("--english " if args.english else "", " ".join(base)))
+              % ("--english " if args.english else ("--slow " if args.slow else ""), " ".join(base)))
         sys.exit(1)
 
 

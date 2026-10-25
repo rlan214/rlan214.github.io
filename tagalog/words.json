@@ -49,7 +49,8 @@
     }
    ],
    "emoji": "👋",
-   "color": "butter"
+   "color": "butter",
+   "kind": "words"
   },
   {
    "unit": "Family",
@@ -98,7 +99,8 @@
     }
    ],
    "emoji": "👨‍👩‍👧",
-   "color": "pink"
+   "color": "pink",
+   "kind": "words"
   },
   {
    "unit": "Numbers",
@@ -175,7 +177,8 @@
     }
    ],
    "emoji": "🔢",
-   "color": "blue"
+   "color": "blue",
+   "kind": "words"
   },
   {
    "unit": "Animals",
@@ -224,7 +227,8 @@
     }
    ],
    "emoji": "🐾",
-   "color": "mint"
+   "color": "mint",
+   "kind": "words"
   },
   {
    "unit": "Food",
@@ -273,7 +277,8 @@
     }
    ],
    "emoji": "🍚",
-   "color": "peach"
+   "color": "peach",
+   "kind": "words"
   },
   {
    "unit": "Colors",
@@ -322,7 +327,8 @@
     }
    ],
    "emoji": "🎨",
-   "color": "lav"
+   "color": "lav",
+   "kind": "words"
   },
   {
    "unit": "Phrases",
@@ -418,6 +424,1033 @@
      "emoji": "🤗",
      "say": "Ingat ka.",
      "en_say": "Take care."
+    }
+   ],
+   "kind": "phrases"
+  },
+  {
+   "unit": "Body parts",
+   "emoji": "🧍",
+   "color": "pink",
+   "kind": "words",
+   "words": [
+    {
+     "file": "ulo",
+     "tag": "Ulo",
+     "en": "head",
+     "phon": "OO-lo",
+     "emoji": "👤"
+    },
+    {
+     "file": "buhok",
+     "tag": "Buhok",
+     "en": "hair",
+     "phon": "boo-HOK",
+     "emoji": "💇"
+    },
+    {
+     "file": "mata",
+     "tag": "Mata",
+     "en": "eye",
+     "phon": "mah-TAH",
+     "emoji": "👁️"
+    },
+    {
+     "file": "ilong",
+     "tag": "Ilong",
+     "en": "nose",
+     "phon": "EE-long",
+     "emoji": "👃"
+    },
+    {
+     "file": "bibig",
+     "tag": "Bibig",
+     "en": "mouth",
+     "phon": "BEE-beeg",
+     "emoji": "👄"
+    },
+    {
+     "file": "tainga",
+     "tag": "Tainga",
+     "en": "ear",
+     "phon": "tah-EE-ngah",
+     "emoji": "👂"
+    },
+    {
+     "file": "kamay",
+     "tag": "Kamay",
+     "en": "hand",
+     "phon": "kah-MAI",
+     "emoji": "✋"
+    },
+    {
+     "file": "paa",
+     "tag": "Paa",
+     "en": "foot",
+     "phon": "pah-AH",
+     "emoji": "🦶"
+    },
+    {
+     "file": "tiyan",
+     "tag": "Tiyan",
+     "en": "tummy",
+     "phon": "tee-YAN",
+     "emoji": "🧍"
+    },
+    {
+     "file": "ngipin",
+     "tag": "Ngipin",
+     "en": "tooth",
+     "phon": "NGEE-peen",
+     "emoji": "🦷"
+    }
+   ]
+  },
+  {
+   "unit": "Home",
+   "emoji": "🏠",
+   "color": "butter",
+   "kind": "words",
+   "words": [
+    {
+     "file": "bahay",
+     "tag": "Bahay",
+     "en": "house",
+     "phon": "BAH-hai",
+     "emoji": "🏠"
+    },
+    {
+     "file": "pinto",
+     "tag": "Pinto",
+     "en": "door",
+     "phon": "PEEN-to",
+     "emoji": "🚪"
+    },
+    {
+     "file": "bintana",
+     "tag": "Bintana",
+     "en": "window",
+     "phon": "been-TAH-nah",
+     "emoji": "🪟"
+    },
+    {
+     "file": "kama",
+     "tag": "Kama",
+     "en": "bed",
+     "phon": "kah-MAH",
+     "emoji": "🛏️"
+    },
+    {
+     "file": "mesa",
+     "tag": "Mesa",
+     "en": "table",
+     "phon": "MEH-sah",
+     "emoji": "🍽️"
+    },
+    {
+     "file": "upuan",
+     "tag": "Upuan",
+     "en": "chair",
+     "phon": "oo-poo-AHN",
+     "emoji": "🪑"
+    },
+    {
+     "file": "kusina",
+     "tag": "Kusina",
+     "en": "kitchen",
+     "phon": "koo-SEE-nah",
+     "emoji": "🍳"
+    },
+    {
+     "file": "banyo",
+     "tag": "Banyo",
+     "en": "bathroom",
+     "phon": "BAHN-yo",
+     "emoji": "🚿"
+    },
+    {
+     "file": "kuwarto",
+     "tag": "Kuwarto",
+     "en": "bedroom",
+     "phon": "KWAR-to",
+     "emoji": "🛌"
+    },
+    {
+     "file": "ilaw",
+     "tag": "Ilaw",
+     "en": "light",
+     "phon": "ee-LAU",
+     "emoji": "💡"
+    }
+   ]
+  },
+  {
+   "unit": "Days and time",
+   "emoji": "📅",
+   "color": "blue",
+   "kind": "words",
+   "words": [
+    {
+     "file": "lunes",
+     "tag": "Lunes",
+     "en": "Monday",
+     "phon": "loo-NES",
+     "emoji": "📅"
+    },
+    {
+     "file": "martes",
+     "tag": "Martes",
+     "en": "Tuesday",
+     "phon": "mar-TES",
+     "emoji": "📅"
+    },
+    {
+     "file": "miyerkules",
+     "tag": "Miyerkules",
+     "en": "Wednesday",
+     "phon": "mee-yer-KOO-les",
+     "emoji": "📅"
+    },
+    {
+     "file": "huwebes",
+     "tag": "Huwebes",
+     "en": "Thursday",
+     "phon": "hoo-WEH-bes",
+     "emoji": "📅"
+    },
+    {
+     "file": "biyernes",
+     "tag": "Biyernes",
+     "en": "Friday",
+     "phon": "bee-YER-nes",
+     "emoji": "📅"
+    },
+    {
+     "file": "sabado",
+     "tag": "Sabado",
+     "en": "Saturday",
+     "phon": "sah-BAH-do",
+     "emoji": "📅"
+    },
+    {
+     "file": "linggo",
+     "tag": "Linggo",
+     "en": "Sunday",
+     "phon": "LEENG-go",
+     "emoji": "📅"
+    },
+    {
+     "file": "ngayon",
+     "tag": "Ngayon",
+     "en": "today / now",
+     "phon": "NGAH-yon",
+     "emoji": "📍"
+    },
+    {
+     "file": "bukas",
+     "tag": "Bukas",
+     "en": "tomorrow",
+     "phon": "boo-KAHS",
+     "emoji": "➡️"
+    },
+    {
+     "file": "kahapon",
+     "tag": "Kahapon",
+     "en": "yesterday",
+     "phon": "kah-hah-PON",
+     "emoji": "⬅️"
+    }
+   ]
+  },
+  {
+   "unit": "Feelings",
+   "emoji": "😄",
+   "color": "mint",
+   "kind": "words",
+   "words": [
+    {
+     "file": "masaya",
+     "tag": "Masaya",
+     "en": "happy",
+     "phon": "mah-SAH-yah",
+     "emoji": "😄"
+    },
+    {
+     "file": "malungkot",
+     "tag": "Malungkot",
+     "en": "sad",
+     "phon": "mah-loong-KOT",
+     "emoji": "😢"
+    },
+    {
+     "file": "galit",
+     "tag": "Galit",
+     "en": "angry",
+     "phon": "gah-LEET",
+     "emoji": "😠"
+    },
+    {
+     "file": "takot",
+     "tag": "Takot",
+     "en": "scared",
+     "phon": "tah-KOT",
+     "emoji": "😨"
+    },
+    {
+     "file": "pagod",
+     "tag": "Pagod",
+     "en": "tired",
+     "phon": "pah-GOD",
+     "emoji": "😩"
+    },
+    {
+     "file": "gutom",
+     "tag": "Gutom",
+     "en": "hungry",
+     "phon": "GOO-tom",
+     "emoji": "🤤"
+    },
+    {
+     "file": "uhaw",
+     "tag": "Uhaw",
+     "en": "thirsty",
+     "phon": "oo-HAW",
+     "emoji": "💧"
+    },
+    {
+     "file": "antok",
+     "tag": "Antok",
+     "en": "sleepy",
+     "phon": "AHN-tok",
+     "emoji": "😴"
+    },
+    {
+     "file": "busog",
+     "tag": "Busog",
+     "en": "full",
+     "phon": "boo-SOG",
+     "emoji": "😌"
+    },
+    {
+     "file": "nahihiya",
+     "tag": "Nahihiya",
+     "en": "shy",
+     "phon": "nah-hee-HEE-yah",
+     "emoji": "😳"
+    }
+   ]
+  },
+  {
+   "unit": "School",
+   "emoji": "🏫",
+   "color": "peach",
+   "kind": "words",
+   "words": [
+    {
+     "file": "paaralan",
+     "tag": "Paaralan",
+     "en": "school",
+     "phon": "pah-ah-rah-LAHN",
+     "emoji": "🏫"
+    },
+    {
+     "file": "guro",
+     "tag": "Guro",
+     "en": "teacher",
+     "phon": "GOO-ro",
+     "emoji": "👩‍🏫"
+    },
+    {
+     "file": "estudyante",
+     "tag": "Estudyante",
+     "en": "student",
+     "phon": "es-too-DYAN-teh",
+     "emoji": "🧑‍🎓"
+    },
+    {
+     "file": "libro",
+     "tag": "Libro",
+     "en": "book",
+     "phon": "LEE-bro",
+     "emoji": "📖"
+    },
+    {
+     "file": "lapis",
+     "tag": "Lapis",
+     "en": "pencil",
+     "phon": "lah-PEES",
+     "emoji": "✏️"
+    },
+    {
+     "file": "papel",
+     "tag": "Papel",
+     "en": "paper",
+     "phon": "pah-PEL",
+     "emoji": "📄"
+    },
+    {
+     "file": "kuwaderno",
+     "tag": "Kuwaderno",
+     "en": "notebook",
+     "phon": "kwah-DER-no",
+     "emoji": "📓"
+    },
+    {
+     "file": "aralin",
+     "tag": "Aralin",
+     "en": "lesson",
+     "phon": "ah-rah-LEEN",
+     "emoji": "📚"
+    },
+    {
+     "file": "klase",
+     "tag": "Klase",
+     "en": "class",
+     "phon": "KLAH-seh",
+     "emoji": "👥"
+    }
+   ]
+  },
+  {
+   "unit": "Clothes",
+   "emoji": "👕",
+   "color": "lav",
+   "kind": "words",
+   "words": [
+    {
+     "file": "damit",
+     "tag": "Damit",
+     "en": "clothes",
+     "phon": "dah-MEET",
+     "emoji": "👚"
+    },
+    {
+     "file": "sapatos",
+     "tag": "Sapatos",
+     "en": "shoes",
+     "phon": "sah-PAH-tos",
+     "emoji": "👟"
+    },
+    {
+     "file": "medyas",
+     "tag": "Medyas",
+     "en": "socks",
+     "phon": "MED-yas",
+     "emoji": "🧦"
+    },
+    {
+     "file": "sumbrero",
+     "tag": "Sumbrero",
+     "en": "hat",
+     "phon": "soom-BREH-ro",
+     "emoji": "🎩"
+    },
+    {
+     "file": "pantalon",
+     "tag": "Pantalon",
+     "en": "pants",
+     "phon": "pahn-tah-LON",
+     "emoji": "👖"
+    },
+    {
+     "file": "palda",
+     "tag": "Palda",
+     "en": "skirt",
+     "phon": "PAL-dah",
+     "emoji": "👗"
+    },
+    {
+     "file": "kamiseta",
+     "tag": "Kamiseta",
+     "en": "t-shirt",
+     "phon": "kah-mee-SEH-tah",
+     "emoji": "👕"
+    },
+    {
+     "file": "tsinelas",
+     "tag": "Tsinelas",
+     "en": "slippers",
+     "phon": "tsee-NEH-las",
+     "emoji": "🩴"
+    },
+    {
+     "file": "sinturon",
+     "tag": "Sinturon",
+     "en": "belt",
+     "phon": "seen-too-RON",
+     "emoji": "🎀"
+    },
+    {
+     "file": "guwantes",
+     "tag": "Guwantes",
+     "en": "gloves",
+     "phon": "goo-WAHN-tes",
+     "emoji": "🧤"
+    }
+   ]
+  },
+  {
+   "unit": "Nature",
+   "emoji": "🌳",
+   "color": "sage",
+   "kind": "words",
+   "words": [
+    {
+     "file": "araw",
+     "tag": "Araw",
+     "en": "sun / day",
+     "phon": "AH-row",
+     "emoji": "☀️"
+    },
+    {
+     "file": "buwan",
+     "tag": "Buwan",
+     "en": "moon / month",
+     "phon": "boo-WAHN",
+     "emoji": "🌙"
+    },
+    {
+     "file": "bituin",
+     "tag": "Bituin",
+     "en": "star",
+     "phon": "bee-too-EEN",
+     "emoji": "⭐"
+    },
+    {
+     "file": "ulan",
+     "tag": "Ulan",
+     "en": "rain",
+     "phon": "oo-LAHN",
+     "emoji": "🌧️"
+    },
+    {
+     "file": "hangin",
+     "tag": "Hangin",
+     "en": "wind",
+     "phon": "HAH-ngeen",
+     "emoji": "💨"
+    },
+    {
+     "file": "ulap",
+     "tag": "Ulap",
+     "en": "cloud",
+     "phon": "OO-lap",
+     "emoji": "☁️"
+    },
+    {
+     "file": "puno",
+     "tag": "Puno",
+     "en": "tree",
+     "phon": "POO-no",
+     "emoji": "🌳"
+    },
+    {
+     "file": "bulaklak",
+     "tag": "Bulaklak",
+     "en": "flower",
+     "phon": "boo-lahk-LAK",
+     "emoji": "🌸"
+    },
+    {
+     "file": "dagat",
+     "tag": "Dagat",
+     "en": "sea",
+     "phon": "dah-GAHT",
+     "emoji": "🌊"
+    },
+    {
+     "file": "bundok",
+     "tag": "Bundok",
+     "en": "mountain",
+     "phon": "boon-DOK",
+     "emoji": "⛰️"
+    }
+   ]
+  },
+  {
+   "unit": "Action words",
+   "emoji": "🏃",
+   "color": "butter",
+   "kind": "words",
+   "words": [
+    {
+     "file": "kain",
+     "tag": "Kain",
+     "en": "eat",
+     "phon": "kah-EEN",
+     "emoji": "🍽️"
+    },
+    {
+     "file": "inom",
+     "tag": "Inom",
+     "en": "drink",
+     "phon": "EE-nom",
+     "emoji": "🥛"
+    },
+    {
+     "file": "tulog",
+     "tag": "Tulog",
+     "en": "sleep",
+     "phon": "TOO-log",
+     "emoji": "💤"
+    },
+    {
+     "file": "laro",
+     "tag": "Laro",
+     "en": "play",
+     "phon": "LAH-ro",
+     "emoji": "🎮"
+    },
+    {
+     "file": "basa",
+     "tag": "Basa",
+     "en": "read",
+     "phon": "BAH-sah",
+     "emoji": "📖"
+    },
+    {
+     "file": "sulat",
+     "tag": "Sulat",
+     "en": "write",
+     "phon": "SOO-lat",
+     "emoji": "✍️"
+    },
+    {
+     "file": "lakad",
+     "tag": "Lakad",
+     "en": "walk",
+     "phon": "LAH-kad",
+     "emoji": "🚶"
+    },
+    {
+     "file": "takbo",
+     "tag": "Takbo",
+     "en": "run",
+     "phon": "TAHK-bo",
+     "emoji": "🏃"
+    },
+    {
+     "file": "kanta",
+     "tag": "Kanta",
+     "en": "sing",
+     "phon": "KAHN-tah",
+     "emoji": "🎤"
+    },
+    {
+     "file": "sayaw",
+     "tag": "Sayaw",
+     "en": "dance",
+     "phon": "SAH-yow",
+     "emoji": "💃"
+    }
+   ]
+  },
+  {
+   "unit": "Questions",
+   "emoji": "❓",
+   "color": "pink",
+   "kind": "sentences",
+   "words": [
+    {
+     "file": "ano_ito",
+     "tag": "Ano ito?",
+     "en": "What is this?",
+     "phon": "AH-no EE-to",
+     "emoji": "❓",
+     "say": "Ano ito?",
+     "en_say": "What is this?"
+    },
+    {
+     "file": "saan_ka_pupunta",
+     "tag": "Saan ka pupunta?",
+     "en": "Where are you going?",
+     "phon": "sah-AHN kah poo-POON-tah",
+     "emoji": "🧭",
+     "say": "Saan ka pupunta?",
+     "en_say": "Where are you going?"
+    },
+    {
+     "file": "sino_ito",
+     "tag": "Sino ito?",
+     "en": "Who is this?",
+     "phon": "SEE-no EE-to",
+     "emoji": "🧑",
+     "say": "Sino ito?",
+     "en_say": "Who is this?"
+    },
+    {
+     "file": "bakit",
+     "tag": "Bakit?",
+     "en": "Why?",
+     "phon": "bah-KEET",
+     "emoji": "🤔",
+     "say": "Bakit?",
+     "en_say": "Why?"
+    },
+    {
+     "file": "magkano_ito",
+     "tag": "Magkano ito?",
+     "en": "How much is this?",
+     "phon": "mag-KAH-no EE-to",
+     "emoji": "💰",
+     "say": "Magkano ito?",
+     "en_say": "How much is this?"
+    },
+    {
+     "file": "kailan",
+     "tag": "Kailan?",
+     "en": "When?",
+     "phon": "kah-ee-LAHN",
+     "emoji": "🗓️",
+     "say": "Kailan?",
+     "en_say": "When?"
+    },
+    {
+     "file": "anong_oras_na",
+     "tag": "Anong oras na?",
+     "en": "What time is it?",
+     "phon": "AH-nong OH-ras nah",
+     "emoji": "⏰",
+     "say": "Anong oras na?",
+     "en_say": "What time is it?"
+    },
+    {
+     "file": "kumusta_ang_araw_mo",
+     "tag": "Kumusta ang araw mo?",
+     "en": "How was your day?",
+     "phon": "koo-moos-TAH ang AH-row moh",
+     "emoji": "🌈",
+     "say": "Kumusta ang araw mo?",
+     "en_say": "How was your day?"
+    }
+   ]
+  },
+  {
+   "unit": "Being polite",
+   "emoji": "🙏",
+   "color": "blue",
+   "kind": "sentences",
+   "words": [
+    {
+     "file": "opo",
+     "tag": "Opo.",
+     "en": "Yes (polite)",
+     "phon": "OH-po",
+     "emoji": "👍",
+     "say": "Opo.",
+     "en_say": "Yes."
+    },
+    {
+     "file": "hindi_po",
+     "tag": "Hindi po.",
+     "en": "No (polite)",
+     "phon": "hin-DEE po",
+     "emoji": "🙅",
+     "say": "Hindi po.",
+     "en_say": "No."
+    },
+    {
+     "file": "pakiusap",
+     "tag": "Pakiusap.",
+     "en": "Please.",
+     "phon": "pah-kee-OO-sap",
+     "emoji": "🥹",
+     "say": "Pakiusap.",
+     "en_say": "Please."
+    },
+    {
+     "file": "pasensya_na",
+     "tag": "Pasensya na.",
+     "en": "Sorry.",
+     "phon": "pah-SEN-syah nah",
+     "emoji": "🙇",
+     "say": "Pasensya na.",
+     "en_say": "Sorry."
+    },
+    {
+     "file": "paumanhin_po",
+     "tag": "Paumanhin po.",
+     "en": "Excuse me (polite)",
+     "phon": "pah-oo-MAH-neen po",
+     "emoji": "🙋",
+     "say": "Paumanhin po.",
+     "en_say": "Excuse me."
+    },
+    {
+     "file": "salamat_sa_tulong",
+     "tag": "Salamat sa tulong.",
+     "en": "Thank you for the help.",
+     "phon": "sah-LAH-mat sah too-LONG",
+     "emoji": "🤝",
+     "say": "Salamat sa tulong.",
+     "en_say": "Thank you for the help."
+    },
+    {
+     "file": "magandang_umaga_po",
+     "tag": "Magandang umaga po.",
+     "en": "Good morning (polite)",
+     "phon": "mah-gan-DAHNG oo-MAH-gah po",
+     "emoji": "🌅",
+     "say": "Magandang umaga po.",
+     "en_say": "Good morning."
+    },
+    {
+     "file": "magandang_hapon",
+     "tag": "Magandang hapon.",
+     "en": "Good afternoon.",
+     "phon": "mah-gan-DAHNG HAH-pon",
+     "emoji": "🌞",
+     "say": "Magandang hapon.",
+     "en_say": "Good afternoon."
+    },
+    {
+     "file": "paalam_na",
+     "tag": "Paalam na.",
+     "en": "Goodbye now.",
+     "phon": "pah-AH-lam nah",
+     "emoji": "👋",
+     "say": "Paalam na.",
+     "en_say": "Goodbye now."
+    },
+    {
+     "file": "hanggang_bukas",
+     "tag": "Hanggang bukas.",
+     "en": "Until tomorrow.",
+     "phon": "HAHNG-gang boo-KAHS",
+     "emoji": "🌄",
+     "say": "Hanggang bukas.",
+     "en_say": "Until tomorrow."
+    }
+   ]
+  },
+  {
+   "unit": "House rules",
+   "emoji": "🏡",
+   "color": "mint",
+   "kind": "sentences",
+   "words": [
+    {
+     "file": "tara_na",
+     "tag": "Tara na!",
+     "en": "Let's go!",
+     "phon": "TAH-rah nah",
+     "emoji": "🚌",
+     "say": "Tara na!",
+     "en_say": "Let's go!"
+    },
+    {
+     "file": "halika_dito",
+     "tag": "Halika dito.",
+     "en": "Come here.",
+     "phon": "hah-LEE-kah DEE-to",
+     "emoji": "🫴",
+     "say": "Halika dito.",
+     "en_say": "Come here."
+    },
+    {
+     "file": "maghugas_ng_kamay",
+     "tag": "Maghugas ng kamay.",
+     "en": "Wash your hands.",
+     "phon": "mag-HOO-gas nang kah-MAI",
+     "emoji": "🧼",
+     "say": "Maghugas ng kamay.",
+     "en_say": "Wash your hands."
+    },
+    {
+     "file": "umupo_ka",
+     "tag": "Umupo ka.",
+     "en": "Sit down.",
+     "phon": "oo-MOO-po kah",
+     "emoji": "🪑",
+     "say": "Umupo ka.",
+     "en_say": "Sit down."
+    },
+    {
+     "file": "tumayo_ka",
+     "tag": "Tumayo ka.",
+     "en": "Stand up.",
+     "phon": "too-MAH-yo kah",
+     "emoji": "🧍",
+     "say": "Tumayo ka.",
+     "en_say": "Stand up."
+    },
+    {
+     "file": "makinig_ka",
+     "tag": "Makinig ka.",
+     "en": "Listen.",
+     "phon": "mah-KEE-neeg kah",
+     "emoji": "👂",
+     "say": "Makinig ka.",
+     "en_say": "Listen."
+    },
+    {
+     "file": "tingnan_mo",
+     "tag": "Tingnan mo.",
+     "en": "Look.",
+     "phon": "teeng-NAHN moh",
+     "emoji": "👀",
+     "say": "Tingnan mo.",
+     "en_say": "Look."
+    },
+    {
+     "file": "buksan_ang_pinto",
+     "tag": "Buksan ang pinto.",
+     "en": "Open the door.",
+     "phon": "book-SAHN ang PEEN-to",
+     "emoji": "🔓",
+     "say": "Buksan ang pinto.",
+     "en_say": "Open the door."
+    },
+    {
+     "file": "isara_ang_bintana",
+     "tag": "Isara ang bintana.",
+     "en": "Close the window.",
+     "phon": "ee-SAH-rah ang been-TAH-nah",
+     "emoji": "🔒",
+     "say": "Isara ang bintana.",
+     "en_say": "Close the window."
+    },
+    {
+     "file": "mag_ingat_ka",
+     "tag": "Mag-ingat ka.",
+     "en": "Be careful.",
+     "phon": "mag-EE-ngaht kah",
+     "emoji": "⚠️",
+     "say": "Mag-ingat ka.",
+     "en_say": "Be careful."
+    }
+   ]
+  },
+  {
+   "unit": "How I feel",
+   "emoji": "😊",
+   "color": "peach",
+   "kind": "sentences",
+   "words": [
+    {
+     "file": "masaya_ako",
+     "tag": "Masaya ako.",
+     "en": "I'm happy.",
+     "phon": "mah-SAH-yah AH-ko",
+     "emoji": "😄",
+     "say": "Masaya ako.",
+     "en_say": "I'm happy."
+    },
+    {
+     "file": "pagod_na_ako",
+     "tag": "Pagod na ako.",
+     "en": "I'm tired.",
+     "phon": "pah-GOD nah AH-ko",
+     "emoji": "😩",
+     "say": "Pagod na ako.",
+     "en_say": "I'm tired."
+    },
+    {
+     "file": "inaantok_na_ako",
+     "tag": "Inaantok na ako.",
+     "en": "I'm sleepy.",
+     "phon": "ee-nah-AHN-tok nah AH-ko",
+     "emoji": "😴",
+     "say": "Inaantok na ako.",
+     "en_say": "I'm sleepy."
+    },
+    {
+     "file": "uhaw_ako",
+     "tag": "Uhaw ako.",
+     "en": "I'm thirsty.",
+     "phon": "oo-HAW AH-ko",
+     "emoji": "💧",
+     "say": "Uhaw ako.",
+     "en_say": "I'm thirsty."
+    },
+    {
+     "file": "gusto_ko_ng_tubig",
+     "tag": "Gusto ko ng tubig.",
+     "en": "I want water.",
+     "phon": "GOOS-to ko nang TOO-beeg",
+     "emoji": "🚰",
+     "say": "Gusto ko ng tubig.",
+     "en_say": "I want water."
+    },
+    {
+     "file": "ayoko",
+     "tag": "Ayoko.",
+     "en": "I don't want it.",
+     "phon": "ah-YO-ko",
+     "emoji": "🙅‍♂️",
+     "say": "Ayoko.",
+     "en_say": "I don't want it."
+    },
+    {
+     "file": "kumain_ka_na_ba",
+     "tag": "Kumain ka na ba?",
+     "en": "Have you eaten yet?",
+     "phon": "koo-mah-EEN kah nah bah",
+     "emoji": "🍛",
+     "say": "Kumain ka na ba?",
+     "en_say": "Have you eaten yet?"
+    }
+   ]
+  },
+  {
+   "unit": "My family",
+   "emoji": "👨‍👩‍👧",
+   "color": "lav",
+   "kind": "sentences",
+   "words": [
+    {
+     "file": "mahal_ko_ang_nanay_ko",
+     "tag": "Mahal ko ang nanay ko.",
+     "en": "I love my mom.",
+     "phon": "mah-HAL ko ang NAH-nai ko",
+     "emoji": "💗",
+     "say": "Mahal ko ang nanay ko.",
+     "en_say": "I love my mom."
+    },
+    {
+     "file": "nasaan_si_tatay",
+     "tag": "Nasaan si tatay?",
+     "en": "Where is Dad?",
+     "phon": "nah-sah-AHN see TAH-tai",
+     "emoji": "🔎",
+     "say": "Nasaan si tatay?",
+     "en_say": "Where is Dad?"
+    },
+    {
+     "file": "nasa_bahay_si_lola",
+     "tag": "Nasa bahay si lola.",
+     "en": "Grandma is at home.",
+     "phon": "NAH-sah BAH-hai see LO-lah",
+     "emoji": "👵",
+     "say": "Nasa bahay si lola.",
+     "en_say": "Grandma is at home."
+    },
+    {
+     "file": "ito_ang_aking_aso",
+     "tag": "Ito ang aking aso.",
+     "en": "This is my dog.",
+     "phon": "EE-to ang AH-king AH-so",
+     "emoji": "🐕",
+     "say": "Ito ang aking aso.",
+     "en_say": "This is my dog."
+    },
+    {
+     "file": "mayroon_akong_kapatid",
+     "tag": "Mayroon akong kapatid.",
+     "en": "I have a sibling.",
+     "phon": "mah-ee-RO-on ah-KONG kah-pah-TEED",
+     "emoji": "👫",
+     "say": "Mayroon akong kapatid.",
+     "en_say": "I have a sibling."
+    },
+    {
+     "file": "ang_bahay_ay_malaki",
+     "tag": "Ang bahay ay malaki.",
+     "en": "The house is big.",
+     "phon": "ang BAH-hai ai mah-lah-KEE",
+     "emoji": "🏡",
+     "say": "Ang bahay ay malaki.",
+     "en_say": "The house is big."
     }
    ]
   }
@@ -566,6 +1599,62 @@
    "phon": "mah-EES",
    "emoji": "🌽",
    "say": "Mais"
+  },
+  {
+   "file": "snack_kwek_kwek",
+   "tag": "Kwek-kwek",
+   "en": "Orange quail eggs",
+   "phon": "KWEK-kwek",
+   "emoji": "🥚",
+   "say": "Kwek-kwek"
+  },
+  {
+   "file": "snack_ensaymada",
+   "tag": "Ensaymada",
+   "en": "Sweet cheesy bun",
+   "phon": "en-sy-mah-DAH",
+   "emoji": "🥐",
+   "say": "Ensaymada"
+  },
+  {
+   "file": "snack_mamon",
+   "tag": "Mamon",
+   "en": "Soft sponge cake",
+   "phon": "mah-MON",
+   "emoji": "🍰",
+   "say": "Mamon"
+  },
+  {
+   "file": "snack_pastillas",
+   "tag": "Pastillas",
+   "en": "Milk candy",
+   "phon": "pas-TEE-yas",
+   "emoji": "🍫",
+   "say": "Pastillas"
+  },
+  {
+   "file": "snack_kropek",
+   "tag": "Kropek",
+   "en": "Shrimp chips",
+   "phon": "kroh-PEK",
+   "emoji": "🍘",
+   "say": "Kropek"
+  },
+  {
+   "file": "snack_sago",
+   "tag": "Sago",
+   "en": "Tapioca pearls",
+   "phon": "SAH-go",
+   "emoji": "🧋",
+   "say": "Sago"
+  },
+  {
+   "file": "snack_pichi_pichi",
+   "tag": "Pichi-pichi",
+   "en": "Cassava jelly",
+   "phon": "PEE-chee PEE-chee",
+   "emoji": "🍡",
+   "say": "Pichi-pichi"
   }
  ]
 }
