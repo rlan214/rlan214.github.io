@@ -1,0 +1,275 @@
+{
+  "_note": "Source of truth for words. Add a unit or word here, then run make_audio.py to generate only the missing clips. Optional per-word field 'say' overrides the text sent to the voice (e.g. a respelling).",
+  "units": [
+    {
+      "unit": "Greetings",
+      "words": [
+        {
+          "file": "kumusta",
+          "tag": "Kumusta",
+          "en": "Hello / How are you",
+          "phon": "koo-MOOS-tah"
+        },
+        {
+          "file": "magandang_umaga",
+          "tag": "Magandang umaga",
+          "en": "Good morning",
+          "phon": "mah-gahn-DAHNG oo-MAH-gah"
+        },
+        {
+          "file": "salamat",
+          "tag": "Salamat",
+          "en": "Thank you",
+          "phon": "sah-LAH-maht"
+        },
+        {
+          "file": "paalam",
+          "tag": "Paalam",
+          "en": "Goodbye",
+          "phon": "pah-AH-lahm"
+        },
+        {
+          "file": "oo",
+          "tag": "Oo",
+          "en": "Yes",
+          "phon": "OH-oh"
+        },
+        {
+          "file": "hindi",
+          "tag": "Hindi",
+          "en": "No",
+          "phon": "HIN-dee"
+        }
+      ]
+    },
+    {
+      "unit": "Family",
+      "words": [
+        {
+          "file": "nanay",
+          "tag": "Nanay",
+          "en": "Mom",
+          "phon": "NAH-nye"
+        },
+        {
+          "file": "tatay",
+          "tag": "Tatay",
+          "en": "Dad",
+          "phon": "tah-TYE"
+        },
+        {
+          "file": "kuya",
+          "tag": "Kuya",
+          "en": "Older brother",
+          "phon": "KOO-yah"
+        },
+        {
+          "file": "ate",
+          "tag": "Ate",
+          "en": "Older sister",
+          "phon": "AH-teh"
+        },
+        {
+          "file": "lola",
+          "tag": "Lola",
+          "en": "Grandma",
+          "phon": "LOH-lah"
+        },
+        {
+          "file": "lolo",
+          "tag": "Lolo",
+          "en": "Grandpa",
+          "phon": "LOH-loh"
+        }
+      ]
+    },
+    {
+      "unit": "Numbers",
+      "words": [
+        {
+          "file": "isa",
+          "tag": "Isa",
+          "en": "One",
+          "phon": "EE-sah"
+        },
+        {
+          "file": "dalawa",
+          "tag": "Dalawa",
+          "en": "Two",
+          "phon": "dah-lah-WAH"
+        },
+        {
+          "file": "tatlo",
+          "tag": "Tatlo",
+          "en": "Three",
+          "phon": "taht-LOH"
+        },
+        {
+          "file": "apat",
+          "tag": "Apat",
+          "en": "Four",
+          "phon": "AH-paht"
+        },
+        {
+          "file": "lima",
+          "tag": "Lima",
+          "en": "Five",
+          "phon": "LEE-mah"
+        },
+        {
+          "file": "anim",
+          "tag": "Anim",
+          "en": "Six",
+          "phon": "AH-nim"
+        },
+        {
+          "file": "pito",
+          "tag": "Pito",
+          "en": "Seven",
+          "phon": "pee-TOH"
+        },
+        {
+          "file": "walo",
+          "tag": "Walo",
+          "en": "Eight",
+          "phon": "wah-LOH"
+        },
+        {
+          "file": "siyam",
+          "tag": "Siyam",
+          "en": "Nine",
+          "phon": "SHAHM"
+        },
+        {
+          "file": "sampu",
+          "tag": "Sampu",
+          "en": "Ten",
+          "phon": "sahm-POO"
+        }
+      ]
+    },
+    {
+      "unit": "Animals",
+      "words": [
+        {
+          "file": "aso",
+          "tag": "Aso",
+          "en": "Dog",
+          "phon": "AH-soh"
+        },
+        {
+          "file": "pusa",
+          "tag": "Pusa",
+          "en": "Cat",
+          "phon": "POO-sah"
+        },
+        {
+          "file": "ibon",
+          "tag": "Ibon",
+          "en": "Bird",
+          "phon": "EE-bon"
+        },
+        {
+          "file": "isda",
+          "tag": "Isda",
+          "en": "Fish",
+          "phon": "is-DAH"
+        },
+        {
+          "file": "baboy",
+          "tag": "Baboy",
+          "en": "Pig",
+          "phon": "BAH-boy"
+        },
+        {
+          "file": "manok",
+          "tag": "Manok",
+          "en": "Chicken",
+          "phon": "mah-NOK"
+        }
+      ]
+    },
+    {
+      "unit": "Food",
+      "words": [
+        {
+          "file": "kanin",
+          "tag": "Kanin",
+          "en": "Rice",
+          "phon": "KAH-nin"
+        },
+        {
+          "file": "tubig",
+          "tag": "Tubig",
+          "en": "Water",
+          "phon": "TOO-big"
+        },
+        {
+          "file": "gulay",
+          "tag": "Gulay",
+          "en": "Vegetable",
+          "phon": "goo-LYE"
+        },
+        {
+          "file": "prutas",
+          "tag": "Prutas",
+          "en": "Fruit",
+          "phon": "PROO-tahs"
+        },
+        {
+          "file": "itlog",
+          "tag": "Itlog",
+          "en": "Egg",
+          "phon": "it-LOG"
+        },
+        {
+          "file": "tinapay",
+          "tag": "Tinapay",
+          "en": "Bread",
+          "phon": "tee-nah-PYE"
+        }
+      ]
+    },
+    {
+      "unit": "Colors",
+      "words": [
+        {
+          "file": "pula",
+          "tag": "Pula",
+          "en": "Red",
+          "phon": "POO-lah"
+        },
+        {
+          "file": "asul",
+          "tag": "Asul",
+          "en": "Blue",
+          "phon": "ah-SOOL"
+        },
+        {
+          "file": "dilaw",
+          "tag": "Dilaw",
+          "en": "Yellow",
+          "phon": "dee-LOW"
+        },
+        {
+          "file": "berde",
+          "tag": "Berde",
+          "en": "Green",
+          "phon": "BEHR-deh"
+        },
+        {
+          "file": "puti",
+          "tag": "Puti",
+          "en": "White",
+          "phon": "poo-TEE"
+        },
+        {
+          "file": "itim",
+          "tag": "Itim",
+          "en": "Black",
+          "phon": "ee-TEEM"
+        }
+      ]
+    }
+  ]
+}
