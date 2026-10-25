@@ -178,6 +178,16 @@
   .listen-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0;}
   .listen-hint{color:var(--muted);font-weight:800;font-size:15px;}
   .type-input{width:100%;font:inherit;font-size:30px;font-weight:800;text-align:center;padding:16px;border-radius:20px;border:2px solid var(--line);background:#fff;color:var(--ink);box-shadow:var(--shadow-sm);}
+  .slot-wrap{position:relative;width:100%;cursor:text;}
+  .slots{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:6px 4px;}
+  .slot{width:44px;height:58px;border-bottom:5px solid #B9C3DC;border-radius:4px 4px 0 0;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;color:var(--ink);text-transform:uppercase;background:#F4F7FD;}
+  .slot.active{border-bottom-color:var(--blue-d);background:#EAF1FF;}
+  .slot.hinted{color:var(--blue-d);}
+  .slot.filled{border-bottom-color:var(--blue-d);}
+  .slot-wrap .type-input{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;padding:0;border:0;box-shadow:none;cursor:text;}
+  .slots.correct .slot{border-bottom-color:var(--mint-d);background:#E9F8F1;}
+  .slots.incorrect .slot{border-bottom-color:var(--coral-d);background:#FDECEC;}
+  .slot-tip{text-align:center;color:var(--ink-soft,#6b7390);font-weight:800;font-size:14px;margin-top:2px;}
   .type-input:focus{outline:none;border-color:var(--blue-d);box-shadow:0 0 0 3px rgba(79,120,189,.22);}
   .type-input.correct{border-color:var(--mint-d);background:#E9F8F1;}
   .type-input.incorrect{border-color:var(--coral-d);background:#FDECEC;}
@@ -663,10 +673,44 @@ function rType(q, stage, opts){
   input.setAttribute("autocapitalize","off"); input.setAttribute("autocorrect","off");
   input.setAttribute("autocomplete","off"); input.setAttribute("spellcheck","false");
   input.setAttribute("enterkeyhint","go"); input.setAttribute("aria-label","Type the Tagalog word");
-  input.placeholder = "Type here";
-  input.addEventListener("input", ()=>{ if(!session.answered) $("check-btn").disabled = !input.value.trim(); });
+  input.placeholder = "";
+  const target = norm(w.tag).replace(/ /g,"");
+  const wrap = document.createElement("div"); wrap.className = "slot-wrap";
+  const slots = document.createElement("div"); slots.className = "slots"; slots.id = "type-slots";
+  const slotEls = [];
+  for(let k=0;k<target.length;k++){ const d = document.createElement("div"); d.className = "slot"; slots.appendChild(d); slotEls.push(d); }
+  input.maxLength = target.length + 2;
+  function drawSlots(){
+    const typed = norm(input.value).replace(/ /g,"");
+    const focused = document.activeElement === input;
+    slotEls.forEach((d,k)=>{
+      d.textContent = typed[k] || "";
+      d.classList.toggle("filled", !!typed[k]);
+      d.classList.toggle("active", focused && !session.answered && k === Math.min(typed.length, slotEls.length-1));
+    });
+  }
+  input.addEventListener("focus", drawSlots); input.addEventListener("blur", drawSlots);
+  input.addEventListener("input", ()=>{ drawSlots(); if(!session.answered) $("check-btn").disabled = !input.value.trim(); });
   input.addEventListener("keydown", (e)=>{ if(e.key==="Enter" && !$("check-btn").disabled){ e.preventDefault(); $("check-btn").click(); } });
-  opts.appendChild(input);
+  wrap.appendChild(slots); wrap.appendChild(input);
+  wrap.addEventListener("click", ()=>input.focus());
+  opts.appendChild(wrap);
+  const tip = document.createElement("div"); tip.className = "slot-tip"; tip.textContent = target.length + " letters · tap the lines to type";
+  opts.appendChild(tip);
+  drawSlots();
+  const letterBtn = document.createElement("button");
+  letterBtn.className = "hint-btn"; letterBtn.textContent = "💡 Show me a letter";
+  letterBtn.addEventListener("click", ()=>{
+    if(session.answered) return;
+    const typed = norm(input.value).replace(/ /g,"");
+    let ok = 0; while(ok < typed.length && ok < target.length && typed[ok] === target[ok]) ok++;
+    if(ok >= target.length) return;
+    input.value = target.slice(0, ok + 1);
+    drawSlots(); $("check-btn").disabled = false;
+    slotEls[ok].classList.add("hinted");
+    input.focus();
+  });
+  opts.appendChild(letterBtn);
   const hint = document.createElement("button");
   hint.className = "hint-btn"; hint.textContent = "🔊 Hear it in Tagalog (hint)";
   hint.addEventListener("click", ()=>sayTagalog(w));
@@ -770,6 +814,8 @@ function handleCheck(){
     const input = $("type-input");
     ok = norm(input.value) === norm(w.tag);
     input.disabled = true; input.classList.add(ok ? "correct" : "incorrect");
+    $("type-slots").classList.add(ok ? "correct" : "incorrect");
+    document.querySelectorAll("#type-slots .slot").forEach(d=>d.classList.remove("active"));
     if(!ok) wrongSub = "The answer is " + w.tag;
   } else if(q.type === "build"){
     const got = session.placed.map(i=>q.tokens[i]).join(" ");
