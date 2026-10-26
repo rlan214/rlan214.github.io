@@ -1876,6 +1876,155 @@
      "en_say": "Where is the bathroom?"
     }
    ]
+  },
+  {
+   "unit": "Sawsawan",
+   "emoji": "🥫",
+   "color": "peach",
+   "kind": "words",
+   "words": [
+    {
+     "file": "suka",
+     "tag": "Suka",
+     "en": "vinegar",
+     "phon": "SOO-kah",
+     "emoji": "🍶"
+    },
+    {
+     "file": "patis",
+     "tag": "Patis",
+     "en": "fish sauce",
+     "phon": "pah-TEES",
+     "emoji": "🐟"
+    },
+    {
+     "file": "bagoong",
+     "tag": "Bagoong",
+     "en": "shrimp paste",
+     "phon": "bah-GO-ong",
+     "emoji": "🦐"
+    },
+    {
+     "file": "toyo",
+     "tag": "Toyo",
+     "en": "soy sauce",
+     "phon": "TO-yo",
+     "emoji": "🫙"
+    },
+    {
+     "file": "asin",
+     "tag": "Asin",
+     "en": "salt",
+     "phon": "AH-sin",
+     "emoji": "🧂"
+    },
+    {
+     "file": "asukal",
+     "tag": "Asukal",
+     "en": "sugar",
+     "phon": "ah-SOO-kal",
+     "emoji": "🍬"
+    },
+    {
+     "file": "paminta",
+     "tag": "Paminta",
+     "en": "pepper",
+     "phon": "pah-MIN-tah",
+     "emoji": "⚫"
+    },
+    {
+     "file": "sili",
+     "tag": "Sili",
+     "en": "chili",
+     "phon": "SEE-lee",
+     "emoji": "🌶️"
+    },
+    {
+     "file": "kalamansi",
+     "tag": "Kalamansi",
+     "en": "Filipino lime",
+     "phon": "kah-lah-MAN-see",
+     "emoji": "🍋"
+    }
+   ]
+  },
+  {
+   "unit": "Fruits",
+   "emoji": "🍎",
+   "color": "mint",
+   "kind": "words",
+   "words": [
+    {
+     "file": "mansanas",
+     "tag": "Mansanas",
+     "en": "apple",
+     "phon": "mahn-SAH-nas",
+     "emoji": "🍎"
+    },
+    {
+     "file": "saging",
+     "tag": "Saging",
+     "en": "banana",
+     "phon": "SAH-ging",
+     "emoji": "🍌"
+    },
+    {
+     "file": "mangga",
+     "tag": "Mangga",
+     "en": "mango",
+     "phon": "MAHNG-gah",
+     "emoji": "🥭"
+    },
+    {
+     "file": "pinya",
+     "tag": "Pinya",
+     "en": "pineapple",
+     "phon": "PEEN-yah",
+     "emoji": "🍍"
+    },
+    {
+     "file": "ubas",
+     "tag": "Ubas",
+     "en": "grapes",
+     "phon": "OO-bas",
+     "emoji": "🍇"
+    },
+    {
+     "file": "pakwan",
+     "tag": "Pakwan",
+     "en": "watermelon",
+     "phon": "pahk-WAHN",
+     "emoji": "🍉"
+    },
+    {
+     "file": "dalandan",
+     "tag": "Dalandan",
+     "en": "orange",
+     "phon": "dah-LAHN-dahn",
+     "emoji": "🍊"
+    },
+    {
+     "file": "papaya",
+     "tag": "Papaya",
+     "en": "papaya",
+     "phon": "pah-PAH-yah",
+     "emoji": "🧡"
+    },
+    {
+     "file": "niyog",
+     "tag": "Niyog",
+     "en": "coconut",
+     "phon": "nee-YOG",
+     "emoji": "🥥"
+    },
+    {
+     "file": "peras",
+     "tag": "Peras",
+     "en": "pear",
+     "phon": "PEH-ras",
+     "emoji": "🍐"
+    }
+   ]
   }
  ],
  "stickers": [
