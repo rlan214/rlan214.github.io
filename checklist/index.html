@@ -245,11 +245,12 @@ function normalize(r){
 
 /* ---------- storage: local now, Firebase when configured ---------- */
 let S = normalize((() => { try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } })());
-let remote = null, syncState = FIREBASE_CONFIG ? 'connecting' : 'local', syncErr = '';
+const SYNC_OFF = true; // cloud sync turned off — set to false to turn it back on
+let remote = null, syncState = (FIREBASE_CONFIG && !SYNC_OFF) ? 'connecting' : 'local', syncErr = '';
 function saveLocal(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 
 async function initRemote(){
-  if (!FIREBASE_CONFIG) return;
+  if (!FIREBASE_CONFIG || SYNC_OFF) return;
   try{
     const {initializeApp} = await import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-app.js`);
     const au = await import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-auth.js`);

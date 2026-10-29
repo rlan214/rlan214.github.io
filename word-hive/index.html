@@ -307,8 +307,10 @@ const FIREBASE_CONFIG = {
   appId: "1:1087028508983:web:c6af5299b886dcc353c2b2"
 };
 const FB_VER = '10.12.2';
-let remote = null, syncState = 'connecting', syncErr = '', pendingRender = false;
+const SYNC_OFF = true; // cloud sync turned off — set to false to turn it back on
+let remote = null, syncState = SYNC_OFF ? 'local' : 'connecting', syncErr = '', pendingRender = false;
 async function initRemote(){
+  if (SYNC_OFF) return;
   try{
     const {initializeApp} = await import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-app.js`);
     const au = await import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-auth.js`);
@@ -335,7 +337,7 @@ function syncRender(){
 function pushWeek(){ if (remote) remote.fs.setDoc(remote.ref, {week: S.week || null, past: S.past || []}).catch(onSyncErr); }
 function pushDay(k, d){ if (remote) remote.fs.updateDoc(remote.ref, new remote.fs.FieldPath('week','days',k), d).catch(onSyncErr); }
 function syncLine(){
-  const m = {connecting:['#f2b84b','Connecting…'], synced:['#22b07d','Synced to all devices'], offline:['#ff7a59','Offline — saved on this iPad, will sync when back online']}[syncState];
+  const m = {local:['#c9bfb1','Saved on this iPad only (sync off)'], connecting:['#f2b84b','Connecting…'], synced:['#22b07d','Synced to all devices'], offline:['#ff7a59','Offline — saved on this iPad, will sync when back online']}[syncState];
   return `<div class="help" style="display:flex;align-items:center;gap:8px;justify-content:center;margin-top:12px"><span style="width:10px;height:10px;border-radius:50%;background:${m[0]};flex:none"></span>${m[1]}${syncState==='offline' && syncErr ? ` <span style="opacity:.7">(${esc(String(syncErr).slice(0,80))})</span>` : ''}</div>`;
 }
 

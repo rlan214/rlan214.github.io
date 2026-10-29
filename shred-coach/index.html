@@ -615,7 +615,10 @@ const FIREBASE_CONFIG = {
   appId: "1:1087028508983:web:c6af5299b886dcc353c2b2"
 };
 const FB_VER = "10.12.2";
+const SYNC_OFF = true; // cloud sync turned off — set to false to turn it back on
+if (SYNC_OFF) S.status = "local";
 (async()=>{
+  if (SYNC_OFF) return;
   try{
     const {initializeApp} = await import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-app.js`);
     const au = await import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-auth.js`);
@@ -771,7 +774,7 @@ function viewToday(){
   <div class="stack">${SUPPS.filter(x=>x.k!=="zinc").map(x=>ck(x.k,x.t,x.s)).join("")}</div>
 
   ${isToday?`<h2>Today's timing</h2>${timelineCard()}`:""}
-  <p class="sync" style="margin-top:20px">${S.status==="synced"?"Synced · shows up on all your devices":S.status==="offline"?"Offline — saved on this device, will sync when back"+(S.err?" ("+esc(S.err)+")":""):"Connecting…"}</p>`;
+  <p class="sync" style="margin-top:20px">${S.status==="local"?"Saved on this device only (sync off)":S.status==="synced"?"Synced · shows up on all your devices":S.status==="offline"?"Offline — saved on this device, will sync when back"+(S.err?" ("+esc(S.err)+")":""):"Connecting…"}</p>`;
 }
 
 function weighTrend(){
