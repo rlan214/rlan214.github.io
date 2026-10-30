@@ -2619,9 +2619,9 @@
   {
    "file": "snack_pandesal",
    "tag": "Pandesal",
-   "en": "Bread roll",
+   "en": "Soft bread roll",
    "phon": "pan-deh-SAL",
-   "emoji": "🥖",
+   "emoji": "🥯",
    "say": "Pandesal"
   },
   {
@@ -2709,7 +2709,7 @@
    "tag": "Siopao",
    "en": "Steamed bun",
    "phon": "SYOH-pow",
-   "emoji": "🥯",
+   "emoji": "🍙",
    "say": "Siopao"
   },
   {
