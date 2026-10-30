@@ -1503,7 +1503,8 @@
      "tag": "Plato",
      "en": "plate",
      "phon": "PLAH-to",
-     "emoji": "🍽️"
+     "emoji": "🍽️",
+     "say": "Plah-to."
     },
     {
      "file": "baso",
@@ -2993,6 +2994,273 @@
    "emoji": "🤝",
    "color": "mint",
    "kind": "sentences"
+  },
+  {
+   "unit": "Pasko words",
+   "emoji": "🎄",
+   "color": "pink",
+   "kind": "words",
+   "season": "pasko",
+   "words": [
+    {
+     "file": "pasko",
+     "tag": "Pasko",
+     "en": "Christmas",
+     "phon": "PAHS-ko",
+     "emoji": "🎄"
+    },
+    {
+     "file": "parol",
+     "tag": "Parol",
+     "en": "star lantern",
+     "phon": "pah-ROL",
+     "emoji": "🌟"
+    },
+    {
+     "file": "belen",
+     "tag": "Belen",
+     "en": "nativity scene",
+     "phon": "beh-LEN",
+     "emoji": "👶"
+    },
+    {
+     "file": "regalo",
+     "tag": "Regalo",
+     "en": "gift",
+     "phon": "reh-GAH-lo",
+     "emoji": "🎁"
+    },
+    {
+     "file": "kampana",
+     "tag": "Kampana",
+     "en": "bell",
+     "phon": "kahm-pah-NAH",
+     "emoji": "🔔"
+    },
+    {
+     "file": "ninong",
+     "tag": "Ninong",
+     "en": "godfather",
+     "phon": "nee-NONG",
+     "emoji": "👨"
+    },
+    {
+     "file": "ninang",
+     "tag": "Ninang",
+     "en": "godmother",
+     "phon": "nee-NANG",
+     "emoji": "👩"
+    },
+    {
+     "file": "aguinaldo",
+     "tag": "Aguinaldo",
+     "en": "Christmas gift money",
+     "phon": "ah-gee-NAL-do",
+     "emoji": "💵"
+    },
+    {
+     "file": "simbang_gabi",
+     "tag": "Simbang Gabi",
+     "en": "dawn Masses before Christmas",
+     "phon": "SIM-bang gah-BEE",
+     "emoji": "⛪"
+    },
+    {
+     "file": "noche_buena",
+     "tag": "Noche Buena",
+     "en": "Christmas Eve feast",
+     "phon": "NO-cheh BWEH-nah",
+     "emoji": "🍽️"
+    }
+   ]
+  },
+  {
+   "unit": "Christmas talk",
+   "emoji": "🎅",
+   "color": "mint",
+   "kind": "sentences",
+   "season": "pasko",
+   "words": [
+    {
+     "file": "maligayang_pasko",
+     "tag": "Maligayang Pasko!",
+     "en": "Merry Christmas!",
+     "phon": "mah-lee-GAH-yang PAHS-ko",
+     "emoji": "🎄",
+     "say": "Maligayang Pasko!",
+     "en_say": "Merry Christmas!",
+     "blank": "pasko"
+    },
+    {
+     "file": "manigong_bagong_taon",
+     "tag": "Manigong Bagong Taon!",
+     "en": "Happy New Year!",
+     "phon": "mah-nee-GONG bah-GONG tah-ON",
+     "emoji": "🎆",
+     "say": "Manigong Bagong Taon!",
+     "en_say": "Happy New Year!",
+     "blank": "taon"
+    },
+    {
+     "file": "ito_ang_parol",
+     "tag": "Ito ang parol.",
+     "en": "This is the parol.",
+     "phon": "ee-TO ang pah-ROL",
+     "emoji": "🌟",
+     "say": "Ito ang parol.",
+     "en_say": "This is the parol.",
+     "blank": "parol"
+    },
+    {
+     "file": "maganda_ang_parol",
+     "tag": "Maganda ang parol.",
+     "en": "The parol is beautiful.",
+     "phon": "mah-GAHN-dah ang pah-ROL",
+     "emoji": "✨",
+     "say": "Maganda ang parol.",
+     "en_say": "The parol is beautiful.",
+     "blank": "maganda"
+    },
+    {
+     "file": "mano_po_ninong",
+     "tag": "Mano po, Ninong.",
+     "en": "Blessing, please, Godfather.",
+     "phon": "MAH-no po nee-NONG",
+     "emoji": "🤲",
+     "say": "Mano po, Ninong.",
+     "en_say": "Blessing, please, Godfather.",
+     "blank": "ninong"
+    },
+    {
+     "file": "mano_po_ninang",
+     "tag": "Mano po, Ninang.",
+     "en": "Blessing, please, Godmother.",
+     "phon": "MAH-no po nee-NANG",
+     "emoji": "🤲",
+     "say": "Mano po, Ninang.",
+     "en_say": "Blessing, please, Godmother.",
+     "blank": "ninang"
+    },
+    {
+     "file": "salamat_po_sa_regalo",
+     "tag": "Salamat po sa regalo.",
+     "en": "Thank you for the gift.",
+     "phon": "sah-LAH-mat po sah reh-GAH-lo",
+     "emoji": "🎁",
+     "say": "Salamat po sa regalo.",
+     "en_say": "Thank you for the gift.",
+     "blank": "regalo"
+    },
+    {
+     "file": "masaya_ang_pasko",
+     "tag": "Masaya ang Pasko.",
+     "en": "Christmas is joyful.",
+     "phon": "mah-SAH-yah ang PAHS-ko",
+     "emoji": "🥳",
+     "say": "Masaya ang Pasko.",
+     "en_say": "Christmas is joyful.",
+     "blank": "masaya"
+    },
+    {
+     "file": "magsimbang_gabi_tayo",
+     "tag": "Magsimbang gabi tayo.",
+     "en": "Let's go to Simbang Gabi.",
+     "phon": "mag-sim-BANG gah-BEE TAH-yo",
+     "emoji": "⛪",
+     "say": "Magsimbang gabi tayo.",
+     "en_say": "Let's go to Simbang Gabi.",
+     "blank": "magsimbang"
+    }
+   ]
+  },
+  {
+   "unit": "Noche Buena",
+   "emoji": "🍽️",
+   "color": "butter",
+   "kind": "sentences",
+   "season": "pasko",
+   "words": [
+    {
+     "file": "masarap_ang_hamon",
+     "tag": "Masarap ang hamon.",
+     "en": "The ham is delicious.",
+     "phon": "mah-sah-RAP ang hah-MON",
+     "emoji": "🍖",
+     "say": "Masarap ang hamon.",
+     "en_say": "The ham is delicious.",
+     "blank": "hamon"
+    },
+    {
+     "file": "masarap_ang_bibingka",
+     "tag": "Masarap ang bibingka.",
+     "en": "The bibingka is delicious.",
+     "phon": "mah-sah-RAP ang bee-BING-kah",
+     "emoji": "🥞",
+     "say": "Masarap ang bibingka.",
+     "en_say": "The bibingka is delicious.",
+     "blank": "bibingka"
+    },
+    {
+     "file": "masarap_ang_leche_flan",
+     "tag": "Masarap ang leche flan.",
+     "en": "The leche flan is delicious.",
+     "phon": "mah-sah-RAP ang LEH-cheh flan",
+     "emoji": "🍮",
+     "say": "Masarap ang leche flan.",
+     "en_say": "The leche flan is delicious.",
+     "blank": "flan"
+    },
+    {
+     "file": "gusto_ko_ng_puto_bumbong",
+     "tag": "Gusto ko ng puto bumbong.",
+     "en": "I want puto bumbong.",
+     "phon": "GOOS-to ko ng POO-to boom-BONG",
+     "emoji": "💜",
+     "say": "Gusto ko ng puto bumbong.",
+     "en_say": "I want puto bumbong.",
+     "blank": "puto"
+    },
+    {
+     "file": "gusto_ko_ng_queso_de_bola",
+     "tag": "Gusto ko ng queso de bola.",
+     "en": "I want queso de bola.",
+     "phon": "GOOS-to ko ng KEH-so deh BO-lah",
+     "emoji": "🧀",
+     "say": "Gusto ko ng queso de bola.",
+     "en_say": "I want queso de bola.",
+     "blank": "queso"
+    },
+    {
+     "file": "busog_na_ako_sa_noche_buena",
+     "tag": "Busog na ako sa Noche Buena.",
+     "en": "I'm full at Noche Buena.",
+     "phon": "BOO-sog nah ah-KO sah NO-cheh BWEH-nah",
+     "emoji": "😌",
+     "say": "Busog na ako sa Noche Buena.",
+     "en_say": "I'm full at Noche Buena.",
+     "blank": "busog"
+    },
+    {
+     "file": "gising_pa_ako_sa_noche_buena",
+     "tag": "Gising pa ako sa Noche Buena.",
+     "en": "I'm still awake at Noche Buena.",
+     "phon": "gee-SING pah ah-KO sah NO-cheh BWEH-nah",
+     "emoji": "🌙",
+     "say": "Gising pa ako sa Noche Buena.",
+     "en_say": "I'm still awake at Noche Buena.",
+     "blank": "gising"
+    },
+    {
+     "file": "maraming_regalo_sa_ilalim_ng_puno",
+     "tag": "Maraming regalo sa ilalim ng puno.",
+     "en": "Many gifts under the tree.",
+     "phon": "mah-RAH-ming reh-GAH-lo sah ee-lah-LEEM ng POO-no",
+     "emoji": "🎄",
+     "say": "Maraming regalo sa ilalim ng puno.",
+     "en_say": "Many gifts under the tree.",
+     "blank": "puno"
+    }
+   ]
   }
  ],
  "stickers": [
@@ -3432,6 +3700,46 @@
    "emoji": "🍥",
    "say": "Espasol",
    "desc": "A soft, chewy log made of rice flour and coconut milk, rolled in toasted rice flour."
+  },
+  {
+   "file": "snack_parol",
+   "tag": "Parol",
+   "en": "Christmas star lantern",
+   "phon": "pah-ROL",
+   "emoji": "🌟",
+   "say": "Parol",
+   "desc": "A glowing star lantern made of bamboo and colorful paper, hung in Filipino windows every Christmas.",
+   "season": "pasko"
+  },
+  {
+   "file": "snack_puto_bumbong",
+   "tag": "Puto bumbong",
+   "en": "Purple rice tubes",
+   "phon": "POO-to boom-BONG",
+   "emoji": "💜",
+   "say": "Puto bumbong",
+   "desc": "Purple sticky rice steamed in bamboo tubes, then topped with butter, coconut and brown sugar. Eaten after Simbang Gabi.",
+   "season": "pasko"
+  },
+  {
+   "file": "snack_hamon",
+   "tag": "Hamon",
+   "en": "Christmas ham",
+   "phon": "hah-MON",
+   "emoji": "🍖",
+   "say": "Hamon",
+   "desc": "A sweet, glazed ham served at the Noche Buena feast on Christmas Eve.",
+   "season": "pasko"
+  },
+  {
+   "file": "snack_queso_de_bola",
+   "tag": "Queso de bola",
+   "en": "Ball of cheese",
+   "phon": "KEH-so deh BO-lah",
+   "emoji": "🧀",
+   "say": "Queso de bola",
+   "desc": "A round cheese in red wax, a favorite on the Christmas table, often eaten with ham.",
+   "season": "pasko"
   }
  ]
 }
