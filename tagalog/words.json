@@ -2613,6 +2613,386 @@
      "blank": "maganda"
     }
    ]
+  },
+  {
+   "unit": "Saying po",
+   "words": [
+    {
+     "file": "mano_po",
+     "tag": "Mano po.",
+     "en": "Blessing, please (greeting an elder)",
+     "phon": "MAH-no po",
+     "emoji": "🤲",
+     "say": "Mano po.",
+     "en_say": "Mano po. A greeting where you touch an elder's hand to your forehead.",
+     "blank": "mano"
+    },
+    {
+     "file": "kumusta_po_kayo",
+     "tag": "Kumusta po kayo?",
+     "en": "How are you? (polite)",
+     "phon": "koo-moos-TAH po kah-YO",
+     "emoji": "😊",
+     "say": "Kumusta po kayo?",
+     "en_say": "How are you? Polite.",
+     "blank": "kumusta"
+    },
+    {
+     "file": "sige_po",
+     "tag": "Sige po.",
+     "en": "Okay. (polite)",
+     "phon": "SEE-geh po",
+     "emoji": "👌",
+     "say": "Sige po.",
+     "en_say": "Okay. Polite.",
+     "blank": "sige"
+    },
+    {
+     "file": "pasok_po",
+     "tag": "Pasok po.",
+     "en": "Please come in.",
+     "phon": "PAH-sok po",
+     "emoji": "🚪",
+     "say": "Pasok po.",
+     "en_say": "Please come in.",
+     "blank": "pasok"
+    },
+    {
+     "file": "walang_anuman_po",
+     "tag": "Walang anuman po.",
+     "en": "You're welcome. (polite)",
+     "phon": "WAH-lang ah-NOO-man po",
+     "emoji": "🤗",
+     "say": "Walang anuman po.",
+     "en_say": "You're welcome. Polite.",
+     "blank": "walang"
+    },
+    {
+     "file": "magandang_gabi_po",
+     "tag": "Magandang gabi po.",
+     "en": "Good evening. (polite)",
+     "phon": "mah-gan-DANG gah-BEE po",
+     "emoji": "🌙",
+     "say": "Magandang gabi po.",
+     "en_say": "Good evening. Polite.",
+     "blank": "gabi"
+    },
+    {
+     "file": "paalam_po",
+     "tag": "Paalam po.",
+     "en": "Goodbye. (polite)",
+     "phon": "pah-AH-lam po",
+     "emoji": "👋",
+     "say": "Paalam po.",
+     "en_say": "Goodbye. Polite.",
+     "blank": "paalam"
+    },
+    {
+     "file": "ingat_po",
+     "tag": "Ingat po.",
+     "en": "Take care. (polite)",
+     "phon": "EE-ngat po",
+     "emoji": "💛",
+     "say": "Ingat po.",
+     "en_say": "Take care. Polite.",
+     "blank": "ingat"
+    }
+   ],
+   "emoji": "🙏",
+   "color": "lav",
+   "kind": "sentences",
+   "intro": {
+    "img": "img/mano_po.webp",
+    "title": "Mano po 🙏",
+    "phon": "MAH-no po",
+    "en": "A blessing for elders",
+    "desc": "In the Philippines, kids show respect to grandparents, parents, aunts and uncles by taking their hand and touching the back of it to their own forehead. The elder says a blessing. Say \"Mano po\" when you do it!",
+    "say": "mano_po"
+   }
+  },
+  {
+   "unit": "At the store",
+   "words": [
+    {
+     "file": "pabili_po_ng_taho",
+     "tag": "Pabili po ng taho.",
+     "en": "May I buy some taho?",
+     "phon": "pah-BEE-lee po ng tah-HO",
+     "emoji": "🥛",
+     "say": "Pabili po ng taho.",
+     "en_say": "May I buy some taho?",
+     "blank": "taho"
+    },
+    {
+     "file": "pabili_po_ng_tinapay",
+     "tag": "Pabili po ng tinapay.",
+     "en": "May I buy some bread?",
+     "phon": "pah-BEE-lee po ng tee-NAH-pai",
+     "emoji": "🍞",
+     "say": "Pabili po ng tinapay.",
+     "en_say": "May I buy some bread?",
+     "blank": "tinapay"
+    },
+    {
+     "file": "pabili_po_ng_gatas",
+     "tag": "Pabili po ng gatas.",
+     "en": "May I buy some milk?",
+     "phon": "pah-BEE-lee po ng gah-TAS",
+     "emoji": "🥛",
+     "say": "Pabili po ng gatas.",
+     "en_say": "May I buy some milk?",
+     "blank": "gatas"
+    },
+    {
+     "file": "magkano_po_ito",
+     "tag": "Magkano po ito?",
+     "en": "How much is this?",
+     "phon": "mag-KAH-no po ee-TO",
+     "emoji": "💰",
+     "say": "Magkano po ito?",
+     "en_say": "How much is this?",
+     "blank": "magkano"
+    },
+    {
+     "file": "magkano_po_ang_mangga",
+     "tag": "Magkano po ang mangga?",
+     "en": "How much is the mango?",
+     "phon": "mag-KAH-no po ang mang-GAH",
+     "emoji": "🥭",
+     "say": "Magkano po ang mangga?",
+     "en_say": "How much is the mango?",
+     "blank": "mangga"
+    },
+    {
+     "file": "isa_po",
+     "tag": "Isa po.",
+     "en": "One, please.",
+     "phon": "ee-SAH po",
+     "emoji": "1️⃣",
+     "say": "Isa po.",
+     "en_say": "One, please.",
+     "blank": "isa"
+    },
+    {
+     "file": "dalawa_po",
+     "tag": "Dalawa po.",
+     "en": "Two, please.",
+     "phon": "dah-LAH-wah po",
+     "emoji": "2️⃣",
+     "say": "Dalawa po.",
+     "en_say": "Two, please.",
+     "blank": "dalawa"
+    },
+    {
+     "file": "tatlong_saging_po",
+     "tag": "Tatlong saging po.",
+     "en": "Three bananas, please.",
+     "phon": "TAT-long sah-GING po",
+     "emoji": "🍌",
+     "say": "Tatlong saging po.",
+     "en_say": "Three bananas, please.",
+     "blank": "saging"
+    },
+    {
+     "file": "heto_po_ang_bayad",
+     "tag": "Heto po ang bayad.",
+     "en": "Here is the payment.",
+     "phon": "HEH-to po ang BAH-yad",
+     "emoji": "💵",
+     "say": "Heto po ang bayad.",
+     "en_say": "Here is the payment.",
+     "blank": "bayad"
+    }
+   ],
+   "emoji": "🏪",
+   "color": "peach",
+   "kind": "sentences"
+  },
+  {
+   "unit": "Yummy talk",
+   "words": [
+    {
+     "file": "masarap_ang_lugaw",
+     "tag": "Masarap ang lugaw.",
+     "en": "The lugaw is delicious.",
+     "phon": "mah-sah-RAP ang LOO-gaw",
+     "emoji": "🍲",
+     "say": "Masarap ang lugaw.",
+     "en_say": "The lugaw is delicious.",
+     "blank": "masarap"
+    },
+    {
+     "file": "masarap_ang_mangga",
+     "tag": "Masarap ang mangga.",
+     "en": "The mango is delicious.",
+     "phon": "mah-sah-RAP ang mang-GAH",
+     "emoji": "🥭",
+     "say": "Masarap ang mangga.",
+     "en_say": "The mango is delicious.",
+     "blank": "mangga"
+    },
+    {
+     "file": "gutom_na_gutom_ako",
+     "tag": "Gutom na gutom ako.",
+     "en": "I'm so hungry.",
+     "phon": "GOO-tom nah GOO-tom ah-KO",
+     "emoji": "🤤",
+     "say": "Gutom na gutom ako.",
+     "en_say": "I'm so hungry.",
+     "blank": "gutom"
+    },
+    {
+     "file": "busog_na_busog_ako",
+     "tag": "Busog na busog ako.",
+     "en": "I'm so full.",
+     "phon": "BOO-sog nah BOO-sog ah-KO",
+     "emoji": "😌",
+     "say": "Busog na busog ako.",
+     "en_say": "I'm so full.",
+     "blank": "busog"
+    },
+    {
+     "file": "pahingi_po_ng_kanin",
+     "tag": "Pahingi po ng kanin.",
+     "en": "May I have some rice?",
+     "phon": "pah-HEE-ngee po ng kah-NEEN",
+     "emoji": "🍚",
+     "say": "Pahingi po ng kanin.",
+     "en_say": "May I have some rice?",
+     "blank": "kanin"
+    },
+    {
+     "file": "pahingi_po_ng_tubig",
+     "tag": "Pahingi po ng tubig.",
+     "en": "May I have some water?",
+     "phon": "pah-HEE-ngee po ng TOO-big",
+     "emoji": "💧",
+     "say": "Pahingi po ng tubig.",
+     "en_say": "May I have some water?",
+     "blank": "tubig"
+    },
+    {
+     "file": "pahingi_pa_po_ng_ulam",
+     "tag": "Pahingi pa po ng ulam.",
+     "en": "May I have more viand (the main dish)?",
+     "phon": "pah-HEE-ngee pah po ng oo-LAM",
+     "emoji": "🍛",
+     "say": "Pahingi pa po ng ulam.",
+     "en_say": "May I have more viand (the main dish)?",
+     "blank": "ulam"
+    },
+    {
+     "file": "maraming_salamat_po_sa_pagkain",
+     "tag": "Maraming salamat po sa pagkain.",
+     "en": "Thank you very much for the food.",
+     "phon": "mah-RAH-ming sah-LAH-mat po sah pag-kah-EEN",
+     "emoji": "🙏",
+     "say": "Maraming salamat po sa pagkain.",
+     "en_say": "Thank you very much for the food.",
+     "blank": "pagkain"
+    }
+   ],
+   "emoji": "😋",
+   "color": "butter",
+   "kind": "sentences"
+  },
+  {
+   "unit": "Sharing food",
+   "words": [
+    {
+     "file": "kain_na_po_kayo",
+     "tag": "Kain na po kayo.",
+     "en": "Please eat. (polite invitation)",
+     "phon": "kah-EEN nah po kah-YO",
+     "emoji": "🍽️",
+     "say": "Kain na po kayo.",
+     "en_say": "Please eat. (polite invitation)",
+     "blank": "kain"
+    },
+    {
+     "file": "gusto_mo_ba_ng_taho",
+     "tag": "Gusto mo ba ng taho?",
+     "en": "Do you want some taho?",
+     "phon": "GOOS-to mo bah ng tah-HO",
+     "emoji": "🥛",
+     "say": "Gusto mo ba ng taho?",
+     "en_say": "Do you want some taho?",
+     "blank": "taho"
+    },
+    {
+     "file": "gusto_mo_ba_ng_mangga",
+     "tag": "Gusto mo ba ng mangga?",
+     "en": "Do you want some mango?",
+     "phon": "GOOS-to mo bah ng mang-GAH",
+     "emoji": "🥭",
+     "say": "Gusto mo ba ng mangga?",
+     "en_say": "Do you want some mango?",
+     "blank": "mangga"
+    },
+    {
+     "file": "gusto_mo_ba_ng_tubig",
+     "tag": "Gusto mo ba ng tubig?",
+     "en": "Do you want some water?",
+     "phon": "GOOS-to mo bah ng TOO-big",
+     "emoji": "💧",
+     "say": "Gusto mo ba ng tubig?",
+     "en_say": "Do you want some water?",
+     "blank": "tubig"
+    },
+    {
+     "file": "oo_gusto_ko",
+     "tag": "Oo, gusto ko.",
+     "en": "Yes, I want some.",
+     "phon": "OH-oh GOOS-to ko",
+     "emoji": "👍",
+     "say": "Oo, gusto ko.",
+     "en_say": "Yes, I want some.",
+     "blank": "gusto"
+    },
+    {
+     "file": "hindi_salamat",
+     "tag": "Hindi, salamat.",
+     "en": "No, thank you.",
+     "phon": "hin-DEE sah-LAH-mat",
+     "emoji": "🙅",
+     "say": "Hindi, salamat.",
+     "en_say": "No, thank you.",
+     "blank": "salamat"
+    },
+    {
+     "file": "ano_ang_gusto_mo",
+     "tag": "Ano ang gusto mo?",
+     "en": "What do you want?",
+     "phon": "ah-NO ang GOOS-to mo",
+     "emoji": "🤔",
+     "say": "Ano ang gusto mo?",
+     "en_say": "What do you want?",
+     "blank": "ano"
+    },
+    {
+     "file": "heto_para_sa_iyo",
+     "tag": "Heto, para sa iyo.",
+     "en": "Here, this is for you.",
+     "phon": "HEH-to PAH-rah sah EE-yo",
+     "emoji": "🎁",
+     "say": "Heto, para sa iyo.",
+     "en_say": "Here, this is for you.",
+     "blank": "heto"
+    },
+    {
+     "file": "tikman_mo",
+     "tag": "Tikman mo.",
+     "en": "Taste it.",
+     "phon": "tik-MAN mo",
+     "emoji": "👅",
+     "say": "Tikman mo.",
+     "en_say": "Taste it.",
+     "blank": "tikman"
+    }
+   ],
+   "emoji": "🤝",
+   "color": "mint",
+   "kind": "sentences"
   }
  ],
  "stickers": [
@@ -2622,7 +3002,9 @@
    "en": "Soft bread roll",
    "phon": "pan-deh-SAL",
    "emoji": "🥯",
-   "say": "Pandesal"
+   "say": "Pandesal",
+   "img": "img/pandesal.webp",
+   "desc": "A soft, slightly sweet bread roll with a crumbly topping. Filipinos eat it warm for breakfast, often with butter or coffee."
   },
   {
    "file": "snack_halo_halo",
@@ -2630,7 +3012,9 @@
    "en": "Shaved ice dessert",
    "phon": "HAH-lo HAH-lo",
    "emoji": "🍧",
-   "say": "Halo-halo"
+   "say": "Halo-halo",
+   "desc": "A cold dessert of shaved ice, sweet beans, fruit and jelly, topped with ice cream. Halo-halo means \"mix-mix\", so you stir it all together before you eat it!",
+   "img": "img/halo_halo.webp"
   },
   {
    "file": "snack_turon",
@@ -2638,7 +3022,9 @@
    "en": "Fried banana roll",
    "phon": "too-RON",
    "emoji": "🌯",
-   "say": "Turon"
+   "say": "Turon",
+   "img": "img/turon.webp",
+   "desc": "A banana wrapped in a thin pastry, fried, and coated in crunchy caramelized sugar."
   },
   {
    "file": "snack_lumpia",
@@ -2646,7 +3032,9 @@
    "en": "Spring roll",
    "phon": "LOOM-pyah",
    "emoji": "🥟",
-   "say": "Lumpia"
+   "say": "Lumpia",
+   "img": "img/lumpia.webp",
+   "desc": "A crispy fried roll filled with meat and vegetables. It is often served at parties with a dipping sauce."
   },
   {
    "file": "snack_bibingka",
@@ -2654,7 +3042,9 @@
    "en": "Rice cake",
    "phon": "bee-BING-kah",
    "emoji": "🥞",
-   "say": "Bibingka"
+   "say": "Bibingka",
+   "img": "img/bibingka.webp",
+   "desc": "A soft rice cake baked in a banana leaf and topped with cheese and coconut. It is a favorite at Christmas time."
   },
   {
    "file": "snack_taho",
@@ -2662,7 +3052,9 @@
    "en": "Warm tofu drink",
    "phon": "tah-HO",
    "emoji": "🥤",
-   "say": "Taho"
+   "say": "Taho",
+   "desc": "Warm, silky soft tofu with sweet brown sugar syrup and little tapioca pearls. Street sellers carry it around in the morning.",
+   "img": "img/taho.webp"
   },
   {
    "file": "snack_ube",
@@ -2670,7 +3062,9 @@
    "en": "Purple yam",
    "phon": "OO-beh",
    "emoji": "🍠",
-   "say": "Ube"
+   "say": "Ube",
+   "desc": "A purple yam with bright purple flesh. It is used to make many sweet treats, like ice cream and cakes.",
+   "img": "img/ube.webp"
   },
   {
    "file": "snack_buko",
@@ -2678,7 +3072,9 @@
    "en": "Young coconut",
    "phon": "BOO-ko",
    "emoji": "🥥",
-   "say": "Buko"
+   "say": "Buko",
+   "desc": "A young green coconut. You drink the fresh, sweet juice and eat the soft white coconut meat inside.",
+   "img": "img/buko.webp"
   },
   {
    "file": "snack_mangga",
@@ -2686,7 +3082,9 @@
    "en": "Mango",
    "phon": "mang-GAH",
    "emoji": "🥭",
-   "say": "Mangga"
+   "say": "Mangga",
+   "desc": "A sweet, juicy golden mango. Mangoes from the Philippines are famous around the world.",
+   "img": "img/mangga.webp"
   },
   {
    "file": "snack_leche_flan",
@@ -2694,7 +3092,9 @@
    "en": "Caramel custard",
    "phon": "LEH-cheh flan",
    "emoji": "🍮",
-   "say": "Leche flan"
+   "say": "Leche flan",
+   "desc": "A smooth, creamy egg custard with sweet caramel sauce on top.",
+   "img": "img/leche_flan.webp"
   },
   {
    "file": "snack_puto",
@@ -2702,7 +3102,9 @@
    "en": "Steamed rice cake",
    "phon": "POO-to",
    "emoji": "🧁",
-   "say": "Puto"
+   "say": "Puto",
+   "img": "img/puto.webp",
+   "desc": "A small, soft, fluffy steamed rice cake, often topped with a slice of cheese."
   },
   {
    "file": "snack_siopao",
@@ -2710,7 +3112,9 @@
    "en": "Steamed bun",
    "phon": "SYOH-pow",
    "emoji": "🍙",
-   "say": "Siopao"
+   "say": "Siopao",
+   "desc": "A fluffy steamed bun filled with warm, savory meat. It is a popular snack or light meal.",
+   "img": "img/siopao.webp"
   },
   {
    "file": "snack_banana_cue",
@@ -2718,7 +3122,9 @@
    "en": "Caramel banana skewer",
    "phon": "bah-NAH-nah kyoo",
    "emoji": "🍌",
-   "say": "Banana cue"
+   "say": "Banana cue",
+   "desc": "Fried bananas coated in caramelized brown sugar and served on a stick.",
+   "img": "img/banana_cue.webp"
   },
   {
    "file": "snack_fishball",
@@ -2726,7 +3132,9 @@
    "en": "Street food fishball",
    "phon": "FISH-bawl",
    "emoji": "🍢",
-   "say": "Fishball"
+   "say": "Fishball",
+   "desc": "Little fried balls of fish paste served on sticks with a sweet and tangy sauce. A popular street snack.",
+   "img": "img/fishball.webp"
   },
   {
    "file": "snack_sorbetes",
@@ -2734,7 +3142,9 @@
    "en": "Ice cream",
    "phon": "sor-BEH-tes",
    "emoji": "🍦",
-   "say": "Sorbetes"
+   "say": "Sorbetes",
+   "desc": "Filipino-style ice cream sold from colorful street carts, in flavors like ube, cheese and mango.",
+   "img": "img/sorbetes.webp"
   },
   {
    "file": "snack_polvoron",
@@ -2742,7 +3152,9 @@
    "en": "Milk candy",
    "phon": "pol-vor-ON",
    "emoji": "🍬",
-   "say": "Polvoron"
+   "say": "Polvoron",
+   "desc": "A crumbly little candy made of toasted flour, powdered milk and sugar, wrapped in colorful paper.",
+   "img": "img/polvoron.webp"
   },
   {
    "file": "snack_chicharon",
@@ -2750,7 +3162,9 @@
    "en": "Crispy pork rinds",
    "phon": "chee-chah-RON",
    "emoji": "🥓",
-   "say": "Chicharon"
+   "say": "Chicharon",
+   "desc": "Crispy, crunchy fried pork skin, eaten as a salty snack.",
+   "img": "img/chicharon.webp"
   },
   {
    "file": "snack_mais",
@@ -2758,7 +3172,9 @@
    "en": "Corn",
    "phon": "mah-EES",
    "emoji": "🌽",
-   "say": "Mais"
+   "say": "Mais",
+   "desc": "Sweet corn on the cob, usually boiled. A popular snack in the Philippines.",
+   "img": "img/mais.webp"
   },
   {
    "file": "snack_kwek_kwek",
@@ -2766,7 +3182,9 @@
    "en": "Orange quail eggs",
    "phon": "KWEK-kwek",
    "emoji": "🥚",
-   "say": "Kwek-kwek"
+   "say": "Kwek-kwek",
+   "desc": "Little boiled quail eggs dipped in bright orange batter and deep fried until crunchy.",
+   "img": "img/kwek_kwek.webp"
   },
   {
    "file": "snack_ensaymada",
@@ -2774,7 +3192,9 @@
    "en": "Sweet cheesy bun",
    "phon": "en-sy-mah-DAH",
    "emoji": "🥐",
-   "say": "Ensaymada"
+   "say": "Ensaymada",
+   "desc": "A soft, buttery sweet bun topped with sugar and cheese.",
+   "img": "img/ensaymada.webp"
   },
   {
    "file": "snack_mamon",
@@ -2782,7 +3202,9 @@
    "en": "Soft sponge cake",
    "phon": "mah-MON",
    "emoji": "🍰",
-   "say": "Mamon"
+   "say": "Mamon",
+   "desc": "A light, fluffy sponge cake that is so soft it melts in your mouth.",
+   "img": "img/mamon.webp"
   },
   {
    "file": "snack_pastillas",
@@ -2790,7 +3212,9 @@
    "en": "Milk candy",
    "phon": "pas-TEE-yas",
    "emoji": "🍫",
-   "say": "Pastillas"
+   "say": "Pastillas",
+   "desc": "A soft, sweet milk candy rolled in sugar and wrapped in pretty cut paper.",
+   "img": "img/pastillas.webp"
   },
   {
    "file": "snack_kropek",
@@ -2798,7 +3222,9 @@
    "en": "Shrimp chips",
    "phon": "kroh-PEK",
    "emoji": "🍘",
-   "say": "Kropek"
+   "say": "Kropek",
+   "desc": "Light, crunchy chips made from shrimp or fish. A crispy snack to share.",
+   "img": "img/kropek.webp"
   },
   {
    "file": "snack_sago",
@@ -2806,7 +3232,9 @@
    "en": "Tapioca pearls",
    "phon": "SAH-go",
    "emoji": "🧋",
-   "say": "Sago"
+   "say": "Sago",
+   "desc": "Chewy tapioca pearls in a cold, sweet drink with brown sugar syrup and jelly cubes.",
+   "img": "img/sago.webp"
   },
   {
    "file": "snack_pichi_pichi",
@@ -2814,7 +3242,9 @@
    "en": "Cassava jelly",
    "phon": "PEE-chee PEE-chee",
    "emoji": "🍡",
-   "say": "Pichi-pichi"
+   "say": "Pichi-pichi",
+   "desc": "A chewy, bouncy jelly made from cassava and rolled in grated coconut.",
+   "img": "img/pichi_pichi.webp"
   },
   {
    "file": "snack_suman",
@@ -2822,7 +3252,9 @@
    "en": "Sticky rice in leaves",
    "phon": "soo-MAHN",
    "emoji": "🍙",
-   "say": "Suman"
+   "say": "Suman",
+   "desc": "Sticky rice cooked in coconut milk and wrapped in banana or palm leaves. Peel off the leaf and eat!",
+   "img": "img/suman.webp"
   },
   {
    "file": "snack_biko",
@@ -2830,7 +3262,9 @@
    "en": "Sweet sticky rice",
    "phon": "BEE-ko",
    "emoji": "🍚",
-   "say": "Biko"
+   "say": "Biko",
+   "desc": "A sweet, chewy sticky-rice cake with a sticky brown sugar and coconut milk topping.",
+   "img": "img/biko.webp"
   },
   {
    "file": "snack_kutsinta",
@@ -2838,7 +3272,9 @@
    "en": "Brown rice cake",
    "phon": "koot-SIN-tah",
    "emoji": "🟤",
-   "say": "Kutsinta"
+   "say": "Kutsinta",
+   "desc": "A chewy, brown steamed rice cake, topped with fresh grated coconut.",
+   "img": "img/kutsinta.webp"
   },
   {
    "file": "snack_maruya",
@@ -2846,7 +3282,9 @@
    "en": "Banana fritter",
    "phon": "mah-ROO-yah",
    "emoji": "🍌",
-   "say": "Maruya"
+   "say": "Maruya",
+   "desc": "Banana fritters: banana slices dipped in batter, fried, and dusted with sugar.",
+   "img": "img/maruya.webp"
   },
   {
    "file": "snack_calamansi",
@@ -2854,7 +3292,9 @@
    "en": "Little Filipino lime",
    "phon": "kah-lah-MAN-see",
    "emoji": "🍋",
-   "say": "Kalamansi"
+   "say": "Kalamansi",
+   "desc": "A tiny green citrus fruit that tastes like a sour lime. It is used in juice and squeezed over food.",
+   "img": "img/calamansi.webp"
   },
   {
    "file": "snack_ginataan",
@@ -2862,7 +3302,9 @@
    "en": "Coconut milk dessert",
    "phon": "gee-nah-TAH-ahn",
    "emoji": "🥣",
-   "say": "Ginataan"
+   "say": "Ginataan",
+   "desc": "A warm, creamy dessert soup made with coconut milk, sweet potatoes, bananas and tapioca pearls.",
+   "img": "img/ginataan.webp"
   },
   {
    "file": "snack_maja_blanca",
@@ -2870,7 +3312,9 @@
    "en": "Coconut pudding",
    "phon": "MAH-hah BLAHN-kah",
    "emoji": "🍮",
-   "say": "Maja blanca"
+   "say": "Maja blanca",
+   "desc": "A soft, creamy pudding made from coconut milk and corn, topped with toasted coconut.",
+   "img": "img/maja_blanca.webp"
   },
   {
    "file": "snack_pan_de_coco",
@@ -2878,7 +3322,9 @@
    "en": "Coconut bread",
    "phon": "pahn deh KO-ko",
    "emoji": "🍞",
-   "say": "Pan de coco"
+   "say": "Pan de coco",
+   "desc": "A soft sweet bread roll filled with sugary shredded coconut.",
+   "img": "img/pan_de_coco.webp"
   },
   {
    "file": "snack_halaya",
@@ -2886,7 +3332,9 @@
    "en": "Sweet purple yam jam",
    "phon": "hah-LAH-yah",
    "emoji": "🍠",
-   "say": "Halaya"
+   "say": "Halaya",
+   "desc": "A smooth, sticky purple jam made from mashed purple yam. Sweet and creamy.",
+   "img": "img/halaya.webp"
   },
   {
    "file": "snack_sapin_sapin",
@@ -2894,7 +3342,9 @@
    "en": "Layered rice cake",
    "phon": "sah-PEEN sah-PEEN",
    "emoji": "🍡",
-   "say": "Sapin-sapin"
+   "say": "Sapin-sapin",
+   "desc": "A colorful rice cake made of many sticky layers. \"Sapin\" means layer.",
+   "img": "img/sapin_sapin.webp"
   },
   {
    "file": "snack_pinipig",
@@ -2902,7 +3352,9 @@
    "en": "Crispy young rice",
    "phon": "pee-nee-PIG",
    "emoji": "🍚",
-   "say": "Pinipig"
+   "say": "Pinipig",
+   "desc": "Crispy, flattened toasted rice flakes. They are sprinkled on desserts and chocolate drinks.",
+   "img": "img/pinipig.webp"
   },
   {
    "file": "snack_bukayo",
@@ -2910,7 +3362,9 @@
    "en": "Coconut candy",
    "phon": "boo-KAH-yo",
    "emoji": "🥥",
-   "say": "Bukayo"
+   "say": "Bukayo",
+   "desc": "A sweet candy made of coconut strips cooked in brown sugar until chewy.",
+   "img": "img/bukayo.webp"
   },
   {
    "file": "snack_yema",
@@ -2918,7 +3372,9 @@
    "en": "Custard candy",
    "phon": "YEH-mah",
    "emoji": "🍬",
-   "say": "Yema"
+   "say": "Yema",
+   "desc": "A soft candy made from sweet egg-yolk custard, rolled in sugar.",
+   "img": "img/yema.webp"
   },
   {
    "file": "snack_cassava_cake",
@@ -2926,7 +3382,9 @@
    "en": "Cassava cake",
    "phon": "kah-SAH-vah cake",
    "emoji": "🍰",
-   "say": "Cassava cake"
+   "say": "Cassava cake",
+   "desc": "A soft, chewy cake made from cassava root, with a creamy custard topping.",
+   "img": "img/cassava_cake.webp"
   },
   {
    "file": "snack_tupig",
@@ -2934,7 +3392,9 @@
    "en": "Grilled rice cake",
    "phon": "too-PIG",
    "emoji": "🥞",
-   "say": "Tupig"
+   "say": "Tupig",
+   "desc": "Sticky rice and coconut wrapped in banana leaves and grilled over charcoal.",
+   "img": "img/tupig.webp"
   },
   {
    "file": "snack_lugaw",
@@ -2942,7 +3402,36 @@
    "en": "Rice porridge",
    "phon": "LOO-gaw",
    "emoji": "🍲",
-   "say": "Lugaw"
+   "say": "Lugaw",
+   "desc": "A warm porridge of rice cooked in broth, often topped with egg, toasted garlic and green onions.",
+   "img": "img/lugaw.webp"
+  },
+  {
+   "file": "snack_champorado",
+   "tag": "Champorado",
+   "en": "Chocolate rice porridge",
+   "phon": "cham-poh-RAH-doh",
+   "emoji": "🍫",
+   "say": "Champorado",
+   "desc": "Sticky rice cooked in chocolate until it is thick and sweet, often eaten for breakfast with milk poured on top."
+  },
+  {
+   "file": "snack_camote_cue",
+   "tag": "Camote cue",
+   "en": "Caramelized sweet potato",
+   "phon": "kah-MOH-teh kyoo",
+   "emoji": "🍠",
+   "say": "Camote cue",
+   "desc": "Slices of sweet potato fried in brown sugar until crunchy and sticky, served on a stick."
+  },
+  {
+   "file": "snack_espasol",
+   "tag": "Espasol",
+   "en": "Rice flour log",
+   "phon": "es-pah-SOL",
+   "emoji": "🍥",
+   "say": "Espasol",
+   "desc": "A soft, chewy log made of rice flour and coconut milk, rolled in toasted rice flour."
   }
  ]
 }
