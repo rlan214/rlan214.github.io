@@ -2025,6 +2025,594 @@
      "emoji": "🍐"
     }
    ]
+  },
+  {
+   "unit": "Describing words",
+   "emoji": "🔎",
+   "color": "butter",
+   "kind": "words",
+   "words": [
+    {
+     "file": "malaki",
+     "tag": "Malaki",
+     "en": "big",
+     "phon": "mah-LAH-kee",
+     "emoji": "🐘"
+    },
+    {
+     "file": "maliit",
+     "tag": "Maliit",
+     "en": "small",
+     "phon": "mah-LEE-it",
+     "emoji": "🐜"
+    },
+    {
+     "file": "mainit",
+     "tag": "Mainit",
+     "en": "hot",
+     "phon": "mah-EE-nit",
+     "emoji": "🔥"
+    },
+    {
+     "file": "malamig",
+     "tag": "Malamig",
+     "en": "cold",
+     "phon": "mah-LAH-mig",
+     "emoji": "🧊"
+    },
+    {
+     "file": "maganda",
+     "tag": "Maganda",
+     "en": "beautiful",
+     "phon": "mah-GAHN-dah",
+     "emoji": "🌺"
+    },
+    {
+     "file": "mabilis",
+     "tag": "Mabilis",
+     "en": "fast",
+     "phon": "mah-bee-LIS",
+     "emoji": "🏃"
+    },
+    {
+     "file": "mabagal",
+     "tag": "Mabagal",
+     "en": "slow",
+     "phon": "mah-bah-GAHL",
+     "emoji": "🐢"
+    },
+    {
+     "file": "matamis",
+     "tag": "Matamis",
+     "en": "sweet",
+     "phon": "mah-TAH-mis",
+     "emoji": "🍭"
+    },
+    {
+     "file": "maasim",
+     "tag": "Maasim",
+     "en": "sour",
+     "phon": "mah-AH-sim",
+     "emoji": "🍋"
+    },
+    {
+     "file": "maalat",
+     "tag": "Maalat",
+     "en": "salty",
+     "phon": "mah-AH-lat",
+     "emoji": "🧂"
+    },
+    {
+     "file": "bago",
+     "tag": "Bago",
+     "en": "new",
+     "phon": "BAH-go",
+     "emoji": "✨"
+    },
+    {
+     "file": "luma",
+     "tag": "Luma",
+     "en": "old",
+     "phon": "LOO-mah",
+     "emoji": "📜"
+    }
+   ]
+  },
+  {
+   "unit": "I want…",
+   "emoji": "🤲",
+   "color": "pink",
+   "kind": "sentences",
+   "words": [
+    {
+     "file": "gusto_ko_ng_tinapay",
+     "tag": "Gusto ko ng tinapay.",
+     "en": "I want bread.",
+     "phon": "GOOS-to ko ng tee-NAH-pai",
+     "emoji": "🍞",
+     "say": "Gusto ko ng tinapay.",
+     "en_say": "I want bread.",
+     "blank": "tinapay"
+    },
+    {
+     "file": "gusto_ko_ng_mansanas",
+     "tag": "Gusto ko ng mansanas.",
+     "en": "I want an apple.",
+     "phon": "GOOS-to ko ng mahn-SAH-nas",
+     "emoji": "🍎",
+     "say": "Gusto ko ng mansanas.",
+     "en_say": "I want an apple.",
+     "blank": "mansanas"
+    },
+    {
+     "file": "gusto_ko_ng_saging",
+     "tag": "Gusto ko ng saging.",
+     "en": "I want a banana.",
+     "phon": "GOOS-to ko ng SAH-ging",
+     "emoji": "🍌",
+     "say": "Gusto ko ng saging.",
+     "en_say": "I want a banana.",
+     "blank": "saging"
+    },
+    {
+     "file": "gusto_ko_ng_gatas",
+     "tag": "Gusto ko ng gatas.",
+     "en": "I want milk.",
+     "phon": "GOOS-to ko ng GAH-tas",
+     "emoji": "🥛",
+     "say": "Gusto ko ng gatas.",
+     "en_say": "I want milk.",
+     "blank": "gatas"
+    },
+    {
+     "file": "gusto_ko_ng_itlog",
+     "tag": "Gusto ko ng itlog.",
+     "en": "I want an egg.",
+     "phon": "GOOS-to ko ng IT-log",
+     "emoji": "🥚",
+     "say": "Gusto ko ng itlog.",
+     "en_say": "I want an egg.",
+     "blank": "itlog"
+    },
+    {
+     "file": "gusto_ko_ng_mangga",
+     "tag": "Gusto ko ng mangga.",
+     "en": "I want a mango.",
+     "phon": "GOOS-to ko ng MAHNG-gah",
+     "emoji": "🥭",
+     "say": "Gusto ko ng mangga.",
+     "en_say": "I want a mango.",
+     "blank": "mangga"
+    }
+   ]
+  },
+  {
+   "unit": "This is…",
+   "emoji": "👉",
+   "color": "blue",
+   "kind": "sentences",
+   "words": [
+    {
+     "file": "ito_ang_aso",
+     "tag": "Ito ang aso.",
+     "en": "This is the dog.",
+     "phon": "EE-to ang AH-so",
+     "emoji": "🐶",
+     "say": "Ito ang aso.",
+     "en_say": "This is the dog.",
+     "blank": "aso"
+    },
+    {
+     "file": "ito_ang_pusa",
+     "tag": "Ito ang pusa.",
+     "en": "This is the cat.",
+     "phon": "EE-to ang POO-sah",
+     "emoji": "🐱",
+     "say": "Ito ang pusa.",
+     "en_say": "This is the cat.",
+     "blank": "pusa"
+    },
+    {
+     "file": "ito_ang_bahay",
+     "tag": "Ito ang bahay.",
+     "en": "This is the house.",
+     "phon": "EE-to ang BAH-hai",
+     "emoji": "🏠",
+     "say": "Ito ang bahay.",
+     "en_say": "This is the house.",
+     "blank": "bahay"
+    },
+    {
+     "file": "ito_ang_libro",
+     "tag": "Ito ang libro.",
+     "en": "This is the book.",
+     "phon": "EE-to ang LEE-bro",
+     "emoji": "📖",
+     "say": "Ito ang libro.",
+     "en_say": "This is the book.",
+     "blank": "libro"
+    },
+    {
+     "file": "ito_ang_lapis",
+     "tag": "Ito ang lapis.",
+     "en": "This is the pencil.",
+     "phon": "EE-to ang LAH-pis",
+     "emoji": "✏️",
+     "say": "Ito ang lapis.",
+     "en_say": "This is the pencil.",
+     "blank": "lapis"
+    },
+    {
+     "file": "ito_ang_bulaklak",
+     "tag": "Ito ang bulaklak.",
+     "en": "This is the flower.",
+     "phon": "EE-to ang boo-LAHK-lak",
+     "emoji": "🌸",
+     "say": "Ito ang bulaklak.",
+     "en_say": "This is the flower.",
+     "blank": "bulaklak"
+    }
+   ]
+  },
+  {
+   "unit": "Where is…?",
+   "emoji": "🧭",
+   "color": "mint",
+   "kind": "sentences",
+   "words": [
+    {
+     "file": "nasaan_ang_kutsara",
+     "tag": "Nasaan ang kutsara?",
+     "en": "Where is the spoon?",
+     "phon": "nah-sah-AHN ang koot-SAH-rah",
+     "emoji": "🥄",
+     "say": "Nasaan ang kutsara?",
+     "en_say": "Where is the spoon?",
+     "blank": "kutsara"
+    },
+    {
+     "file": "nasaan_ang_plato",
+     "tag": "Nasaan ang plato?",
+     "en": "Where is the plate?",
+     "phon": "nah-sah-AHN ang PLAH-to",
+     "emoji": "🍽️",
+     "say": "Nasaan ang plato?",
+     "en_say": "Where is the plate?",
+     "blank": "plato"
+    },
+    {
+     "file": "nasaan_ang_baso",
+     "tag": "Nasaan ang baso?",
+     "en": "Where is the glass?",
+     "phon": "nah-sah-AHN ang BAH-so",
+     "emoji": "🥛",
+     "say": "Nasaan ang baso?",
+     "en_say": "Where is the glass?",
+     "blank": "baso"
+    },
+    {
+     "file": "nasaan_ang_libro",
+     "tag": "Nasaan ang libro?",
+     "en": "Where is the book?",
+     "phon": "nah-sah-AHN ang LEE-bro",
+     "emoji": "📖",
+     "say": "Nasaan ang libro?",
+     "en_say": "Where is the book?",
+     "blank": "libro"
+    },
+    {
+     "file": "nasaan_ang_lapis",
+     "tag": "Nasaan ang lapis?",
+     "en": "Where is the pencil?",
+     "phon": "nah-sah-AHN ang LAH-pis",
+     "emoji": "✏️",
+     "say": "Nasaan ang lapis?",
+     "en_say": "Where is the pencil?",
+     "blank": "lapis"
+    },
+    {
+     "file": "nasaan_ang_sapatos",
+     "tag": "Nasaan ang sapatos?",
+     "en": "Where is the shoes?",
+     "phon": "nah-sah-AHN ang sah-PAH-tos",
+     "emoji": "👟",
+     "say": "Nasaan ang sapatos?",
+     "en_say": "Where is the shoes?",
+     "blank": "sapatos"
+    }
+   ]
+  },
+  {
+   "unit": "I have…",
+   "emoji": "🎒",
+   "color": "peach",
+   "kind": "sentences",
+   "words": [
+    {
+     "file": "may_aso_ako",
+     "tag": "May aso ako.",
+     "en": "I have a dog.",
+     "phon": "mai AH-so ah-KO",
+     "emoji": "🐶",
+     "say": "May aso ako.",
+     "en_say": "I have a dog.",
+     "blank": "aso"
+    },
+    {
+     "file": "may_pusa_ako",
+     "tag": "May pusa ako.",
+     "en": "I have a cat.",
+     "phon": "mai POO-sah ah-KO",
+     "emoji": "🐱",
+     "say": "May pusa ako.",
+     "en_say": "I have a cat.",
+     "blank": "pusa"
+    },
+    {
+     "file": "may_lapis_ako",
+     "tag": "May lapis ako.",
+     "en": "I have a pencil.",
+     "phon": "mai LAH-pis ah-KO",
+     "emoji": "✏️",
+     "say": "May lapis ako.",
+     "en_say": "I have a pencil.",
+     "blank": "lapis"
+    },
+    {
+     "file": "may_libro_ako",
+     "tag": "May libro ako.",
+     "en": "I have a book.",
+     "phon": "mai LEE-bro ah-KO",
+     "emoji": "📖",
+     "say": "May libro ako.",
+     "en_say": "I have a book.",
+     "blank": "libro"
+    },
+    {
+     "file": "may_sumbrero_ako",
+     "tag": "May sumbrero ako.",
+     "en": "I have a hat.",
+     "phon": "mai soom-BREH-ro ah-KO",
+     "emoji": "👒",
+     "say": "May sumbrero ako.",
+     "en_say": "I have a hat.",
+     "blank": "sumbrero"
+    },
+    {
+     "file": "may_kuwaderno_ako",
+     "tag": "May kuwaderno ako.",
+     "en": "I have a notebook.",
+     "phon": "mai koo-wah-DAIR-no ah-KO",
+     "emoji": "📓",
+     "say": "May kuwaderno ako.",
+     "en_say": "I have a notebook.",
+     "blank": "kuwaderno"
+    }
+   ]
+  },
+  {
+   "unit": "I don't want…",
+   "emoji": "🙅",
+   "color": "lav",
+   "kind": "sentences",
+   "words": [
+    {
+     "file": "ayaw_ko_ng_gulay",
+     "tag": "Ayaw ko ng gulay.",
+     "en": "I don't want vegetables.",
+     "phon": "AH-yaw ko ng GOO-lai",
+     "emoji": "🥦",
+     "say": "Ayaw ko ng gulay.",
+     "en_say": "I don't want vegetables.",
+     "blank": "gulay"
+    },
+    {
+     "file": "ayaw_ko_ng_sili",
+     "tag": "Ayaw ko ng sili.",
+     "en": "I don't want chili.",
+     "phon": "AH-yaw ko ng SEE-lee",
+     "emoji": "🌶️",
+     "say": "Ayaw ko ng sili.",
+     "en_say": "I don't want chili.",
+     "blank": "sili"
+    },
+    {
+     "file": "ayaw_ko_ng_kape",
+     "tag": "Ayaw ko ng kape.",
+     "en": "I don't want coffee.",
+     "phon": "AH-yaw ko ng kah-PEH",
+     "emoji": "☕",
+     "say": "Ayaw ko ng kape.",
+     "en_say": "I don't want coffee.",
+     "blank": "kape"
+    },
+    {
+     "file": "ayaw_ko_ng_gatas",
+     "tag": "Ayaw ko ng gatas.",
+     "en": "I don't want milk.",
+     "phon": "AH-yaw ko ng GAH-tas",
+     "emoji": "🥛",
+     "say": "Ayaw ko ng gatas.",
+     "en_say": "I don't want milk.",
+     "blank": "gatas"
+    },
+    {
+     "file": "ayaw_ko_ng_bagoong",
+     "tag": "Ayaw ko ng bagoong.",
+     "en": "I don't want shrimp paste.",
+     "phon": "AH-yaw ko ng bah-GO-ong",
+     "emoji": "🦐",
+     "say": "Ayaw ko ng bagoong.",
+     "en_say": "I don't want shrimp paste.",
+     "blank": "bagoong"
+    },
+    {
+     "file": "ayaw_ko_ng_isda",
+     "tag": "Ayaw ko ng isda.",
+     "en": "I don't want fish.",
+     "phon": "AH-yaw ko ng IS-dah",
+     "emoji": "🐟",
+     "say": "Ayaw ko ng isda.",
+     "en_say": "I don't want fish.",
+     "blank": "isda"
+    }
+   ]
+  },
+  {
+   "unit": "Color talk",
+   "emoji": "🎨",
+   "color": "sage",
+   "kind": "sentences",
+   "words": [
+    {
+     "file": "pula_ang_mansanas",
+     "tag": "Pula ang mansanas.",
+     "en": "The apple is red.",
+     "phon": "POO-lah ang mahn-SAH-nas",
+     "emoji": "🍎",
+     "say": "Pula ang mansanas.",
+     "en_say": "The apple is red.",
+     "blank": "pula"
+    },
+    {
+     "file": "dilaw_ang_saging",
+     "tag": "Dilaw ang saging.",
+     "en": "The banana is yellow.",
+     "phon": "dee-LAHW ang SAH-ging",
+     "emoji": "🍌",
+     "say": "Dilaw ang saging.",
+     "en_say": "The banana is yellow.",
+     "blank": "dilaw"
+    },
+    {
+     "file": "berde_ang_gulay",
+     "tag": "Berde ang gulay.",
+     "en": "The vegetable is green.",
+     "phon": "BEHR-deh ang GOO-lai",
+     "emoji": "🥬",
+     "say": "Berde ang gulay.",
+     "en_say": "The vegetable is green.",
+     "blank": "berde"
+    },
+    {
+     "file": "asul_ang_dagat",
+     "tag": "Asul ang dagat.",
+     "en": "The sea is blue.",
+     "phon": "AH-sool ang DAH-gat",
+     "emoji": "🌊",
+     "say": "Asul ang dagat.",
+     "en_say": "The sea is blue.",
+     "blank": "asul"
+    },
+    {
+     "file": "puti_ang_ulap",
+     "tag": "Puti ang ulap.",
+     "en": "The cloud is white.",
+     "phon": "POO-tee ang OO-lap",
+     "emoji": "☁️",
+     "say": "Puti ang ulap.",
+     "en_say": "The cloud is white.",
+     "blank": "puti"
+    },
+    {
+     "file": "dilaw_ang_araw",
+     "tag": "Dilaw ang araw.",
+     "en": "The sun is yellow.",
+     "phon": "dee-LAHW ang AH-raw",
+     "emoji": "☀️",
+     "say": "Dilaw ang araw.",
+     "en_say": "The sun is yellow.",
+     "blank": "dilaw"
+    }
+   ]
+  },
+  {
+   "unit": "Describe it",
+   "emoji": "🧐",
+   "color": "butter",
+   "kind": "sentences",
+   "words": [
+    {
+     "file": "malaki_ang_aso",
+     "tag": "Malaki ang aso.",
+     "en": "The dog is big.",
+     "phon": "mah-LAH-kee ang AH-so",
+     "emoji": "🐕",
+     "say": "Malaki ang aso.",
+     "en_say": "The dog is big.",
+     "blank": "malaki"
+    },
+    {
+     "file": "maliit_ang_pusa",
+     "tag": "Maliit ang pusa.",
+     "en": "The cat is small.",
+     "phon": "mah-LEE-it ang POO-sah",
+     "emoji": "🐈",
+     "say": "Maliit ang pusa.",
+     "en_say": "The cat is small.",
+     "blank": "maliit"
+    },
+    {
+     "file": "mainit_ang_kape",
+     "tag": "Mainit ang kape.",
+     "en": "The coffee is hot.",
+     "phon": "mah-EE-nit ang kah-PEH",
+     "emoji": "☕",
+     "say": "Mainit ang kape.",
+     "en_say": "The coffee is hot.",
+     "blank": "mainit"
+    },
+    {
+     "file": "malamig_ang_tubig",
+     "tag": "Malamig ang tubig.",
+     "en": "The water is cold.",
+     "phon": "mah-LAH-mig ang TOO-big",
+     "emoji": "🧊",
+     "say": "Malamig ang tubig.",
+     "en_say": "The water is cold.",
+     "blank": "malamig"
+    },
+    {
+     "file": "matamis_ang_mangga",
+     "tag": "Matamis ang mangga.",
+     "en": "The mango is sweet.",
+     "phon": "mah-TAH-mis ang MAHNG-gah",
+     "emoji": "🥭",
+     "say": "Matamis ang mangga.",
+     "en_say": "The mango is sweet.",
+     "blank": "matamis"
+    },
+    {
+     "file": "maasim_ang_kalamansi",
+     "tag": "Maasim ang kalamansi.",
+     "en": "The calamansi is sour.",
+     "phon": "mah-AH-sim ang kah-lah-MAN-see",
+     "emoji": "🍋",
+     "say": "Maasim ang kalamansi.",
+     "en_say": "The calamansi is sour.",
+     "blank": "maasim"
+    },
+    {
+     "file": "maalat_ang_patis",
+     "tag": "Maalat ang patis.",
+     "en": "The fish sauce is salty.",
+     "phon": "mah-AH-lat ang pah-TEES",
+     "emoji": "🐟",
+     "say": "Maalat ang patis.",
+     "en_say": "The fish sauce is salty.",
+     "blank": "maalat"
+    },
+    {
+     "file": "maganda_ang_bulaklak",
+     "tag": "Maganda ang bulaklak.",
+     "en": "The flower is beautiful.",
+     "phon": "mah-GAHN-dah ang boo-LAHK-lak",
+     "emoji": "🌸",
+     "say": "Maganda ang bulaklak.",
+     "en_say": "The flower is beautiful.",
+     "blank": "maganda"
+    }
+   ]
   }
  ],
  "stickers": [
@@ -2275,6 +2863,86 @@
    "phon": "gee-nah-TAH-ahn",
    "emoji": "🥣",
    "say": "Ginataan"
+  },
+  {
+   "file": "snack_maja_blanca",
+   "tag": "Maja blanca",
+   "en": "Coconut pudding",
+   "phon": "MAH-hah BLAHN-kah",
+   "emoji": "🍮",
+   "say": "Maja blanca"
+  },
+  {
+   "file": "snack_pan_de_coco",
+   "tag": "Pan de coco",
+   "en": "Coconut bread",
+   "phon": "pahn deh KO-ko",
+   "emoji": "🍞",
+   "say": "Pan de coco"
+  },
+  {
+   "file": "snack_halaya",
+   "tag": "Halaya",
+   "en": "Sweet purple yam jam",
+   "phon": "hah-LAH-yah",
+   "emoji": "🍠",
+   "say": "Halaya"
+  },
+  {
+   "file": "snack_sapin_sapin",
+   "tag": "Sapin-sapin",
+   "en": "Layered rice cake",
+   "phon": "sah-PEEN sah-PEEN",
+   "emoji": "🍡",
+   "say": "Sapin-sapin"
+  },
+  {
+   "file": "snack_pinipig",
+   "tag": "Pinipig",
+   "en": "Crispy young rice",
+   "phon": "pee-nee-PIG",
+   "emoji": "🍚",
+   "say": "Pinipig"
+  },
+  {
+   "file": "snack_bukayo",
+   "tag": "Bukayo",
+   "en": "Coconut candy",
+   "phon": "boo-KAH-yo",
+   "emoji": "🥥",
+   "say": "Bukayo"
+  },
+  {
+   "file": "snack_yema",
+   "tag": "Yema",
+   "en": "Custard candy",
+   "phon": "YEH-mah",
+   "emoji": "🍬",
+   "say": "Yema"
+  },
+  {
+   "file": "snack_cassava_cake",
+   "tag": "Cassava cake",
+   "en": "Cassava cake",
+   "phon": "kah-SAH-vah cake",
+   "emoji": "🍰",
+   "say": "Cassava cake"
+  },
+  {
+   "file": "snack_tupig",
+   "tag": "Tupig",
+   "en": "Grilled rice cake",
+   "phon": "too-PIG",
+   "emoji": "🥞",
+   "say": "Tupig"
+  },
+  {
+   "file": "snack_lugaw",
+   "tag": "Lugaw",
+   "en": "Rice porridge",
+   "phon": "LOO-gaw",
+   "emoji": "🍲",
+   "say": "Lugaw"
   }
  ]
 }
