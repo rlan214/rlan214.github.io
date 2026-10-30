@@ -3681,7 +3681,8 @@
    "phon": "cham-poh-RAH-doh",
    "emoji": "🍫",
    "say": "Champorado",
-   "desc": "Sticky rice cooked in chocolate until it is thick and sweet, often eaten for breakfast with milk poured on top."
+   "desc": "Sticky rice cooked in chocolate until it is thick and sweet, often eaten for breakfast with milk poured on top.",
+   "img": "img/champorado.webp"
   },
   {
    "file": "snack_camote_cue",
@@ -3690,7 +3691,8 @@
    "phon": "kah-MOH-teh kyoo",
    "emoji": "🍠",
    "say": "Camote cue",
-   "desc": "Slices of sweet potato fried in brown sugar until crunchy and sticky, served on a stick."
+   "desc": "Slices of sweet potato fried in brown sugar until crunchy and sticky, served on a stick.",
+   "img": "img/camote_cue.webp"
   },
   {
    "file": "snack_espasol",
@@ -3699,7 +3701,8 @@
    "phon": "es-pah-SOL",
    "emoji": "🍥",
    "say": "Espasol",
-   "desc": "A soft, chewy log made of rice flour and coconut milk, rolled in toasted rice flour."
+   "desc": "A soft, chewy log made of rice flour and coconut milk, rolled in toasted rice flour.",
+   "img": "img/espasol.webp"
   },
   {
    "file": "snack_parol",
@@ -3709,7 +3712,8 @@
    "emoji": "🌟",
    "say": "Parol",
    "desc": "A glowing star lantern made of bamboo and colorful paper, hung in Filipino windows every Christmas.",
-   "season": "pasko"
+   "season": "pasko",
+   "img": "img/parol.webp"
   },
   {
    "file": "snack_puto_bumbong",
@@ -3719,7 +3723,8 @@
    "emoji": "💜",
    "say": "Puto bumbong",
    "desc": "Purple sticky rice steamed in bamboo tubes, then topped with butter, coconut and brown sugar. Eaten after Simbang Gabi.",
-   "season": "pasko"
+   "season": "pasko",
+   "img": "img/puto_bumbong.webp"
   },
   {
    "file": "snack_hamon",
@@ -3729,7 +3734,8 @@
    "emoji": "🍖",
    "say": "Hamon",
    "desc": "A sweet, glazed ham served at the Noche Buena feast on Christmas Eve.",
-   "season": "pasko"
+   "season": "pasko",
+   "img": "img/hamon.webp"
   },
   {
    "file": "snack_queso_de_bola",
@@ -3739,7 +3745,8 @@
    "emoji": "🧀",
    "say": "Queso de bola",
    "desc": "A round cheese in red wax, a favorite on the Christmas table, often eaten with ham.",
-   "season": "pasko"
+   "season": "pasko",
+   "img": "img/queso_de_bola.webp"
   }
  ]
 }
