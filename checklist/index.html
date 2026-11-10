@@ -126,6 +126,7 @@ h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1.1}
 .item .tag{font-size:.8rem;color:var(--soft);display:block}
 .box{width:40px;height:40px;border-radius:13px;border:3px solid var(--box);flex:none;display:grid;place-items:center;color:#fff;font-size:1.4rem}
 .item.on{background:var(--good-soft)}
+.golink{display:flex;width:100%;margin:-4px 0 14px;background:var(--workout);box-shadow:0 5px 0 #d9662a;color:#fff;text-decoration:none}
 .item.on .tx{color:var(--good-ink);text-decoration:line-through;text-decoration-thickness:2px}
 .item.on .box{background:var(--good);border-color:var(--good)}
 .empty{text-align:center;color:var(--soft);padding:30px 10px}
@@ -236,10 +237,16 @@ function blank(){
 }
 function normalize(r){
   const b = blank();
-  if (!r || r.v !== 1) return b;
+  if (!r || r.v !== 1) r = b;
   r.kids = Array.isArray(r.kids) && r.kids.length ? r.kids : b.kids;
   r.kids.forEach(k => { k.items = k.items || []; });
   r.days = r.days || {};
+  // one-time: put the guided splits stretch on Kryslana's daily list (remove it from Parent setup if not wanted)
+  if (!r.stretchAdded){
+    const ky = r.kids.find(k => k.id === 'kryslana');
+    if (ky && !ky.items.find(it => it.id === 'stretch')) ky.items.push({id:'stretch', t:'Splits stretch', e:'🤸', c:'workout'});
+    r.stretchAdded = true;
+  }
   return r;
 }
 
@@ -248,6 +255,7 @@ let S = normalize((() => { try{ return JSON.parse(localStorage.getItem(KEY)); }c
 const SYNC_OFF = true; // cloud sync turned off — set to false to turn it back on
 let remote = null, syncState = (FIREBASE_CONFIG && !SYNC_OFF) ? 'connecting' : 'local', syncErr = '';
 function saveLocal(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+saveLocal(); // persist one-time additions (e.g. stretch item) so stretch.html can tick it
 
 async function initRemote(){
   if (!FIREBASE_CONFIG || SYNC_OFF) return;
@@ -503,7 +511,7 @@ function vKid(){
       if (!list.length) return '';
       return `<div class="group" style="--gc:${CATS[c].color}"><h3><span class="dot"></span>${CATS[c].label}</h3>
         ${list.map(it => `<button class="item ${p.done[it.id]?'on':''}" data-act="tick" data-id="${it.id}">
-          <span class="em">${esc(it.e || CATS[c].emoji)}</span><span class="tx">${esc(it.t)}</span><span class="box">${p.done[it.id]?'✔':''}</span></button>`).join('')}
+          <span class="em">${esc(it.e || CATS[c].emoji)}</span><span class="tx">${esc(it.t)}</span><span class="box">${p.done[it.id]?'✔':''}</span></button>${it.id === 'stretch' && !p.done[it.id] ? `<a class="btn golink" href="stretch.html?kid=${encodeURIComponent(k.id)}">▶ Start stretch</a>` : ''}`).join('')}
       </div>`;
     }).join('');
   }

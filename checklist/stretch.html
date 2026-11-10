@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#fff7ec">
+<link rel="apple-touch-icon" sizes="180x180" href="/checklist/apple-touch-icon.png">
+<title>Splits Stretch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Guided splits stretch — opened from the Daily Checklist. On finish it ticks
+   the "Splits stretch" item (id "stretch") in the checklist's local save. */
+:root{
+  --bg:#fff7ec; --card:#fff; --ink:#2b2340; --soft:#6d6585; --line:#efe4d4;
+  --good:#22b07d; --good-soft:#dcf5ea; --accent:#7c5cff; --warm:#ff8a3d; --track:#f1ebe2;
+  --shadow:0 6px 0 rgba(43,35,64,.08),0 12px 28px rgba(43,35,64,.06);
+  --f-display:'Baloo 2',system-ui,sans-serif; --f-body:'Nunito',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#17131f; --card:#231d30; --ink:#f3eefc; --soft:#a79fc0; --line:#2f2840; --track:#2f2840; --good-soft:#163a2d;
+    --shadow:0 6px 0 rgba(0,0,0,.35),0 12px 28px rgba(0,0,0,.25)}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-weight:700}
+button,a{font:inherit;color:inherit;border:0;background:none;cursor:pointer;text-decoration:none}
+.wrap{max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 24px)}
+h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1.1}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.top h1{flex:1;font-size:1.9rem}
+.iconbtn{width:48px;height:48px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;font-size:1.4rem}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+.hint{color:var(--soft);margin:6px 0 0;line-height:1.35}
+.lens{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.lens button{padding:14px 6px;border-radius:18px;background:var(--track);text-align:center;font-family:var(--f-display);font-size:1.35rem;line-height:1.05}
+.lens button small{display:block;font-family:var(--f-body);font-size:.8rem;color:var(--soft);margin-top:4px}
+.lens button.on{background:var(--accent);color:#fff;box-shadow:0 5px 0 #5a3fd6}
+.lens button.on small{color:#fff;opacity:.85}
+.list{margin:10px 0 0;padding:0;list-style:none}
+.list li{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1.5px dashed var(--line)}
+.list li:last-child{border:0}
+.list .em{font-size:1.4rem;width:44px;text-align:center}
+.list .em img{width:44px;height:44px;object-fit:contain;border-radius:10px;background:#fff;display:block}
+.list .nm{flex:1}
+.list .tm{color:var(--soft);font-size:.9rem}
+.btn{display:flex;width:100%;align-items:center;justify-content:center;gap:8px;padding:18px 22px;border-radius:20px;background:var(--good);color:#fff;font-family:var(--f-display);font-size:1.6rem;box-shadow:0 6px 0 #168a61}
+.btn:active{transform:translateY(3px);box-shadow:0 3px 0 #168a61}
+.btn.ghost{background:var(--card);color:var(--ink);box-shadow:var(--shadow);font-size:1.25rem}
+.safe{border-left:6px solid var(--warm)}
+.safe ul{margin:8px 0 0;padding-left:20px;line-height:1.45}
+
+/* player */
+.prog{height:12px;border-radius:99px;background:var(--track);overflow:hidden;margin-bottom:14px}
+.prog i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .4s}
+.stage{text-align:center;padding:22px 18px}
+.phase{display:inline-block;padding:6px 14px;border-radius:99px;background:var(--track);color:var(--soft);font-size:.95rem;margin-bottom:8px}
+.stage .bigem{font-size:4.2rem;line-height:1;display:block}
+.stage .pic img{width:min(300px,70vw);height:min(300px,70vw);object-fit:contain;border-radius:22px;background:#fff;display:block;margin:4px auto}
+.stage h2{font-size:2.3rem;margin-top:6px}
+.side{display:inline-block;margin-top:8px;padding:6px 16px;border-radius:14px;background:var(--accent);color:#fff;font-family:var(--f-display);font-size:1.35rem}
+.side.R{background:var(--warm)}
+.ring{--p:0;position:relative;width:220px;height:220px;margin:18px auto 10px;border-radius:50%;
+  background:conic-gradient(var(--rc,var(--accent)) calc(var(--p)*1%),var(--track) 0);display:grid;place-items:center}
+.ring>div{width:180px;height:180px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-family:var(--f-display);font-size:4.4rem;line-height:1}
+.ring small{display:block;font-family:var(--f-body);font-size:.95rem;color:var(--soft)}
+.cue{margin:6px auto 0;max-width:460px;font-size:1.2rem;line-height:1.4}
+.cue li{margin:4px 0;text-align:left}
+.next{color:var(--soft);margin-top:12px}
+.ctrls{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:10px}
+.ctrls button{padding:16px 6px;border-radius:18px;background:var(--card);box-shadow:var(--shadow);font-family:var(--f-display);font-size:1.25rem}
+.ctrls .main{background:var(--accent);color:#fff;box-shadow:0 5px 0 #5a3fd6}
+.rest .ring{--rc:var(--good)}
+.done{text-align:center;padding:28px 18px}
+.done .bigem{font-size:5rem}
+.done h2{font-size:2.4rem;margin:8px 0}
+.burst{position:fixed;pointer-events:none;font-size:2rem;z-index:9;animation:fly 1.2s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(260deg);opacity:0}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+/* ---------- the moves (rewritten from the splits sheet, kid-friendly cues) ---------- */
+const M = {
+  swingF: {n:'Front Leg Swings', e:'🦵', sided:true, cue:['Hold a wall or chair for balance.','Swing your leg forward and back — 10 easy swings.','Smooth and controlled, no kicking hard.']},
+  swingS: {n:'Side Leg Swings',  e:'🦵', sided:true, cue:['Face the wall, hands on it.','Swing your leg out to the side and back across — 10 swings.','Keep your body tall.']},
+  squat:  {n:'Deep Squat Hold',  e:'🧘', cue:['Feet wider than your hips, toes out a little.','Sink down low, chest up, hands together.','Breathe slow.']},
+  fly:    {n:'Butterfly',        e:'🦋', cue:['Sit and put the bottoms of your feet together.','Hold your feet, sit up tall.','Let your knees drop toward the floor — no pushing hard.']},
+  lunge:  {n:'Low Lunge',        e:'🏃', sided:true, cue:['Step one foot forward, back knee on the floor (use a pillow).','Chest up, hands on your front knee.','Slide your hips forward a little.']},
+  half:   {n:'Half Split',       e:'🤸', sided:true, cue:['From the lunge, straighten your front leg.','Hips back over your back knee, toes up.','Lean forward with a flat back.']},
+  lizard: {n:'Lizard Pose',      e:'🦎', sided:true, cue:['Lunge with your front foot outside your hands.','Let your hips sink toward the floor.','Stay on your hands — elbows down only if it feels easy.']},
+  pigeon: {n:'Pigeon Pose',      e:'🕊️', sided:true, cue:['Bring one knee forward, shin across in front of you.','Slide the other leg straight back.','Sit tall, hips even.']},
+  ham:    {n:'Hamstring Reach',  e:'🙆', sided:true, cue:['Sit with one leg straight, the other foot tucked in.','Reach toward your toes with a flat back.','Knee stays straight but not locked.']},
+  inner:  {n:'Side Reach',       e:'🌈', sided:true, cue:['Sit with one leg out to the side, other leg bent.','Reach your top arm over your head toward the straight leg.','Feel it along your side and inner thigh.']},
+  front:  {n:'Front Split',      e:'⭐', sided:true, cue:['Slide one leg forward and one back.','Hands on the floor or on pillows — only as low as feels OK.','Hips face forward. No bouncing!']},
+  middle: {n:'Middle Split',     e:'🌟', cue:['Sit with your legs wide apart, toes up.','Walk your hands forward with a flat back.','Stop at a gentle pull.']},
+  fold:   {n:'Split Fold',       e:'🙇', sided:true, cue:['Go into your front split (as low as you can).','Fold your body over your front leg.','Relax and breathe.']},
+  reach:  {n:'Split Reach',      e:'🙌', sided:true, cue:['Go into your front split (as low as you can).','Reach both arms up high.','Lift your chest gently — no big back bend.']},
+  lean:   {n:'Middle Split Lean',e:'↔️', sided:true, cue:['Legs wide apart.','Turn and lean your body over one leg.','Back flat, breathe.']},
+};
+const FILE = {swingF:'front-leg-swings', swingS:'side-leg-swings', squat:'deep-squat', fly:'butterfly',
+  lunge:'low-lunge', half:'half-split', lizard:'lizard', pigeon:'pigeon', ham:'hamstring-reach', inner:'side-reach',
+  front:'front-split', middle:'middle-split', fold:'split-fold', reach:'split-reach', lean:'middle-split-lean'};
+// photo if stretch-img/<name>.webp (or .png) exists, otherwise the emoji
+function pic(key, cls){
+  const f = 'stretch-img/' + FILE[key];
+  return `<span class="${cls}"><img src="${f}.webp" alt="" onerror="if(!this.dataset.p){this.dataset.p=1;this.src='${f}.png'}else{this.parentNode.textContent='${M[key].e}'}"></span>`;
+}
+const WARM = [['swingF',30],['swingS',30],['squat',30],['fly',45]];
+const MAIN = ['lunge','half','lizard','pigeon','ham','inner','front','middle'];
+const PLANS = {
+  15: {label:'15', sub:'1 round', rounds:1, hold:30, extra:false},
+  30: {label:'30', sub:'2 rounds', rounds:2, hold:40, extra:false},
+  45: {label:'45', sub:'full sheet', rounds:3, hold:40, extra:true},
+};
+const SWITCH = 8, BETWEEN = 10, ROUND_REST = 30;
+
+function build(planKey){
+  const P = PLANS[planKey], steps = [];
+  const add = (key, secs, phase) => {
+    const m = M[key];
+    if (m.sided){ steps.push({key, secs, phase, side:'L'}); steps.push({key, secs, phase, side:'R'}); }
+    else steps.push({key, secs, phase});
+  };
+  WARM.forEach(([k,s]) => add(k, s, 'Warm-up'));
+  for (let r = 1; r <= P.rounds; r++){
+    MAIN.forEach(k => add(k, k === 'middle' ? P.hold + 15 : P.hold, P.rounds > 1 ? `Round ${r} of ${P.rounds}` : 'Stretch'));
+  }
+  if (P.extra) ['fold','reach','lean'].forEach(k => add(k, 30, 'Finishers'));
+  // rests between steps
+  const seq = [];
+  steps.forEach((s, i) => {
+    seq.push(s);
+    const nx = steps[i+1]; if (!nx) return;
+    const rest = (nx.phase !== s.phase && i > 0) ? ROUND_REST : (nx.key === s.key ? SWITCH : BETWEEN);
+    seq.push({rest:true, secs:rest, nextUp:nx});
+  });
+  return seq;
+}
+const totalSecs = seq => seq.reduce((a, s) => a + s.secs, 0);
+const fmt = s => Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+
+/* ---------- state ---------- */
+const PREF = 'stretch.plan';
+let plan = (() => { try{ return localStorage.getItem(PREF) || '15'; }catch(e){ return '15'; } })();
+if (!PLANS[plan]) plan = '15';
+let seq = [], idx = 0, left = 0, timer = null, paused = false, wake = null, actx = null;
+const app = document.getElementById('app');
+const KID = new URLSearchParams(location.search).get('kid') || 'kryslana';
+
+/* ---------- sound + voice ---------- */
+function beep(f = 880, d = .15){
+  try{
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.frequency.value = f; o.connect(g); g.connect(actx.destination);
+    g.gain.setValueAtTime(.25, actx.currentTime); g.gain.exponentialRampToValueAtTime(.001, actx.currentTime + d);
+    o.start(); o.stop(actx.currentTime + d);
+  }catch(e){}
+}
+function say(t){
+  try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.rate = .95; u.pitch = 1.1; speechSynthesis.speak(u); }catch(e){}
+}
+const sideWord = s => s === 'L' ? 'left leg' : 'right leg';
+async function keepAwake(){ try{ if ('wakeLock' in navigator) wake = await navigator.wakeLock.request('screen'); }catch(e){} }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && timer) keepAwake(); });
+
+/* ---------- views ---------- */
+function vStart(){
+  const s = build(plan), holds = s.filter(x => !x.rest);
+  const uniq = []; holds.forEach(h => { if (!uniq.find(u => u.key === h.key)) uniq.push(h); });
+  app.innerHTML = `
+    <div class="top"><a class="iconbtn" href="./" aria-label="Back">←</a><h1>Splits Stretch</h1></div>
+    <div class="card">
+      <h3>How long today?</h3>
+      <div class="lens">${Object.entries(PLANS).map(([k,p]) => `<button class="${k===plan?'on':''}" data-plan="${k}">${p.label} min<small>${p.sub}</small></button>`).join('')}</div>
+      <p class="hint">This one: about <b>${Math.round(totalSecs(s)/60)} minutes</b>, ${holds.length} holds.</p>
+      <ul class="list">${uniq.map(u => `<li>${pic(u.key, 'em')}<span class="nm">${M[u.key].n}</span><span class="tm">${u.secs}s${M[u.key].sided?' each side':''}</span></li>`).join('')}</ul>
+    </div>
+    <div class="card safe">
+      <h3>Stretch rules</h3>
+      <ul>
+        <li>A gentle pull is good. <b>Pain means back off.</b></li>
+        <li>No bouncing — hold still and breathe.</li>
+        <li>Use pillows or books under your hands in the splits.</li>
+      </ul>
+    </div>
+    <button class="btn" data-act="go">▶ Start</button>`;
+}
+function vPlayer(){
+  const s = seq[idx], cur = s.rest ? s.nextUp : s, m = M[cur.key];
+  const pct = s.secs ? (1 - left / s.secs) * 100 : 0;
+  const doneSecs = seq.slice(0, idx).reduce((a, x) => a + x.secs, 0) + (s.secs - left);
+  const nextHold = seq.slice(idx + 1).find(x => !x.rest);
+  app.innerHTML = `
+    <div class="top"><button class="iconbtn" data-act="quit" aria-label="Stop">✕</button>
+      <h1 style="font-size:1.4rem">${fmt(Math.max(0, totalSecs(seq) - doneSecs))} left</h1></div>
+    <div class="prog"><i style="width:${doneSecs / totalSecs(seq) * 100}%"></i></div>
+    <div class="card stage ${s.rest ? 'rest' : ''}">
+      <div class="phase">${s.rest ? 'Get ready…' : esc(cur.phase)}</div>
+      ${pic(cur.key, 'bigem pic')}
+      <h2>${esc(m.n)}</h2>
+      ${cur.side ? `<div class="side ${cur.side}">${cur.side === 'L' ? 'Left leg' : 'Right leg'}</div>` : ''}
+      <div class="ring" style="--p:${pct}"><div>${left}<small>${s.rest ? 'get ready' : paused ? 'paused' : 'seconds'}</small></div></div>
+      <ol class="cue">${m.cue.map(c => `<li>${esc(c)}</li>`).join('')}</ol>
+      ${!s.rest && nextHold ? `<div class="next">Next: ${esc(M[nextHold.key].n)}${nextHold.side ? ' — ' + sideWord(nextHold.side) : ''}</div>` : ''}
+    </div>
+    <div class="ctrls">
+      <button data-act="back">⏮ Back</button>
+      <button class="main" data-act="pause">${paused ? '▶ Go' : '⏸ Pause'}</button>
+      <button data-act="skip">Skip ⏭</button>
+    </div>`;
+}
+function vDone(){
+  const mins = Math.round(totalSecs(seq) / 60);
+  app.innerHTML = `
+    <div class="card done">
+      <div class="bigem">🏆</div>
+      <h2>Stretch done!</h2>
+      <p class="hint">${mins} minutes. It's checked off on your list.</p>
+    </div>
+    <a class="btn" href="./">Back to my list</a>`;
+  for (let i = 0; i < 24; i++) setTimeout(() => burstOne(), i * 40);
+}
+function burstOne(){
+  const e = document.createElement('div'); e.className = 'burst';
+  e.textContent = ['⭐','🎉','🤸','💜','✨'][Math.floor(Math.random()*5)];
+  e.style.left = innerWidth/2 + 'px'; e.style.top = innerHeight/3 + 'px';
+  e.style.setProperty('--dx', (Math.random()*2-1)*innerWidth*.5 + 'px');
+  e.style.setProperty('--dy', (Math.random()*2-1)*innerHeight*.4 + 'px');
+  document.body.appendChild(e); setTimeout(() => e.remove(), 1300);
+}
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- player ---------- */
+function announce(){
+  const s = seq[idx];
+  if (s.rest){
+    const n = s.nextUp, same = idx > 0 && seq[idx-1].key === n.key;
+    const first = idx === 1 ? '' : 'Nice! ';
+    say(same ? `${first}Switch sides. Get ready, ${sideWord(n.side)}.`
+             : `${first}Get ready for ${M[n.key].n}${n.side ? ', ' + sideWord(n.side) : ''}.`);
+  } else { beep(990, .25); say(idx === 0 ? `Get ready for ${M[s.key].n}${s.side ? ', ' + sideWord(s.side) : ''}. Go!` : 'Go!'); }
+}
+function enter(i){
+  idx = i; left = seq[idx].secs; announce(); vPlayer();
+}
+function tick(){
+  if (paused) return;
+  left--;
+  if (left > 0 && left <= 3){
+    if (seq[idx].rest) say(String(left));   // get-ready countdown: "3, 2, 1" then "Go!"
+    else beep(660, .1);                       // end of a hold: quiet beeps
+  }
+  if (left <= 0){
+    if (idx + 1 >= seq.length){ finish(); return; }
+    enter(idx + 1); return;
+  }
+  vPlayer();
+}
+function start(){
+  seq = build(plan); paused = false;
+  beep(1, .01); // unlock audio on iOS inside the tap
+  keepAwake();
+  clearInterval(timer); timer = setInterval(tick, 1000);
+  enter(0);
+}
+function stop(){ clearInterval(timer); timer = null; try{ speechSynthesis.cancel(); }catch(e){} try{ wake && wake.release(); }catch(e){} wake = null; }
+function finish(){
+  stop(); markDone(); beep(1046, .3); setTimeout(() => beep(1318, .4), 250);
+  say('All done! Great stretching!'); vDone();
+}
+
+/* ---------- tick the checklist item (same site, same local save) ---------- */
+function markDone(){
+  const KEY = 'checklist.v1';
+  try{
+    const S = JSON.parse(localStorage.getItem(KEY)); if (!S || !S.kids) return;
+    const kid = S.kids.find(k => k.id === KID); if (!kid) return;
+    if (!kid.items.find(it => it.id === 'stretch')) kid.items.push({id:'stretch', t:'Splits stretch', e:'🤸', c:'workout'});
+    const d = new Date(), dk = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    S.days = S.days || {}; S.days[dk] = S.days[dk] || {};
+    const r = S.days[dk][KID] = S.days[dk][KID] || {};
+    r.done = r.done || {}; r.done.stretch = Date.now();
+    const wd = d.getDay();
+    r.total = kid.items.filter(it => !it.dow || !it.dow.length || it.dow.includes(wd)).length + (r.extra || []).length;
+    localStorage.setItem(KEY, JSON.stringify(S));
+  }catch(e){}
+}
+
+/* ---------- taps ---------- */
+document.addEventListener('click', e => {
+  const p = e.target.closest('[data-plan]');
+  if (p){ plan = p.dataset.plan; try{ localStorage.setItem(PREF, plan); }catch(err){} vStart(); return; }
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  switch (b.dataset.act){
+    case 'go': start(); break;
+    case 'pause': paused = !paused; if (!paused) beep(880, .1); vPlayer(); break;
+    case 'skip': if (idx + 1 >= seq.length) finish(); else enter(idx + 1); break;
+    case 'back': { let i = idx - 1; while (i > 0 && seq[i].rest) i--; enter(Math.max(0, i)); } break;
+    case 'quit': if (confirm('Stop stretching? It won’t be checked off.')){ stop(); vStart(); } break;
+  }
+});
+vStart();
+</script>
+</body>
+</html>
