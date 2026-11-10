@@ -245,6 +245,8 @@ body.shotmode .formlist{display:flex}
     <div class="slbl">Camera</div>
     <div class="segc" id="camSeg"><button data-f="user">Front</button><button data-f="environment">Back</button></div>
     <p class="hint">Front camera lets her see the screen. Back camera is sharper — the coach voice does the talking.</p>
+    <label class="row"><input type="checkbox" id="optBall"> Ball path check (front view)</label>
+    <p class="hint">Watches the ball right after release — it should fly straight, not drift left or right. Leave empty space above her hands on screen so the camera can see the ball leave.</p>
     <label class="row"><input type="checkbox" id="optVoice"> Coach voice</label>
     <label class="row"><input type="checkbox" id="optRec"> Record replay video</label>
     <label class="row"><input type="checkbox" id="optDbg"> Show all body points</label>
@@ -266,6 +268,7 @@ body.shotmode .formlist{display:flex}
 <script type="module">
 const $ = id => document.getElementById(id);
 const MP = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+const BALL_MODEL = 'https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite';
 const POSE_MODEL = 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
 
 /* ---------------- sessions ---------------- */
@@ -278,13 +281,14 @@ const store = {
   set(k,v){ try{ localStorage.setItem('ss1.'+k, JSON.stringify(v)); }catch{} }
 };
 const S = { voice:store.get('voice',true), rec:store.get('rec',true), debug:store.get('debug',false), facing:store.get('facing','user'),
-  view:store.get('view','front'), hand:store.get('hand','right'), n:store.get('n',10), name:store.get('name','Kryslana') };
+  view:store.get('view','front'), ballPath:store.get('ballPath',true), hand:store.get('hand','right'), n:store.get('n',10), name:store.get('name','Kryslana') };
 let pbs = store.get('pbs',{});
 const pbKey = () => S.view+'-'+S.n;
 
 /* ---------------- elements / runtime ---------------- */
 const video=$('cam'), view=$('view'), vctx=view.getContext('2d');
 const SW=160; let SH=90; const small=document.createElement('canvas'), sctx=small.getContext('2d',{willReadFrequently:true});
+let ballDet=null, ballLoading=false, lastBallTs=0;
 let camOn=false, state='idle', timers=[], actx=null, vision=null, poseDet=null, poseLoading=false, lastPoseTs=0, frameN=0, lastLoop=0;
 const body={at:0, lm:null, leg:0, base:0, baseAt:0, ankOK:false, hipY:0, ankleY:0};
 const pops=[]; let R=null;
@@ -345,8 +349,30 @@ function greenCheck(){
 async function recoverGreen(){
   restarting=true; greenRestarts++;
   try{ await openStream(); toast('Camera hiccup — restarted'); }catch{}
-  if(greenRestarts>=2 && !forceCPU){ forceCPU=true; poseDet=null; loadModel(); toast('Switched AI to steady mode'); }
+  if(greenRestarts>=2 && !forceCPU){ forceCPU=true; poseDet=null; ballDet=null; loadModel(); toast('Switched AI to steady mode'); }
   restarting=false;
+}
+async function loadBall(){
+  if(!S.ballPath||ballDet||ballLoading) return; ballLoading=true;
+  try{
+    const {FilesetResolver,ObjectDetector}=await import(MP);
+    if(!vision) vision=await FilesetResolver.forVisionTasks(MP+'/wasm');
+    const opts=d=>({baseOptions:{modelAssetPath:BALL_MODEL,delegate:d},runningMode:'VIDEO',scoreThreshold:.2,maxResults:3,categoryAllowlist:['sports ball']});
+    if(forceCPU) ballDet=await ObjectDetector.createFromOptions(vision,opts('CPU'));
+    else { try{ ballDet=await ObjectDetector.createFromOptions(vision,opts('GPU')); }catch{ ballDet=await ObjectDetector.createFromOptions(vision,opts('CPU')); } }
+  }catch(e){ console.warn(e); toast('Ball tracker failed to load — ball path check is off'); }
+  ballLoading=false;
+}
+function ballTrack(now){
+  const ts=Math.max(now,lastBallTs+1); lastBallTs=ts; let res;
+  try{ res=ballDet.detectForVideo(video,ts); }catch{ return; }
+  const vw=video.videoWidth, vh=video.videoHeight, last=shot.balls[shot.balls.length-1]; let best=null;
+  for(const det of res.detections||[]){
+    const b=det.boundingBox, x=(b.originX+b.width/2)/vw, y=(b.originY+b.height/2)/vh;
+    let sc=det.categories[0].score; if(last&&now-last.t<300) sc/=(1+Math.hypot(x-last.x,y-last.y)*3);
+    if(!best||sc>best.sc) best={sc,x,y,r:Math.max(b.width,b.height)/2/vh,t:now};
+  }
+  if(best) shot.balls.push(best);
 }
 async function loadModel(){
   if(poseDet||poseLoading) return; poseLoading=true;
@@ -358,7 +384,7 @@ async function loadModel(){
     else { try{ poseDet=await PoseLandmarker.createFromOptions(vision,opts('GPU')); }catch{ poseDet=await PoseLandmarker.createFromOptions(vision,opts('CPU')); } }
     toast('Body tracker ready 🏀');
   }catch(e){ console.warn(e); toast('Body tracker failed to load — check internet'); }
-  poseLoading=false;
+  poseLoading=false; loadBall();
 }
 function poseTrack(now){
   const ts=Math.max(now,lastPoseTs+1); lastPoseTs=ts; let res;
@@ -387,7 +413,9 @@ function loop(now){
   if(vw&&vh){
     if(view.width!==vw||view.height!==vh){ view.width=vw; view.height=vh; SH=Math.max(40,Math.round(SW*vh/vw)); small.width=SW; small.height=SH; }
     frameN++; if(frameN%20===0) greenCheck();
-    if(poseDet && poseTrack(now)) shotUpdate(now,vw/vh);
+    const ballOn = S.ballPath && S.view==='front' && ballDet && state==='running' && shot.st==='up';
+    if(ballOn && frameN%2===0) ballTrack(now);
+    else if(poseDet && poseTrack(now)) shotUpdate(now,vw/vh);
     draw(vw,vh,now);
     if(recorder&&recorder.state==='recording') compositeRec(vw,vh);
     status(now);
@@ -418,7 +446,7 @@ function roundRect(x,y,w,h,r){ vctx.beginPath(); vctx.moveTo(x+r,y); vctx.arcTo(
 function pop(text,c='#f6c623',x=null,y=null,big=false){ pops.push({text,c,x,y,big,t:performance.now()}); }
 function status(now){
   const dot=$('dot'), msg=$('trackMsg'); dot.className='dot';
-  const m = !poseDet ? (poseLoading?'Loading body tracker…':'Body tracker not loaded — check internet') : bodyOK(now) ? (shot.lastSeenHands?'Body ✓ · shoot when ready':'Body ✓ · keep your hands on screen') : 'Step back — head to feet (and hands up) must show';
+  const m = !poseDet ? (poseLoading?'Loading body tracker…':'Body tracker not loaded — check internet') : bodyOK(now) ? (shot.lastSeenHands?('Body ✓ · shoot when ready'+(S.ballPath&&S.view==='front'?(ballDet?' · ball path on':ballLoading?' · loading ball tracker…':''):'')):'Body ✓ · keep your hands on screen') : 'Step back — head to feet (and hands up) must show';
   if(poseDet&&bodyOK(now)) dot.classList.add('ok');
   if(msg.textContent!==m) msg.textContent=m;
 }
@@ -428,20 +456,21 @@ function status(now){
 // front view = iPad faces her; side view = iPad at her side, shooting arm closest
 // Coaching rules follow Sarah Behn's B.E.E.F. method (Basketball by Behn): Balance, Eyes, Elbow ("L", no chicken wing), Follow-through ("all four to the floor", hold 2-3 sec)
 const SHOT_CHECKS={
-  front:[['knees','Bend & extend'],['stance','Balance: feet shoulder-width'],['elbow','No chicken wing'],['high','Release high'],['follow','Hold it 2 sec · all four to the floor'],['legs','Legs quiet in the air'],['drift','Land on your spot']],
+  front:[['knees','Bend & extend'],['stance','Balance: feet shoulder-width'],['elbow','No chicken wing'],['path','Ball flies straight'],['high','Release high'],['follow','Hold it 2 sec · all four to the floor'],['legs','Legs quiet in the air'],['drift','Land on your spot']],
   side:[['knees','Bend & extend'],['setL','L under the ball'],['rock','No rocking the baby'],['ext','Arm straight up'],['high','Release high'],['follow','Hold it 2 sec · all four to the floor'],['legs','No leg kick'],['drift','Land on your spot']]
 };
-const SHOT_PRIORITY={front:['elbow','follow','knees','legs','high','stance','drift'], side:['setL','rock','follow','knees','ext','legs','high','drift']};
+const checksFor=v=>SHOT_CHECKS[v].filter(c=>c[0]!=='path'||S.ballPath);
+const SHOT_PRIORITY={front:['elbow','path','follow','knees','legs','high','stance','drift'], side:['setL','rock','follow','knees','ext','legs','high','drift']};
 const SHOT_CUES={knees:'Bend and extend! Use your legs.', stance:'Balance. Feet shoulder width apart.', elbow:'No chicken wing! Elbow in an L, under the ball.',
   high:'Shoot it up high, over your head.', follow:'Hold it! All four to the floor, two seconds.', ext:'Arm straight up and snap the wrist.',
-  setL:'Make an L under the ball. Pizza tray!', rock:"Don't rock the baby! Elbow goes straight up.", drift:'Balance! Land right where you jumped.', legs:'Keep your legs under you.'};
+  setL:'Make an L under the ball. Pizza tray!', rock:"Don't rock the baby! Elbow goes straight up.", drift:'Balance! Land right where you jumped.', path:'Shoot it straight! Elbow in, pizza tray.', legs:'Keep your legs under you.'};
 const FOLLOW_SECS=2;
 const ang=(a,b,c)=>{ const v1x=a.x-b.x,v1y=a.y-b.y,v2x=c.x-b.x,v2y=c.y-b.y; const d=Math.hypot(v1x,v1y)*Math.hypot(v2x,v2y); return d?Math.acos(Math.max(-1,Math.min(1,(v1x*v2x+v1y*v2y)/d)))*180/Math.PI:180; };
 const med=a=>{ if(!a.length) return null; const b=[...a].sort((x,y)=>x-y); return b[b.length>>1]; };
 const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
 const shot={
-  st:'wait', buf:[], up:[], t0:0, sm:null, lastSeenHands:false, last:null, flash:0,
-  reset(){ this.st='wait'; this.buf=[]; this.up=[]; this.sm=null; this.last=null; }
+  st:'wait', buf:[], up:[], t0:0, sm:null, lastSeenHands:false, last:null, flash:0, balls:[], path:null,
+  reset(){ this.st='wait'; this.buf=[]; this.up=[]; this.sm=null; this.last=null; this.balls=[]; this.path=null; }
 };
 function shotFrame(now,ar){
   const L=body.lm; if(!L) return null;
@@ -463,7 +492,7 @@ function shotUpdate(now,ar){
   shot.lastSeenHands=f.armOK;
   if(shot.st==='wait'){
     shot.buf.push(f); while(shot.buf.length&&now-shot.buf[0].t>1600) shot.buf.shift();
-    if(f.armOK && f.wr.y < f.sh.y-.02){ shot.st='up'; shot.up=[f]; shot.t0=now; }
+    if(f.armOK && f.wr.y < f.sh.y-.02){ shot.st='up'; shot.up=[f]; shot.t0=now; shot.balls=[]; }
   } else {
     shot.up.push(f);
     const done = (f.wr.y > f.sh.y+.03 && now-shot.t0>250) || now-shot.t0>7000;
@@ -524,20 +553,32 @@ function evalShot(pre,U){
       const d=Math.abs(m1-m0)/(view==='front'?sw:base); res.drift = d<=(view==='front'?.7:.45);
     }
   }
+  // ball path (front view): once the ball leaves her hand it should rise straight, not drift left/right
+  if(view==='front'&&S.ballPath&&ballDet){
+    const ar=video.videoWidth&&video.videoHeight?video.videoWidth/video.videoHeight:16/9;
+    const raw=body.lm, wx=(S.hand==='right'?raw[16]:raw[15]);
+    const near=shot.balls.filter(b=>Math.abs(b.t-pk.t)<250).sort((a,b)=>Math.abs(a.t-pk.t)-Math.abs(b.t-pk.t))[0];
+    const flight=shot.balls.filter(b=>b.t>pk.t && b.t<pk.t+900 && (!near||b.y<near.y-b.r*.6));
+    if(near&&flight.length>=2){
+      const last=flight[flight.length-1], dy=near.y-last.y, dx=(last.x-near.x)*ar;
+      if(dy>=.05){ const deg=Math.atan2(Math.abs(dx),dy)*180/Math.PI; res.path=deg<=12; why.path=dx<0?'right':'left'; // raw image left = her right (camera faces her)
+        shot.path={pts:[near,...flight],ok:res.path,t:performance.now()}; }
+    }
+  }
   // score + coach
-  const keys=SHOT_CHECKS[view].map(c=>c[0]).filter(k=>res[k]!=null), passed=keys.filter(k=>res[k]).length;
+  const keys=checksFor(view).map(c=>c[0]).filter(k=>res[k]!=null), passed=keys.filter(k=>res[k]).length;
   const score=keys.length?Math.round(passed/keys.length*100):0;
   R.shots.push({res,score}); R.reps=R.shots.length; R.all=R.reps; R.score+=score;
   R.streak = score===100 ? R.streak+1 : 0; R.best=Math.max(R.best,R.streak);
   shot.last={res,why,score,t:performance.now()};
   const miss=SHOT_PRIORITY[view].find(k=>res[k]===false);
   if(!miss){ beep(1100,.15,.3); pop(R.streak>=3?'ON FIRE!':'PERFECT FORM','#5ff0a0',null,.25,true); say(R.streak>=3?'Perfect again! On fire!':'Perfect form!',{urgent:true}); }
-  else { beep(520,.12,.25); pop(({follow:'HOLD IT!',elbow:'CHICKEN WING!',rock:'ROCKING!',setL:'MAKE AN L!',knees:'BEND & EXTEND!',legs:'LEGS!',high:'HIGHER!',ext:'ARM UP!',drift:'BALANCE!',stance:'BALANCE!'})[miss]||'FIX IT!','#ff5a4f',null,.25); say((score>=70?'Good shot. ':'')+(miss==='legs'&&why.legs?why.legs: miss==='knees'&&why.knees==='extend'?'Extend! Push up through your legs.' : miss==='knees'&&why.knees==='bend'?'Bend your knees first!' : SHOT_CUES[miss]),{urgent:true}); }
+  else { beep(520,.12,.25); pop(({path:'STRAIGHT!',follow:'HOLD IT!',elbow:'CHICKEN WING!',rock:'ROCKING!',setL:'MAKE AN L!',knees:'BEND & EXTEND!',legs:'LEGS!',high:'HIGHER!',ext:'ARM UP!',drift:'BALANCE!',stance:'BALANCE!'})[miss]||'FIX IT!','#ff5a4f',null,.25); say((score>=70?'Good shot. ':'')+(miss==='legs'&&why.legs?why.legs: miss==='knees'&&why.knees==='extend'?'Extend! Push up through your legs.' : miss==='knees'&&why.knees==='bend'?'Bend your knees first!' : miss==='path'?('Ball went to your '+why.path+'. Shoot it straight! Elbow in, pizza tray.') : SHOT_CUES[miss]),{urgent:true}); }
   renderFormList(res,R.shots); updateBoard();
   if(R.reps>=R.def.target) later(()=>endSegment(),1600);
 }
 function renderFormList(res,shots){
-  const rows=SHOT_CHECKS[S.view].map(([k,lab])=>{
+  const rows=checksFor(S.view).map(([k,lab])=>{
     const n=shots?shots.filter(s=>s.res[k]!=null).length:0, p=n?Math.round(shots.filter(s=>s.res[k]).length/n*100)+'%':'–';
     const v=res?res[k]:null, mk=v==null?'·':v?'✓':'✗';
     return `<div class="frow${v==null?'':v?' ok':' bad'}"><span class="fm">${mk}</span><span class="fn">${lab}</span><span class="fp">${p}</span></div>`; });
@@ -555,13 +596,16 @@ function drawShot(vw,vh,u,now){
   for(const i of [...arm,25,26,27,28]){ const [x,y]=pt(i); vctx.fillStyle='#fff'; vctx.beginPath(); vctx.arc(x,y,u*.8,0,7); vctx.fill(); }
   if(S.view==='side'){ const a=Math.round(ang(...arm.map(i=>({x:L[i].x*vw/vh,y:L[i].y})))); const [x,y]=pt(arm[1]);
     vctx.font=`700 ${u*3.4}px 'Barlow Condensed',sans-serif`; vctx.lineWidth=u*.6; vctx.strokeStyle='#06211a'; vctx.fillStyle='#f6c623'; vctx.strokeText(a+'°',x+u*2,y); vctx.fillText(a+'°',x+u*2,y); }
+  if(shot.path&&now-shot.path.t<2500){ const pts=shot.path.pts; vctx.strokeStyle=shot.path.ok?'#5ff0a0':'#ff5a4f'; vctx.lineWidth=Math.max(3,u*.8); vctx.setLineDash([u*1.5,u]);
+    vctx.beginPath(); pts.forEach((b,j)=>{ const x=X(b.x,vw), y=b.y*vh; j?vctx.lineTo(x,y):vctx.moveTo(x,y); }); vctx.stroke(); vctx.setLineDash([]);
+    for(const b of pts){ vctx.beginPath(); vctx.arc(X(b.x,vw),b.y*vh,Math.max(u*1.2,b.r*vh*.4),0,7); vctx.fillStyle=shot.path.ok?'rgba(95,240,160,.7)':'rgba(255,90,79,.7)'; vctx.fill(); } }
   vctx.restore();
 }
 function finishShot(r,key){
   const n=r.shots.length, avg=n?Math.round(r.shots.reduce((a,x)=>a+x.score,0)/n):0, perfect=r.shots.filter(s=>s.score===100).length;
   const complete=!r.early&&n>=r.def.target; let better=false;
   if(complete&&n){ const old=pbs[key]; better=old==null||avg>old; if(better){ pbs[key]=avg; store.set('pbs',pbs); } }
-  const rows=SHOT_CHECKS[S.view].map(([k,lab])=>{ const m=r.shots.filter(s=>s.res[k]!=null).length; return {lab,k,p:m?Math.round(r.shots.filter(s=>s.res[k]).length/m*100):null}; });
+  const rows=checksFor(S.view).map(([k,lab])=>{ const m=r.shots.filter(s=>s.res[k]!=null).length; return {lab,k,p:m?Math.round(r.shots.filter(s=>s.res[k]).length/m*100):null}; });
   const worst=rows.filter(x=>x.p!=null).sort((a,b)=>a.p-b.p)[0];
   $('tcard').innerHTML=`
     <div class="tc-head"><svg aria-hidden="true"><use href="#gaMark"/></svg><div><div class="a">ANGELS</div><div class="b">SWISH SCHOOL</div></div></div>
@@ -661,7 +705,7 @@ function renderPB(){ const v=pbs[pbKey()]; $('pb').textContent=v==null?'—':v+'
 function renderInfo(){
   renderChips();
   $('dName').textContent=S.n+' Form Shots · '+(S.view==='front'?'Front':'Side');
-  $('dDesc').textContent=S.view==='front'?'iPad faces her, 8–10 ft away. Checks bend & extend, balance, chicken wing, release, the 2-second hold, and legs kicking left/right.':'iPad at her side, 8–10 ft away, shooting arm closest. Checks the L, rocking the baby, arm straight up, bend & extend, the 2-second hold, and leg kick.';
+  $('dDesc').textContent=S.view==='front'?'iPad faces her, 8–10 ft away. Checks bend & extend, balance, chicken wing, release, the 2-second hold, and legs kicking left/right'+(S.ballPath?', plus a straight ball path — leave space above her hands.':'.'):'iPad at her side, 8–10 ft away, shooting arm closest. Checks the L, rocking the baby, arm straight up, bend & extend, the 2-second hold, and leg kick.';
   document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.view));
   $('startMsg').textContent=S.view==='front'?'Stand the iPad 8–10 feet away, facing her. Head to feet AND hands over her head must fit on screen.':'Stand the iPad 8–10 feet to her side, shooting arm closest. Head to feet AND hands over her head must fit on screen.';
   $('big').textContent='0/'+S.n; $('sScore').textContent='–'; $('sSpeed').textContent='–'; $('sStreak').textContent='0'; $('sTime').textContent='0:00';
@@ -671,7 +715,7 @@ function renderPlayer(){ $('pName').textContent=S.name.toUpperCase(); $('startNu
 function renderSettings(){
   document.querySelectorAll('#camSeg button').forEach(b=>b.classList.toggle('on',b.dataset.f===S.facing));
   document.querySelectorAll('#handSeg button').forEach(b=>b.classList.toggle('on',b.dataset.h===S.hand));
-  $('optVoice').checked=S.voice; $('optRec').checked=S.rec; $('optDbg').checked=S.debug; $('inName').value=S.name;
+  $('optBall').checked=S.ballPath; $('optVoice').checked=S.voice; $('optRec').checked=S.rec; $('optDbg').checked=S.debug; $('inName').value=S.name;
 }
 function openSheet(){ renderSettings(); $('sheet').classList.remove('hidden'); }
 function closeSheet(){ S.name=($('inName').value.trim()||'Angel').slice(0,14); store.set('name',S.name); renderPlayer(); $('sheet').classList.add('hidden'); }
@@ -691,6 +735,7 @@ $('camSeg').onclick=e=>{ const b=e.target.closest('button'); if(b) switchCamera(
 $('flipBtn').onclick=()=>switchCamera(S.facing==='user'?'environment':'user');
 $('setBtn').onclick=openSheet; $('playerChip').onclick=openSheet;
 $('closeSheet').onclick=closeSheet; $('sheet').onclick=e=>{ if(e.target.id==='sheet') closeSheet(); };
+$('optBall').onchange=e=>{ S.ballPath=e.target.checked; store.set('ballPath',S.ballPath); if(S.ballPath&&camOn) loadBall(); renderInfo(); };
 $('optVoice').onchange=e=>{ S.voice=e.target.checked; store.set('voice',S.voice); if(S.voice){ primeVoice(); say('Coach is on!'); } };
 $('optRec').onchange=e=>{ S.rec=e.target.checked; store.set('rec',S.rec); };
 $('optDbg').onchange=e=>{ S.debug=e.target.checked; store.set('debug',S.debug); };
