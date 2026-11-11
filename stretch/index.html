@@ -128,6 +128,7 @@ h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1.1}
 <body>
 <div id="scene" aria-hidden="true"></div>
 <div class="wrap" id="app"></div>
+<script src="/shared/voicepack.js"></script>
 <script>
 /* ---------- the moves (rewritten from the splits sheet, kid-friendly cues) ---------- */
 const M = {
@@ -194,6 +195,7 @@ const PREF = 'stretch.plan';
 let plan = (() => { try{ return localStorage.getItem(PREF) || '15'; }catch(e){ return '15'; } })();
 if (!PLANS[plan]) plan = '15';
 let runStart = 0, skips = 0, lastReport = '';
+let tipped = {};
 let seq = [], idx = 0, left = 0, timer = null, paused = false, wake = null, actx = null;
 const app = document.getElementById('app');
 const STREAK = 'stretch.streak';
@@ -224,7 +226,11 @@ function beep(f = 880, d = .15){
     o.start(); o.stop(actx.currentTime + d);
   }catch(e){}
 }
+// recorded Lily clips (ElevenLabs) with the device voice as a fallback
+const VP_BASE = '/stretch/audio/', VP_ID = 'lily';
+try{ VoicePack.load(VP_BASE, VP_ID); }catch(e){}
 function say(t){
+  try{ if (window.VoicePack && VoicePack.play(t, VP_BASE, VP_ID) !== false) return; }catch(e){}
   try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.rate = .95; u.pitch = 1.1; speechSynthesis.speak(u); }catch(e){}
 }
 const sideWord = s => s === 'L' ? 'left leg' : 'right leg';
@@ -421,7 +427,13 @@ function announce(){
     const first = idx === 1 ? '' : 'Nice! ';
     say(same ? `${first}Switch sides. Get ready, ${sideWord(n.side)}.`
              : `${first}Get ready for ${M[n.key].n}${n.side ? ', ' + sideWord(n.side) : ''}.`);
-  } else { beep(990, .25); say(idx === 0 ? `Get ready for ${M[s.key].n}${s.side ? ', ' + sideWord(s.side) : ''}. Go!` : 'Go!'); }
+  } else {
+    beep(990, .25);
+    // read the form tips the first time each stretch comes up (first side only)
+    let tip = '';
+    if (s.side !== 'R' && !tipped[s.key]){ tipped[s.key] = 1; tip = ' ' + M[s.key].cue.join(' '); }
+    say((idx === 0 ? `Get ready for ${M[s.key].n}${s.side ? ', ' + sideWord(s.side) : ''}. Go!` : 'Go!') + tip);
+  }
 }
 function enter(i){
   idx = i; left = seq[idx].secs; announce(); vPlayer();
@@ -440,13 +452,14 @@ function tick(){
   vPlayer();
 }
 function start(){
-  seq = build(plan); paused = false; runStart = Date.now(); skips = 0;
+  seq = build(plan); paused = false; runStart = Date.now(); skips = 0; tipped = {};
+  try{ VoicePack.unlock(); VoicePack.load(VP_BASE, VP_ID); }catch(e){}
   beep(1, .01); // unlock audio on iOS inside the tap
   keepAwake();
   clearInterval(timer); timer = setInterval(tick, 1000);
   enter(0);
 }
-function stop(){ clearInterval(timer); timer = null; try{ speechSynthesis.cancel(); }catch(e){} try{ wake && wake.release(); }catch(e){} wake = null; }
+function stop(){ clearInterval(timer); timer = null; try{ speechSynthesis.cancel(); }catch(e){} try{ VoicePack.stop(); }catch(e){} try{ wake && wake.release(); }catch(e){} wake = null; }
 function finish(){
   stop(); beep(1046, .3); setTimeout(() => beep(1318, .4), 250);
   say('All done! Great stretching!'); vDone();

@@ -271,6 +271,9 @@ body.shotmode .formlist{display:flex}
     <label class="row"><input type="checkbox" id="optBall"> Ball path check (front view)</label>
     <p class="hint">Watches the ball right after release — it should fly straight, not drift left or right. Leave empty space above her hands on screen so the camera can see the ball leave.</p>
     <label class="row"><input type="checkbox" id="optVoice"> Coach voice</label>
+    <div class="slbl">Coach</div>
+    <div class="segc lvl" id="vpSeg"><button data-v="lily">Lily</button><button data-v="harry">Harry</button><button data-v="device">iPad</button></div>
+    <p class="hint">Lily and Harry are recorded coach voices. Any line without a recording uses the iPad voice.</p>
     <label class="row"><input type="checkbox" id="optRec"> Record replay video</label>
     <label class="row"><input type="checkbox" id="optDbg"> Show all body points</label>
     <p class="coachnote">Coaching follows Coach Sarah Behn's B.E.E.F.: Balance, Eyes on the front rim, Elbow in an L (pizza tray, no chicken wing), Follow-through — all four to the floor, hold 2–3 seconds.</p>
@@ -293,6 +296,7 @@ body.shotmode .formlist{display:flex}
 <div class="sheet hidden" id="chkSheet"><div class="sheetcard" id="chkCard"></div></div>
 <div class="toast" id="toast"></div>
 
+<script src="/shared/voicepack.js"></script>
 <script type="module">
 const $ = id => document.getElementById(id);
 const MP = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
@@ -308,7 +312,7 @@ const store = {
   get(k,d){ try{ const v=localStorage.getItem('ss1.'+k); return v==null?d:JSON.parse(v); }catch{ return d; } },
   set(k,v){ try{ localStorage.setItem('ss1.'+k, JSON.stringify(v)); }catch{} }
 };
-const S = { voice:store.get('voice',true), rec:store.get('rec',true), debug:store.get('debug',false), facing:store.get('facing','user'),
+const S = { voice:store.get('voice',true), vpack:store.get('vpack','lily'), rec:store.get('rec',true), debug:store.get('debug',false), facing:store.get('facing','user'),
   view:store.get('view','front'), ballPath:store.get('ballPath',true), hand:store.get('hand','right'), n:store.get('n',10), name:store.get('name','Kryslana') };
 let pbs = store.get('pbs',{});
 const pbKey = () => S.view+'-'+S.n;
@@ -329,14 +333,19 @@ const later=(fn,ms)=>{ const id=setTimeout(fn,ms); timers.push(id); return id; }
 function clearTimers(){ timers.forEach(clearTimeout); timers=[]; }
 function season(){ const d=new Date(), y=d.getFullYear(); return d.getMonth()>=6 ? `${y}-${String(y+1).slice(2)}` : `${y-1}-${String(y).slice(2)}`; }
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function ensureAudio(){ try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); }catch{} }
+const VP_BASE='/swish-school/audio/';
+function vpOn(){ return S.vpack && S.vpack!=='device'; }
+function vpLoad(){ try{ if(vpOn()){ VoicePack.unlock(); VoicePack.load(VP_BASE,S.vpack); } }catch{} }
+function ensureAudio(){ vpLoad(); try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); }catch{} }
 function beep(f=880,d=.14,v=.4){ if(!actx) return; const o=actx.createOscillator(), g=actx.createGain(), t=actx.currentTime;
   o.type='triangle'; o.frequency.value=f; g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(v,t+.01); g.gain.exponentialRampToValueAtTime(.0001,t+d);
   o.connect(g).connect(actx.destination); o.start(t); o.stop(t+d+.02); }
 const sayGate={};
 function say(text,{key=null,gap=0,urgent=false}={}){
-  if(!S.voice || !('speechSynthesis' in window)) return;
+  if(!S.voice) return;
   const now=performance.now(); if(key){ if(sayGate[key] && now-sayGate[key]<gap) return; sayGate[key]=now; }
+  if(vpOn()){ try{ if(VoicePack.play(text,VP_BASE,S.vpack,{interrupt:urgent})!==false) return; }catch{} }
+  if(!('speechSynthesis' in window)) return;
   try{ if(urgent) speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.rate=1.05; u.pitch=1.05; speechSynthesis.speak(u); }catch{}
 }
 function primeVoice(){ try{ if(S.voice && 'speechSynthesis' in window){ const u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u); } }catch{} }
@@ -492,6 +501,7 @@ const SHOT_PRIORITY={front:['elbow','path','follow','knees','legs','high','stanc
 const SHOT_CUES={knees:'Bend and extend! Use your legs.', stance:'Balance. Feet shoulder width apart.', elbow:'No chicken wing! Elbow in an L, under the ball.',
   high:'Shoot it up high, over your head.', follow:'Hold it! All four to the floor, two seconds.', ext:'Arm straight up and snap the wrist.',
   setL:'Make an L under the ball. Pizza tray!', rock:"Don't rock the baby! Elbow goes straight up.", drift:'Balance! Land right where you jumped.', path:'Shoot it straight! Elbow in, pizza tray.', legs:'Keep your legs under you.'};
+const SAY_LAB={knees:'bend and extend', stance:'your balance', elbow:'no chicken wing', path:'shooting it straight', high:'releasing it high', follow:'holding your follow through', legs:'keeping your legs quiet', drift:'landing on your spot', setL:'your L under the ball', rock:'not rocking the baby', ext:'getting your arm straight up'};
 const FOLLOW_SECS=2;
 const ang=(a,b,c)=>{ const v1x=a.x-b.x,v1y=a.y-b.y,v2x=c.x-b.x,v2y=c.y-b.y; const d=Math.hypot(v1x,v1y)*Math.hypot(v2x,v2y); return d?Math.acos(Math.max(-1,Math.min(1,(v1x*v2x+v1y*v2y)/d)))*180/Math.PI:180; };
 const med=a=>{ if(!a.length) return null; const b=[...a].sort((x,y)=>x-y); return b[b.length>>1]; };
@@ -647,7 +657,7 @@ function finishShot(r,key){
     <div class="tc-segs">${rows.map(x=>`<div><span>${x.lab}</span><b>${x.p==null?'–':x.p+'%'}</b></div>`).join('')}</div>
     <div class="tc-band">${esc(S.name)}<small>Angels · ${season()}</small></div>`;
   $('resOv').classList.remove('hidden'); $('replayBtn').classList.toggle('hidden',!recURL&&!(S.rec&&recorder)); renderPB();
-  const lines=[]; if(!complete) lines.push('Round over.'); else { if(better) lines.push('New personal best!'); lines.push(`Form score ${avg}. ${perfect} perfect shots.`); if(worst&&worst.p<100) lines.push('Next time, work on: '+worst.lab+'.'); lines.push(avg>=85?'Lets go Angels!':avg>=60?'Nice work!':'Keep grinding!'); }
+  const lines=[]; if(!complete) lines.push('Round over.'); else { if(better) lines.push('New personal best!'); if(worst&&worst.p<100) lines.push('Next time, work on '+(SAY_LAB[worst.k]||worst.lab)+'.'); lines.push(avg>=85?"Let's go Angels!":avg>=60?'Nice work!':'Keep grinding!'); }
   say(lines.join(' '),{urgent:true}); if(better) beep(1320,.25,.35);
 }
 
@@ -687,7 +697,7 @@ function endSegment(early=false){
   finishShot(R,pbKey());
 }
 function cancelRun(){
-  clearTimers(); try{ speechSynthesis.cancel(); }catch{}
+  clearTimers(); try{ speechSynthesis.cancel(); }catch{} try{ VoicePack.stop(); }catch{}
   if(state==='running'){ endSegment(true); return; }
   state='idle'; $('cdOv').classList.add('hidden'); stopRecorder(true); setGo('START'); renderInfo();
 }
@@ -797,7 +807,7 @@ const CHECK_INFO={
 const labelOf=k=>(SHOT_CHECKS.front.concat(SHOT_CHECKS.side).find(c=>c[0]===k)||[k,k])[1];
 let lCur=-1, lFrom='app';
 function openLearn(id){ $('learn').classList.remove('hidden'); if(id==null) renderLearnIndex(); else renderStep(STEPS.findIndex(s=>s.id===id)); }
-function closeLearn(){ try{ speechSynthesis.cancel(); }catch{} $('learn').classList.add('hidden'); }
+function closeLearn(){ try{ speechSynthesis.cancel(); }catch{} try{ VoicePack.stop(); }catch{} $('learn').classList.add('hidden'); }
 function renderLearnIndex(){
   lCur=-1; $('lTitle').textContent='How to Shoot'; $('lPrev').classList.add('hidden'); $('lNext').classList.add('hidden');
   $('lBody').innerHTML=`<div class="lintro"><b>Coach Behn's B.E.E.F.</b> — Balance, Eyes, Elbow, Follow-through. Teach one step at a time, in order. Move on only when the step feels easy. Tap a step for what to do, what to say, what to watch for, and a home drill.</div>`+
@@ -856,6 +866,7 @@ function renderInfo(){
 function renderPlayer(){ $('pName').textContent=S.name.toUpperCase(); $('startNum').textContent=S.name; }
 function renderSettings(){
   document.querySelectorAll('#camSeg button').forEach(b=>b.classList.toggle('on',b.dataset.f===S.facing));
+  document.querySelectorAll('#vpSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.vpack));
   document.querySelectorAll('#handSeg button').forEach(b=>b.classList.toggle('on',b.dataset.h===S.hand));
   $('optBall').checked=S.ballPath; $('optVoice').checked=S.voice; $('optRec').checked=S.rec; $('optDbg').checked=S.debug; $('inName').value=S.name;
 }
@@ -873,6 +884,9 @@ $('saveVid').onclick=saveReplay;
 $('chips').onclick=e=>{ const b=e.target.closest('.chip'); if(!b) return; if(busy()) return toast('Finish the round first'); S.n=+b.dataset.n; store.set('n',S.n); state='idle'; $('resOv').classList.add('hidden'); renderInfo(); };
 $('viewSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; if(busy()) return toast('Finish the round first'); S.view=b.dataset.v; store.set('view',S.view); state='idle'; $('resOv').classList.add('hidden'); renderInfo(); };
 $('handSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; if(busy()) return toast('Finish the round first'); S.hand=b.dataset.h; store.set('hand',S.hand); renderSettings(); };
+$('vpSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; S.vpack=b.dataset.v; store.set('vpack',S.vpack);
+  document.querySelectorAll('#vpSeg button').forEach(x=>x.classList.toggle('on',x.dataset.v===S.vpack)); vpLoad();
+  if(S.voice){ ensureAudio(); setTimeout(()=>say('Coach is on!',{urgent:true}),vpOn()?600:0); } };
 $('camSeg').onclick=e=>{ const b=e.target.closest('button'); if(b) switchCamera(b.dataset.f); };
 $('flipBtn').onclick=()=>switchCamera(S.facing==='user'?'environment':'user');
 $('setBtn').onclick=openSheet; $('playerChip').onclick=openSheet;
