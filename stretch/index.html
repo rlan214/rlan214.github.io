@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#fff7ec">
+<link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+<meta name="apple-mobile-web-app-title" content="Splits Stretch">
+<title>Splits Stretch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Splits Stretch — shareable guided stretch routine. Nothing leaves the device;
+   only the chosen length and the day streak are saved locally. */
+:root{
+  --bg:#fff7ec; --card:#fff; --ink:#2b2340; --soft:#6d6585; --line:#efe4d4;
+  --good:#22b07d; --good-soft:#dcf5ea; --accent:#7c5cff; --warm:#ff8a3d; --track:#f1ebe2;
+  --shadow:0 6px 0 rgba(43,35,64,.08),0 12px 28px rgba(43,35,64,.06);
+  --f-display:'Baloo 2',system-ui,sans-serif; --f-body:'Nunito',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#17131f; --card:#231d30; --ink:#f3eefc; --soft:#a79fc0; --line:#2f2840; --track:#2f2840; --good-soft:#163a2d;
+    --shadow:0 6px 0 rgba(0,0,0,.35),0 12px 28px rgba(0,0,0,.25)}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;color:var(--ink);font-family:var(--f-body);font-weight:700}
+html{background:var(--bg)} body{background:transparent;min-height:100dvh}
+:root{--sky:var(--bg);--sky-ink:var(--ink);--sky-soft:var(--soft);--edge:transparent}
+.wrap{position:relative;z-index:1}
+body.has-lights .wrap{padding-top:calc(env(safe-area-inset-top) + 48px)}
+.top h1{color:var(--sky-ink)}
+/* ---------- season scene (same family as the Daily Checklist / Word Hive) ---------- */
+#scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:var(--sky)}
+#scene .p{position:absolute;top:-12vh;left:var(--x);width:var(--s);animation:fall var(--d) linear var(--dl) infinite;opacity:var(--o,1)}
+#scene .p > svg{display:block;width:100%;height:auto;animation:sway var(--sw) ease-in-out infinite alternate}
+#scene .p.up{top:auto;bottom:-12vh;animation-name:rise}
+#scene .p.fly{top:var(--y);left:-14vw;animation-name:flyx}
+#scene .p.fly > svg{animation:flap .22s ease-in-out infinite alternate}
+#scene .p.still{top:var(--y);animation:twinkle var(--d) ease-in-out var(--dl) infinite alternate}
+#scene .p.still > svg{animation:none}
+@keyframes fall{to{transform:translateY(126vh)}}
+@keyframes rise{to{transform:translateY(-126vh)}}
+@keyframes flyx{0%{transform:translate(0,0)}50%{transform:translate(64vw,-4vh)}100%{transform:translate(128vw,2vh)}}
+@keyframes sway{from{transform:translateX(-26px) rotate(-28deg)}to{transform:translateX(26px) rotate(32deg)}}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(.55)}}
+@keyframes twinkle{from{opacity:.25;transform:scale(.8)}to{opacity:1;transform:scale(1.1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+#scene .sun{position:absolute;right:4vw;top:calc(env(safe-area-inset-top) + 70px);width:clamp(70px,11vw,120px);aspect-ratio:1}
+#scene .sun .rays{animation:spin 40s linear infinite;transform-origin:50% 50%}
+#scene .moon{position:absolute;right:9vw;top:auto;bottom:calc(18vh + 40px);width:clamp(70px,11vw,120px);aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 36% 34%,#FFFBE6,#FFE9A8 55%,#F0CC6A);box-shadow:0 0 50px 16px rgba(255,236,170,.35)}
+#scene .moon::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 62% 60%,rgba(200,160,70,.35) 0 9%,transparent 10%),radial-gradient(circle at 40% 70%,rgba(200,160,70,.28) 0 6%,transparent 7%),radial-gradient(circle at 66% 32%,rgba(200,160,70,.25) 0 5%,transparent 6%)}
+#scene .ground{position:absolute;left:0;right:0;bottom:0;height:18vh;min-height:110px}
+#scene .ground svg,#scene .lights svg{width:100%;height:100%;display:block}
+#scene .lights{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top) - 6px);height:36px}
+#scene .lights .bulb{animation:blink 1.6s ease-in-out infinite alternate}
+@keyframes blink{from{opacity:.45}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#scene *{animation:none!important}}
+
+body.glass .card,body.glass .iconbtn,body.glass .ctrls button,body.glass .streak{-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);border:1.5px solid var(--edge)}
+body.glass .card{box-shadow:0 6px 0 rgba(0,0,0,.22),0 16px 36px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.2)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chips button{padding:8px 12px;border-radius:99px;background:var(--track);font-size:.95rem}
+.chips button.on{background:var(--accent);color:#fff}
+.greet{font-family:var(--f-display);color:var(--sky-ink);opacity:.9;margin:-8px 0 12px;font-size:1.1rem}
+
+button,a{font:inherit;color:inherit;border:0;background:none;cursor:pointer;text-decoration:none}
+.wrap{max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 24px)}
+h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1.1}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.top h1{flex:1;font-size:1.9rem}
+.iconbtn{width:48px;height:48px;border-radius:16px;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;font-size:1.4rem}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+.hint{color:var(--soft);margin:6px 0 0;line-height:1.35}
+.lens{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.lens button{padding:14px 6px;border-radius:18px;background:var(--track);text-align:center;font-family:var(--f-display);font-size:1.35rem;line-height:1.05}
+.lens button small{display:block;font-family:var(--f-body);font-size:.8rem;color:var(--soft);margin-top:4px}
+.lens button.on{background:var(--accent);color:#fff;box-shadow:0 5px 0 #5a3fd6}
+.lens button.on small{color:#fff;opacity:.85}
+.list{margin:10px 0 0;padding:0;list-style:none}
+.list li{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1.5px dashed var(--line)}
+.list li:last-child{border:0}
+.list .em{font-size:1.4rem;width:44px;text-align:center}
+.list .em img{width:44px;height:44px;object-fit:contain;border-radius:10px;background:#fff;display:block}
+.list .nm{flex:1}
+.list .tm{color:var(--soft);font-size:.9rem}
+.btn{display:flex;width:100%;align-items:center;justify-content:center;gap:8px;padding:18px 22px;border-radius:20px;background:var(--good);color:#fff;font-family:var(--f-display);font-size:1.6rem;box-shadow:0 6px 0 #168a61}
+.btn:active{transform:translateY(3px);box-shadow:0 3px 0 #168a61}
+.btn.ghost{background:var(--card);color:var(--ink);box-shadow:var(--shadow);font-size:1.25rem}
+.safe{border-left:6px solid var(--warm)}
+.safe ul{margin:8px 0 0;padding-left:20px;line-height:1.45}
+
+/* player */
+.prog{height:12px;border-radius:99px;background:var(--track);overflow:hidden;margin-bottom:14px}
+.prog i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .4s}
+.stage{text-align:center;padding:22px 18px}
+.phase{display:inline-block;padding:6px 14px;border-radius:99px;background:var(--track);color:var(--soft);font-size:.95rem;margin-bottom:8px}
+.stage .bigem{font-size:4.2rem;line-height:1;display:block}
+.stage .pic img{width:min(300px,70vw);height:min(300px,70vw);object-fit:contain;border-radius:22px;background:#fff;display:block;margin:4px auto}
+.stage h2{font-size:2.3rem;margin-top:6px}
+.side{display:inline-block;margin-top:8px;padding:6px 16px;border-radius:14px;background:var(--accent);color:#fff;font-family:var(--f-display);font-size:1.35rem}
+.side.R{background:var(--warm)}
+.ring{--p:0;position:relative;width:220px;height:220px;margin:18px auto 10px;border-radius:50%;
+  background:conic-gradient(var(--rc,var(--accent)) calc(var(--p)*1%),var(--track) 0);display:grid;place-items:center}
+.ring>div{width:180px;height:180px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-family:var(--f-display);font-size:4.4rem;line-height:1}
+.ring small{display:block;font-family:var(--f-body);font-size:.95rem;color:var(--soft)}
+.cue{margin:6px auto 0;max-width:460px;font-size:1.2rem;line-height:1.4}
+.cue li{margin:4px 0;text-align:left}
+.next{color:var(--soft);margin-top:12px}
+.ctrls{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:10px}
+.ctrls button{padding:16px 6px;border-radius:18px;background:var(--card);box-shadow:var(--shadow);font-family:var(--f-display);font-size:1.25rem}
+.ctrls .main{background:var(--accent);color:#fff;box-shadow:0 5px 0 #5a3fd6}
+.rest .ring{--rc:var(--good)}
+.done{text-align:center;padding:28px 18px}
+.done .bigem{font-size:5rem}
+.done h2{font-size:2.4rem;margin:8px 0}
+.streak{padding:8px 14px;border-radius:99px;background:var(--card);box-shadow:var(--shadow);font-family:var(--f-display);font-size:1.2rem}
+.streakbig{font-family:var(--f-display);font-size:1.6rem;margin:10px 0 0}
+.streakbig small{display:block;font-family:var(--f-body);font-size:.9rem;color:var(--soft)}
+.parents summary{font-family:var(--f-display);font-size:1.15rem;cursor:pointer}
+.burst{position:fixed;pointer-events:none;font-size:2rem;z-index:9;animation:fly 1.2s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(260deg);opacity:0}}
+</style>
+</head>
+<body>
+<div id="scene" aria-hidden="true"></div>
+<div class="wrap" id="app"></div>
+<script>
+/* ---------- the moves (rewritten from the splits sheet, kid-friendly cues) ---------- */
+const M = {
+  swingF: {n:'Front Leg Swings', e:'🦵', sided:true, cue:['Hold a wall or chair for balance.','Swing your leg forward and back — 10 easy swings.','Smooth and controlled, no kicking hard.']},
+  swingS: {n:'Side Leg Swings',  e:'🦵', sided:true, cue:['Face the wall, hands on it.','Swing your leg out to the side and back across — 10 swings.','Keep your body tall.']},
+  squat:  {n:'Deep Squat Hold',  e:'🧘', cue:['Feet wider than your hips, toes out a little.','Sink down low, chest up, hands together.','Breathe slow.']},
+  fly:    {n:'Butterfly',        e:'🦋', cue:['Sit and put the bottoms of your feet together.','Hold your feet, sit up tall.','Let your knees drop toward the floor — no pushing hard.']},
+  lunge:  {n:'Low Lunge',        e:'🏃', sided:true, cue:['Step one foot forward, back knee on the floor (use a pillow).','Chest up, hands on your front knee.','Slide your hips forward a little.']},
+  half:   {n:'Half Split',       e:'🤸', sided:true, cue:['From the lunge, straighten your front leg.','Hips back over your back knee, toes up.','Lean forward with a flat back.']},
+  lizard: {n:'Lizard Pose',      e:'🦎', sided:true, cue:['Lunge with your front foot outside your hands.','Let your hips sink toward the floor.','Stay on your hands — elbows down only if it feels easy.']},
+  pigeon: {n:'Pigeon Pose',      e:'🕊️', sided:true, cue:['Bring one knee forward, shin across in front of you.','Slide the other leg straight back.','Sit tall, hips even.']},
+  ham:    {n:'Hamstring Reach',  e:'🙆', sided:true, cue:['Sit with one leg straight, the other foot tucked in.','Reach toward your toes with a flat back.','Knee stays straight but not locked.']},
+  inner:  {n:'Side Reach',       e:'🌈', sided:true, cue:['Sit with one leg out to the side, other leg bent.','Reach your top arm over your head toward the straight leg.','Feel it along your side and inner thigh.']},
+  front:  {n:'Front Split',      e:'⭐', sided:true, cue:['Slide one leg forward and one back.','Hands on the floor or on pillows — only as low as feels OK.','Hips face forward. No bouncing!']},
+  middle: {n:'Middle Split',     e:'🌟', cue:['Sit with your legs wide apart, toes up.','Walk your hands forward with a flat back.','Stop at a gentle pull.']},
+  fold:   {n:'Split Fold',       e:'🙇', sided:true, cue:['Go into your front split (as low as you can).','Fold your body over your front leg.','Relax and breathe.']},
+  reach:  {n:'Split Reach',      e:'🙌', sided:true, cue:['Go into your front split (as low as you can).','Reach both arms up high.','Lift your chest gently — no big back bend.']},
+  lean:   {n:'Middle Split Lean',e:'↔️', sided:true, cue:['Legs wide apart.','Turn and lean your body over one leg.','Back flat, breathe.']},
+};
+const FILE = {swingF:'front-leg-swings', swingS:'side-leg-swings', squat:'deep-squat', fly:'butterfly',
+  lunge:'low-lunge', half:'half-split', lizard:'lizard', pigeon:'pigeon', ham:'hamstring-reach', inner:'side-reach',
+  front:'front-split', middle:'middle-split', fold:'split-fold', reach:'split-reach', lean:'middle-split-lean'};
+// photo if img/<name>.webp (or .png) exists, otherwise the emoji
+function pic(key, cls){
+  const f = 'img/' + FILE[key];
+  return `<span class="${cls}"><img src="${f}.webp" alt="" onerror="if(!this.dataset.p){this.dataset.p=1;this.src='${f}.png'}else{this.parentNode.textContent='${M[key].e}'}"></span>`;
+}
+const WARM = [['swingF',30],['swingS',30],['squat',30],['fly',45]];
+const MAIN = ['lunge','half','lizard','pigeon','ham','inner','front','middle'];
+const PLANS = {
+  15: {label:'15', sub:'1 round', rounds:1, hold:30, extra:false},
+  30: {label:'30', sub:'2 rounds', rounds:2, hold:40, extra:false},
+  45: {label:'45', sub:'full sheet', rounds:3, hold:40, extra:true},
+};
+const SWITCH = 8, BETWEEN = 10, ROUND_REST = 30;
+
+function build(planKey){
+  const P = PLANS[planKey], steps = [];
+  const add = (key, secs, phase) => {
+    const m = M[key];
+    if (m.sided){ steps.push({key, secs, phase, side:'L'}); steps.push({key, secs, phase, side:'R'}); }
+    else steps.push({key, secs, phase});
+  };
+  WARM.forEach(([k,s]) => add(k, s, 'Warm-up'));
+  for (let r = 1; r <= P.rounds; r++){
+    MAIN.forEach(k => add(k, k === 'middle' ? P.hold + 15 : P.hold, P.rounds > 1 ? `Round ${r} of ${P.rounds}` : 'Stretch'));
+  }
+  if (P.extra) ['fold','reach','lean'].forEach(k => add(k, 30, 'Finishers'));
+  // rests between steps
+  const seq = [];
+  steps.forEach((s, i) => {
+    seq.push(s);
+    const nx = steps[i+1]; if (!nx) return;
+    const rest = (nx.phase !== s.phase && i > 0) ? ROUND_REST : (nx.key === s.key ? SWITCH : BETWEEN);
+    seq.push({rest:true, secs:rest, nextUp:nx});
+  });
+  return seq;
+}
+const totalSecs = seq => seq.reduce((a, s) => a + s.secs, 0);
+const fmt = s => Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+
+/* ---------- state ---------- */
+const PREF = 'stretch.plan';
+let plan = (() => { try{ return localStorage.getItem(PREF) || '15'; }catch(e){ return '15'; } })();
+if (!PLANS[plan]) plan = '15';
+let seq = [], idx = 0, left = 0, timer = null, paused = false, wake = null, actx = null;
+const app = document.getElementById('app');
+const STREAK = 'stretch.streak';
+const dayKey = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+function getStreak(){
+  try{
+    const s = JSON.parse(localStorage.getItem(STREAK)) || {};
+    const t = new Date(), y = new Date(t); y.setDate(t.getDate() - 1);
+    if (s.last === dayKey(t) || s.last === dayKey(y)) return s;   // still alive
+    return {count:0, best:s.best || 0, last:s.last};
+  }catch(e){ return {count:0, best:0}; }
+}
+function bumpStreak(){
+  const s = getStreak(), today = dayKey(new Date());
+  if (s.last !== today){ s.count = (s.count || 0) + 1; s.last = today; }
+  s.best = Math.max(s.best || 0, s.count);
+  try{ localStorage.setItem(STREAK, JSON.stringify(s)); }catch(e){}
+  return s;
+}
+
+/* ---------- sound + voice ---------- */
+function beep(f = 880, d = .15){
+  try{
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.frequency.value = f; o.connect(g); g.connect(actx.destination);
+    g.gain.setValueAtTime(.25, actx.currentTime); g.gain.exponentialRampToValueAtTime(.001, actx.currentTime + d);
+    o.start(); o.stop(actx.currentTime + d);
+  }catch(e){}
+}
+function say(t){
+  try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.rate = .95; u.pitch = 1.1; speechSynthesis.speak(u); }catch(e){}
+}
+const sideWord = s => s === 'L' ? 'left leg' : 'right leg';
+async function keepAwake(){ try{ if ('wakeLock' in navigator) wake = await navigator.wakeLock.request('screen'); }catch(e){} }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && timer) keepAwake(); });
+
+const THEME_KEY = 'stretch.theme';  // own picker
+let themePref = (() => { try{ return localStorage.getItem(THEME_KEY) || 'auto'; }catch(e){ return 'auto'; } })();
+const LEAF = c => `<svg viewBox="0 0 40 40"><path d="M20 2l4 8 7-3-2 8 8 2-7 5 3 6-8-1-2 9-3-8-3 8-2-9-8 1 3-6-7-5 8-2-2-8 7 3z" fill="${c}"/><path d="M20 12v26" stroke="rgba(0,0,0,.25)" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const OVAL_LEAF = c => `<svg viewBox="0 0 40 40"><path d="M20 3C30 10 34 20 20 37 6 20 10 10 20 3z" fill="${c}"/><path d="M20 8v27" stroke="rgba(0,0,0,.22)" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const FLAKE = `<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M20 3v34M5 11.5l30 17M5 28.5l30-17"/><path d="M15 6l5 4 5-4M15 34l5-4 5 4M6 17l6 1.5-2 5.5M34 23l-6-1.5 2-5.5M6 23l6-1.5-2-5.5M34 17l-6 1.5 2 5.5"/></svg>`;
+const DOT = `<svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.5" fill="#fff"/></svg>`;
+const PETAL = c => `<svg viewBox="0 0 30 30"><path d="M15 2c8 6 9 16 0 26C6 18 7 8 15 2z" fill="${c}"/><path d="M15 6v16" stroke="rgba(255,255,255,.6)" stroke-width="1.4" stroke-linecap="round"/></svg>`;
+const BAT = `<svg viewBox="0 0 64 30"><path d="M32 10c2-4 4-5 4-5l1 4c3-1 7-1 10 2 4-4 11-6 17-4-5 2-7 7-7 12-3-3-7-3-9 0-2-3-6-3-8-1-2 3-5 6-8 7-3-1-6-4-8-7-2-2-6-2-8 1-2-3-6-3-9 0 0-5-2-10-7-12 6-2 13 0 17 4 3-3 7-3 10-2l1-4s2 1 4 5z" fill="#160C26"/></svg>`;
+const SPARK = c => `<svg viewBox="0 0 20 20"><path d="M10 0c1 6 4 9 10 10-6 1-9 4-10 10-1-6-4-9-10-10 6-1 9-4 10-10z" fill="${c}"/></svg>`;
+const BUBBLE = `<svg viewBox="0 0 30 30"><circle cx="15" cy="15" r="13" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.85)" stroke-width="2"/><path d="M8 12a8 8 0 0 1 6-5" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>`;
+const BALLOON = c => `<svg viewBox="0 0 30 44"><ellipse cx="15" cy="15" rx="12" ry="14" fill="${c}"/><ellipse cx="11" cy="10" rx="3" ry="5" fill="#fff" opacity=".45"/><path d="M15 29l-2 3h4z" fill="${c}"/><path d="M15 32c-2 4 2 6 0 11" stroke="#9a8fb0" stroke-width="1.2" fill="none"/></svg>`;
+const SUN = `<svg viewBox="0 0 100 100"><g class="rays" stroke="#FFD25A" stroke-width="5" stroke-linecap="round"><path d="M50 4v12M50 84v12M4 50h12M84 50h12M17 17l8.5 8.5M74.5 74.5L83 83M17 83l8.5-8.5M74.5 25.5L83 17"/></g><circle cx="50" cy="50" r="24" fill="#FFC93C"/></svg>`;
+const hills = (c1, c2, extra='') => `<svg viewBox="0 0 1200 200" preserveAspectRatio="none"><path d="M0 110 C 180 40 360 60 520 100 S 860 40 1200 90 V200 H0z" fill="${c2}"/><path d="M0 150 C 220 100 420 120 620 145 S 980 110 1200 140 V200 H0z" fill="${c1}"/>${extra}</svg>`;
+const PUMPKINS = `<g><ellipse cx="160" cy="168" rx="34" ry="24" fill="#FF8A1F"/><path d="M140 168c0-16 8-22 20-22s20 6 20 22" fill="none" stroke="#C25E05" stroke-width="3"/><rect x="157" y="136" width="6" height="12" rx="2" fill="#4E6B22"/><ellipse cx="1040" cy="172" rx="26" ry="18" fill="#FF9A2E"/><rect x="1037" y="148" width="5" height="10" rx="2" fill="#4E6B22"/></g>`;
+const JACK = `<g><ellipse cx="180" cy="166" rx="38" ry="27" fill="#FF8A1F"/><path d="M164 158l8-8 4 9zM196 158l-8-8-4 9zM164 172q16 12 32 0l-6 3-4-4-6 5-6-5-4 4z" fill="#FFD447"/><rect x="176" y="132" width="7" height="13" rx="2" fill="#3D5E1C"/><ellipse cx="1030" cy="172" rx="28" ry="20" fill="#E9761A"/><rect x="1027" y="146" width="6" height="11" rx="2" fill="#3D5E1C"/></g>`;
+const TREES = `<g fill="#1E7A45"><path d="M150 60l38 70h-18l26 44h-92l26-44h-18z"/><path d="M1050 80l32 60h-15l22 38h-78l22-38h-15z"/></g><g fill="#5B3A1C"><rect x="143" y="172" width="14" height="20"/><rect x="1043" y="176" width="14" height="18"/></g><circle cx="150" cy="58" r="7" fill="#FFD166"/>`;
+const FLOWERS = [180,330,520,760,930,1090].map((x,i)=>`<g transform="translate(${x} ${150+(i%2)*12})"><path d="M0 0v30" stroke="#4E9A3A" stroke-width="3"/><g fill="${['#FF8FB8','#FFD25A','#B98CFF','#FF8FB8','#FFB0C9','#FFD25A'][i]}"><circle cx="0" cy="-8" r="6"/><circle cx="8" cy="0" r="6"/><circle cx="0" cy="8" r="6"/><circle cx="-8" cy="0" r="6"/></g><circle r="4.5" fill="#FFF3B0"/></g>`).join('');
+const WAVES = `<path d="M0 175 q 30 -12 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 t 60 0 V200 H0z" fill="#5CC8F0" opacity=".9"/>`;
+
+const GLASS = {'--card':'rgba(255,255,255,.11)','--ink':'#FFF8FF','--line':'rgba(255,255,255,.16)','--track':'rgba(255,255,255,.16)','--chip':'rgba(255,255,255,.13)','--input':'rgba(255,255,255,.09)','--box':'rgba(255,255,255,.4)','--good-soft':'rgba(34,176,125,.3)','--good-ink':'#A6F5D2','--del-bg':'rgba(255,122,89,.22)','--edge':'rgba(255,255,255,.18)','--blob':'.2','--btn-deep':'rgba(0,0,0,.35)','--shadow':'0 6px 0 rgba(0,0,0,.22),0 16px 36px rgba(0,0,0,.28)'};
+const THEMES = {
+  classic:{label:'Plain (no season)', months:[], greet:'', fx:'balloons', vars:{}, ground:hills('#F3E2C8','#EBD3B0'), burst:['⭐','✨','🌟','🎉'], cheer:'Great job'},
+  autumn:{label:'Fall leaves', months:[8,10], greet:'Happy fall! 🍂', fx:'leaves',
+    vars:{'--sky':'linear-gradient(180deg,#FFE9C9 0%,#FFCE94 55%,#F6A25A 100%)','--sky-ink':'#4A2410','--sky-soft':'#7A4A2A','--bg':'#F6A25A','--line':'#F1DEC6','--btn':'#C24A1F'},
+    ground:hills('#B65A22','#D98A3D',PUMPKINS), burst:['🍂','🍁','⭐','✨'], cheer:'Fall-tastic'},
+  halloween:{label:'Halloween', months:[9], greet:'Happy Halloween! 🎃', fx:'bats', moon:true,
+    vars:{'--sky':'linear-gradient(180deg,#160C2E 0%,#2E1850 55%,#55296B 100%)','--sky-ink':'#F6EEFF','--sky-soft':'#DCCDF5','--bg':'#160C2E',...GLASS,'--soft':'#D6C6F2','--btn':'#F26B1D'}, glass:true,
+    ground:hills('#120A22','#2A1846',JACK), burst:['🎃','🦇','👻','⭐','✨'], cheer:'Spook-tacular'},
+  christmas:{label:'Christmas', months:[11], greet:'Merry Christmas! 🎄', fx:'snow', lights:true,
+    vars:{'--sky':'linear-gradient(180deg,#0D1F3D 0%,#1B3961 60%,#2C5482 100%)','--sky-ink':'#FFFFFF','--sky-soft':'#DCE6F7','--bg':'#0D1F3D',...GLASS,'--soft':'#CFDCF2','--btn':'#D62839'}, glass:true,
+    ground:hills('#F4F8FF','#D6E4F7',TREES), burst:['🎄','⭐','❄️','🎁','✨'], cheer:'Ho ho ho'},
+  winter:{label:'Winter snow', months:[0,1], greet:'Stay cozy! ❄️', fx:'snow',
+    vars:{'--sky':'linear-gradient(180deg,#3E6FB8 0%,#6F9EDB 55%,#A9CDF2 100%)','--sky-ink':'#FFFFFF','--sky-soft':'#EEF4FD','--bg':'#3E6FB8',...GLASS,'--card':'rgba(255,255,255,.16)','--soft':'#E1EBFA','--btn':'#1E52A0'}, glass:true,
+    ground:hills('#F6FAFF','#DCE8F7'), burst:['❄️','⛄','⭐','✨'], cheer:'Snow-tastic'},
+  spring:{label:'Spring blossoms', months:[2,3,4], greet:'Happy spring! 🌸', fx:'petals', sun:true,
+    vars:{'--sky':'linear-gradient(180deg,#DDF4FF 0%,#EAF8EE 55%,#FFE6F0 100%)','--sky-ink':'#244233','--sky-soft':'#55705F','--bg':'#EAF8EE','--btn':'#2F8A3D'},
+    ground:hills('#7CC46A','#A5D98F',FLOWERS), burst:['🌸','🌷','🐝','⭐'], cheer:'Blooming great'},
+  summer:{label:'Summer sun', months:[5,6,7], greet:'Happy summer! ☀️', fx:'bubbles', sun:true,
+    vars:{'--sky':'linear-gradient(180deg,#4FC3F7 0%,#8FDBFF 55%,#D3F3FF 100%)','--sky-ink':'#0E3550','--sky-soft':'#2F5A78','--bg':'#4FC3F7','--btn':'#E85A22'},
+    ground:hills('#F5D99A','#EBC678',WAVES), burst:['☀️','🌊','🐚','⭐'], cheer:'Sun-sational'},
+};
+const THEME_ORDER = ['auto','autumn','halloween','christmas','winter','spring','summer','classic'];
+const autoTheme = () => { const m = new Date().getMonth(); return Object.keys(THEMES).find(k => THEMES[k].months.includes(m)) || 'classic'; };
+const themeName = () => THEMES[themePref] ? themePref : autoTheme();
+const TH = () => THEMES[themeName()];
+const rnd = (a,b) => a + Math.random()*(b-a);
+const pickOne = a => a[Math.floor(Math.random()*a.length)];
+function particle(svg, cls, o){ return `<div class="p ${cls}" style="${Object.entries(o).map(([k,v])=>`--${k}:${v}`).join(';')}">${svg}</div>`; }
+function sceneFx(kind){
+  const out = [];
+  const fallers = (n, svgs, smin, smax, dmin, dmax) => { for (let i=0;i<n;i++) out.push(particle(pickOne(svgs), '', {x:rnd(-4,98).toFixed(1)+'vw', s:rnd(smin,smax).toFixed(0)+'px', d:rnd(dmin,dmax).toFixed(1)+'s', dl:(-rnd(0,dmax)).toFixed(1)+'s', sw:rnd(1.6,3.4).toFixed(1)+'s', o:rnd(.75,1).toFixed(2)})); };
+  if (kind==='leaves') fallers(14, ['#D2542A','#F4A93A','#B83A1B','#E8C547','#9C4A2A','#E07A2E'].map((c,i)=>i%2?OVAL_LEAF(c):LEAF(c)), 22, 42, 11, 20);
+  else if (kind==='snow'){ for (let i=0;i<30;i++) out.push(particle(DOT, '', {x:rnd(0,100).toFixed(1)+'vw', s:rnd(4,10).toFixed(0)+'px', d:rnd(9,18).toFixed(1)+'s', dl:(-rnd(0,18)).toFixed(1)+'s', sw:rnd(2,4).toFixed(1)+'s', o:rnd(.5,.95).toFixed(2)})); fallers(8, [FLAKE], 16, 28, 12, 22); }
+  else if (kind==='petals') fallers(16, ['#FF9EC4','#FFC2D9','#FFFFFF','#F7B3CF'].map(PETAL), 14, 24, 12, 20);
+  else if (kind==='bubbles'){ for (let i=0;i<12;i++) out.push(particle(BUBBLE, 'up', {x:rnd(0,96).toFixed(1)+'vw', s:rnd(18,44).toFixed(0)+'px', d:rnd(14,26).toFixed(1)+'s', dl:(-rnd(0,26)).toFixed(1)+'s', sw:rnd(2.5,4.5).toFixed(1)+'s', o:rnd(.7,1).toFixed(2)})); }
+  else if (kind==='bats'){
+    for (let i=0;i<24;i++) out.push(particle(SPARK('#FFF4C9'), 'still', {x:rnd(0,100).toFixed(1)+'vw', y:rnd(2,60).toFixed(1)+'vh', s:rnd(5,12).toFixed(0)+'px', d:rnd(1.4,3.4).toFixed(1)+'s', dl:(-rnd(0,3)).toFixed(1)+'s', sw:'1s'}));
+    for (let i=0;i<4;i++) out.push(particle(BAT, 'fly', {x:'0', y:rnd(10,38).toFixed(1)+'vh', s:rnd(34,62).toFixed(0)+'px', d:rnd(16,28).toFixed(1)+'s', dl:(-rnd(0,24)).toFixed(1)+'s', sw:'1s'}));
+  }
+  else if (kind==='balloons'){ for (let i=0;i<6;i++) out.push(particle(BALLOON(pickOne(['#FF8A8A','#7C5CFF','#4F8CFF','#FFC93C','#22B07D'])), 'up', {x:rnd(0,94).toFixed(1)+'vw', s:rnd(26,40).toFixed(0)+'px', d:rnd(22,34).toFixed(1)+'s', dl:(-rnd(0,34)).toFixed(1)+'s', sw:rnd(3,5).toFixed(1)+'s', o:'.85'})); }
+  return out.join('');
+}
+function lightsSvg(){
+  const cs = ['#FF4D5E','#FFD166','#3DD68C','#6EC3FF','#FF8FD8']; let b = '';
+  for (let i=0;i<24;i++){ const x = 25 + i*50, y = 12 + 9*Math.sin((i%6)/6*Math.PI); b += `<rect x="${x-3}" y="${y-4}" width="6" height="6" rx="1" fill="#2B3A2B"/><ellipse class="bulb" style="animation-delay:${(-Math.random()*1.6).toFixed(2)}s" cx="${x}" cy="${y+9}" rx="6" ry="9" fill="${cs[i%5]}"/>`; }
+  return `<svg viewBox="0 0 1200 40" preserveAspectRatio="none"><path d="M0 10 Q 25 26 50 12 T 100 12 T 150 12 T 200 12 T 250 12 T 300 12 T 350 12 T 400 12 T 450 12 T 500 12 T 550 12 T 600 12 T 650 12 T 700 12 T 750 12 T 800 12 T 850 12 T 900 12 T 950 12 T 1000 12 T 1050 12 T 1100 12 T 1150 12 T 1200 12" stroke="#2B3A2B" stroke-width="2" fill="none"/>${b}</svg>`;
+}
+let appliedTheme = null;
+function applyTheme(force){
+  const name = themeName();
+  if (name === appliedTheme && !force) return;
+  appliedTheme = name;
+  const t = THEMES[name], root = document.documentElement;
+  new Set(Object.values(THEMES).flatMap(x => Object.keys(x.vars))).forEach(k => root.style.removeProperty(k));
+  Object.entries(t.vars).forEach(([k,v]) => root.style.setProperty(k, v));
+  document.getElementById('scene').innerHTML = (t.sun ? `<div class="sun">${SUN}</div>` : '') + (t.moon ? '<div class="moon"></div>' : '') +
+    (t.lights ? `<div class="lights">${lightsSvg()}</div>` : '') + sceneFx(t.fx) + `<div class="ground">${t.ground}</div>`;
+  document.body.classList.toggle('has-lights', !!t.lights);
+  document.body.classList.toggle('glass', !!t.glass);
+  const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = getComputedStyle(root).getPropertyValue('--bg').trim() || '#fff7ec';
+}
+
+/* ---------- views ---------- */
+function vStart(){
+  const s = build(plan), holds = s.filter(x => !x.rest);
+  const uniq = []; holds.forEach(h => { if (!uniq.find(u => u.key === h.key)) uniq.push(h); });
+  app.innerHTML = `
+    <div class="top"><h1>🤸 Splits Stretch</h1>${(() => { const st = getStreak(); return `<div class="streak" title="Days in a row">🔥 ${st.count || 0}</div>`; })()}</div>
+    ${TH().greet ? `<div class="greet">${TH().greet}</div>` : ''}
+    <div class="card">
+      <h3>How long today?</h3>
+      <div class="lens">${Object.entries(PLANS).map(([k,p]) => `<button class="${k===plan?'on':''}" data-plan="${k}">${p.label} min<small>${p.sub}</small></button>`).join('')}</div>
+      <p class="hint">This one: about <b>${Math.round(totalSecs(s)/60)} minutes</b>, ${holds.length} holds.</p>
+      <ul class="list">${uniq.map(u => `<li>${pic(u.key, 'em')}<span class="nm">${M[u.key].n}</span><span class="tm">${u.secs}s${M[u.key].sided?' each side':''}</span></li>`).join('')}</ul>
+    </div>
+    <div class="card safe">
+      <h3>Stretch rules</h3>
+      <ul>
+        <li>A gentle pull is good. <b>Pain means back off.</b></li>
+        <li>No bouncing — hold still and breathe.</li>
+        <li>Use pillows or books under your hands in the splits.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Look</h3>
+      <div class="chips">${THEME_ORDER.map(n => `<button class="${themePref===n?'on':''}" data-theme="${n}">${n==='auto' ? 'Auto · ' + THEMES[autoTheme()].label : THEMES[n].label}</button>`).join('')}</div>
+    </div>
+    <details class="card parents">
+      <summary>For parents</summary>
+      <p class="hint">A guided daily stretching routine toward the splits: warm-up first, then each stretch on a timer with voice cues. Kids should only stretch to a gentle pull — never pain, never bouncing — and should skip it if they have an injury or anything hurts. Flexibility varies a lot between kids, so no one needs to match the photos. Nothing is collected or sent anywhere; the app only remembers the chosen length and the day streak on this device.</p>
+      <p class="hint">Tip: tap Share → <b>Add to Home Screen</b> to keep it like an app.</p>
+    </details>
+    <button class="btn" data-act="go">▶ Start</button>`;
+}
+function vPlayer(){
+  const s = seq[idx], cur = s.rest ? s.nextUp : s, m = M[cur.key];
+  const pct = s.secs ? (1 - left / s.secs) * 100 : 0;
+  const doneSecs = seq.slice(0, idx).reduce((a, x) => a + x.secs, 0) + (s.secs - left);
+  const nextHold = seq.slice(idx + 1).find(x => !x.rest);
+  app.innerHTML = `
+    <div class="top"><button class="iconbtn" data-act="quit" aria-label="Stop">✕</button>
+      <h1 style="font-size:1.4rem">${fmt(Math.max(0, totalSecs(seq) - doneSecs))} left</h1></div>
+    <div class="prog"><i style="width:${doneSecs / totalSecs(seq) * 100}%"></i></div>
+    <div class="card stage ${s.rest ? 'rest' : ''}">
+      <div class="phase">${s.rest ? 'Get ready…' : esc(cur.phase)}</div>
+      ${pic(cur.key, 'bigem pic')}
+      <h2>${esc(m.n)}</h2>
+      ${cur.side ? `<div class="side ${cur.side}">${cur.side === 'L' ? 'Left leg' : 'Right leg'}</div>` : ''}
+      <div class="ring" style="--p:${pct}"><div>${left}<small>${s.rest ? 'get ready' : paused ? 'paused' : 'seconds'}</small></div></div>
+      <ol class="cue">${m.cue.map(c => `<li>${esc(c)}</li>`).join('')}</ol>
+      ${!s.rest && nextHold ? `<div class="next">Next: ${esc(M[nextHold.key].n)}${nextHold.side ? ' — ' + sideWord(nextHold.side) : ''}</div>` : ''}
+    </div>
+    <div class="ctrls">
+      <button data-act="back">⏮ Back</button>
+      <button class="main" data-act="pause">${paused ? '▶ Go' : '⏸ Pause'}</button>
+      <button data-act="skip">Skip ⏭</button>
+    </div>`;
+}
+function vDone(){
+  const st = bumpStreak();
+  const mins = Math.round(totalSecs(seq) / 60);
+  app.innerHTML = `
+    <div class="card done">
+      <div class="bigem">🏆</div>
+      <h2>${TH().cheer && TH().cheer !== 'Great job' ? TH().cheer + '! ' : ''}Stretch done!</h2>
+      <p class="hint">${mins} minutes of stretching.</p>
+      <p class="streakbig">🔥 ${st.count} day${st.count === 1 ? '' : 's'} in a row${st.best > st.count ? `<small>Best: ${st.best}</small>` : ''}</p>
+    </div>
+    <button class="btn" data-act="home">Done</button>`;
+  for (let i = 0; i < 24; i++) setTimeout(() => burstOne(), i * 40);
+}
+function burstOne(){
+  const e = document.createElement('div'); e.className = 'burst';
+  const em = TH().burst || ['⭐','🎉','🤸','💜','✨']; e.textContent = em[Math.floor(Math.random()*em.length)];
+  e.style.left = innerWidth/2 + 'px'; e.style.top = innerHeight/3 + 'px';
+  e.style.setProperty('--dx', (Math.random()*2-1)*innerWidth*.5 + 'px');
+  e.style.setProperty('--dy', (Math.random()*2-1)*innerHeight*.4 + 'px');
+  document.body.appendChild(e); setTimeout(() => e.remove(), 1300);
+}
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- player ---------- */
+function announce(){
+  const s = seq[idx];
+  if (s.rest){
+    const n = s.nextUp, same = idx > 0 && seq[idx-1].key === n.key;
+    const first = idx === 1 ? '' : 'Nice! ';
+    say(same ? `${first}Switch sides. Get ready, ${sideWord(n.side)}.`
+             : `${first}Get ready for ${M[n.key].n}${n.side ? ', ' + sideWord(n.side) : ''}.`);
+  } else { beep(990, .25); say(idx === 0 ? `Get ready for ${M[s.key].n}${s.side ? ', ' + sideWord(s.side) : ''}. Go!` : 'Go!'); }
+}
+function enter(i){
+  idx = i; left = seq[idx].secs; announce(); vPlayer();
+}
+function tick(){
+  if (paused) return;
+  left--;
+  if (left > 0 && left <= 3){
+    if (seq[idx].rest) say(String(left));   // get-ready countdown: "3, 2, 1" then "Go!"
+    else beep(660, .1);                       // end of a hold: quiet beeps
+  }
+  if (left <= 0){
+    if (idx + 1 >= seq.length){ finish(); return; }
+    enter(idx + 1); return;
+  }
+  vPlayer();
+}
+function start(){
+  seq = build(plan); paused = false;
+  beep(1, .01); // unlock audio on iOS inside the tap
+  keepAwake();
+  clearInterval(timer); timer = setInterval(tick, 1000);
+  enter(0);
+}
+function stop(){ clearInterval(timer); timer = null; try{ speechSynthesis.cancel(); }catch(e){} try{ wake && wake.release(); }catch(e){} wake = null; }
+function finish(){
+  stop(); beep(1046, .3); setTimeout(() => beep(1318, .4), 250);
+  say('All done! Great stretching!'); vDone();
+}
+
+/* ---------- taps ---------- */
+document.addEventListener('click', e => {
+  const th = e.target.closest('[data-theme]');
+  if (th){ themePref = th.dataset.theme; try{ localStorage.setItem(THEME_KEY, themePref); }catch(err){} applyTheme(true); vStart(); return; }
+  const p = e.target.closest('[data-plan]');
+  if (p){ plan = p.dataset.plan; try{ localStorage.setItem(PREF, plan); }catch(err){} vStart(); return; }
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  switch (b.dataset.act){
+    case 'go': start(); break;
+    case 'pause': paused = !paused; if (!paused) beep(880, .1); vPlayer(); break;
+    case 'skip': if (idx + 1 >= seq.length) finish(); else enter(idx + 1); break;
+    case 'back': { let i = idx - 1; while (i > 0 && seq[i].rest) i--; enter(Math.max(0, i)); } break;
+    case 'quit': if (confirm('Stop stretching? Today won’t count.')){ stop(); vStart(); } break;
+    case 'home': vStart(); break;
+  }
+});
+applyTheme(true);
+vStart();
+</script>
+</body>
+</html>
