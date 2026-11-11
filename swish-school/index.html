@@ -166,6 +166,27 @@ body.shotmode .formlist{display:flex}
 .toast.show{opacity:.94}
 
 .formlist{display:flex}
+.frow{cursor:pointer}.frow .fi{opacity:.55;font-size:14px}
+.learn{position:fixed;inset:0;z-index:25;background:var(--deep);overflow:auto;padding:calc(12px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.lhead{display:flex;align-items:center;gap:8px;position:sticky;top:0;background:var(--deep);padding:6px 0 10px;z-index:2}
+.lhead .lt{flex:1;min-width:0;font-family:var(--jersey);color:var(--gold);font-size:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lhead button{background:var(--green);border:1px solid var(--line);border-radius:12px;padding:9px 13px;font-size:17px;font-weight:800;color:var(--ink)}
+.lhead button:disabled{opacity:.35}
+.lwrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.lintro{background:linear-gradient(180deg,var(--green2),var(--green));border:2px solid var(--gold);border-radius:16px;padding:14px 16px;font-size:18px;line-height:1.35;color:var(--cream)}
+.lintro b{color:var(--gold)}
+.lstep{display:flex;gap:12px;align-items:center;background:var(--green);border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-align:left;width:100%}
+.lstep .n{font-family:var(--jersey);background:var(--gold);color:var(--deep);border-radius:12px;min-width:44px;height:44px;display:grid;place-items:center;font-size:22px}
+.lstep .t{font-weight:800;font-size:20px}.lstep .c{color:var(--muted);font-size:16px}
+.lcard{background:var(--green);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.lcard h4{font-size:14px;font-weight:800;letter-spacing:2px;color:var(--muted);margin-bottom:6px;text-transform:uppercase}
+.lcard ul{padding-left:20px;font-size:18px;line-height:1.4}.lcard li{margin:3px 0}
+.lcard p{font-size:18px;line-height:1.4}
+.lcue{font-family:var(--jersey);color:var(--gold);font-size:clamp(26px,5vw,38px);-webkit-text-stroke:1px #fff;line-height:1.1}
+.says{display:flex;gap:10px;align-items:flex-start;border-left:4px solid var(--gold);background:rgba(0,0,0,.2);border-radius:0 10px 10px 0;padding:8px 10px;margin:6px 0;font-size:18px;line-height:1.3;font-style:italic}
+.says button{flex:0 0 auto;background:var(--gold);border:0;border-radius:10px;width:40px;height:36px;font-size:18px;font-style:normal}
+.chk{display:inline-block;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:999px;padding:5px 11px;margin:3px 4px 3px 0;font-size:15px;font-weight:700}
+.chk.no{opacity:.6}
 .coachnote{font-size:15px;color:var(--muted);line-height:1.3}
 </style>
 </head>
@@ -184,6 +205,7 @@ body.shotmode .formlist{display:flex}
   <svg class="mark" aria-hidden="true"><use href="#gaMark"/></svg>
   <div class="brand"><div class="t1">ANGELS</div><div class="t2">SWISH SCHOOL</div></div>
   <div class="player" id="playerChip"><span class="pname" id="pName">KRYSLANA</span></div>
+  <button class="iconbtn" id="learnOpen" aria-label="How to shoot">📘</button>
   <button class="iconbtn" id="setBtn" aria-label="Settings">⚙️</button>
 </header>
 <div class="chips" id="chips"></div>
@@ -210,6 +232,7 @@ body.shotmode .formlist{display:flex}
       <div class="resBtns">
         <button class="go alt" id="replayBtn">▶ Replay</button>
         <button class="go" id="againBtn">Again!</button>
+        <button class="go alt full hidden" id="learnBtn">📘 Learn</button>
         <button class="go alt full" id="doneBtn">Done</button>
       </div>
     </div>
@@ -263,6 +286,11 @@ body.shotmode .formlist{display:flex}
     <div class="resBtns" style="width:100%"><button class="go alt" id="saveVid">Save video</button><button class="go" id="closeReplay">Close</button></div>
   </div>
 </div>
+<div class="learn hidden" id="learn">
+  <div class="lhead"><button id="lBack">‹ Back</button><div class="lt" id="lTitle">How to Shoot</div><button id="lPrev" aria-label="Previous step">‹</button><button id="lNext">Next ›</button></div>
+  <div class="lwrap" id="lBody"></div>
+</div>
+<div class="sheet hidden" id="chkSheet"><div class="sheetcard" id="chkCard"></div></div>
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -581,7 +609,7 @@ function renderFormList(res,shots){
   const rows=checksFor(S.view).map(([k,lab])=>{
     const n=shots?shots.filter(s=>s.res[k]!=null).length:0, p=n?Math.round(shots.filter(s=>s.res[k]).length/n*100)+'%':'–';
     const v=res?res[k]:null, mk=v==null?'·':v?'✓':'✗';
-    return `<div class="frow${v==null?'':v?' ok':' bad'}"><span class="fm">${mk}</span><span class="fn">${lab}</span><span class="fp">${p}</span></div>`; });
+    return `<div class="frow${v==null?'':v?' ok':' bad'}" data-k="${k}"><span class="fm">${mk}</span><span class="fn">${lab} <span class="fi">ⓘ</span></span><span class="fp">${p}</span></div>`; });
   $('formList').innerHTML=rows.join('');
 }
 function drawShot(vw,vh,u,now){
@@ -607,6 +635,7 @@ function finishShot(r,key){
   if(complete&&n){ const old=pbs[key]; better=old==null||avg>old; if(better){ pbs[key]=avg; store.set('pbs',pbs); } }
   const rows=checksFor(S.view).map(([k,lab])=>{ const m=r.shots.filter(s=>s.res[k]!=null).length; return {lab,k,p:m?Math.round(r.shots.filter(s=>s.res[k]).length/m*100):null}; });
   const worst=rows.filter(x=>x.p!=null).sort((a,b)=>a.p-b.p)[0];
+  if(worst&&worst.p<100){ $('learnBtn').dataset.k=worst.k; $('learnBtn').textContent='📘 Learn: '+worst.lab; $('learnBtn').classList.remove('hidden'); } else $('learnBtn').classList.add('hidden');
   $('tcard').innerHTML=`
     <div class="tc-head"><svg aria-hidden="true"><use href="#gaMark"/></svg><div><div class="a">ANGELS</div><div class="b">SWISH SCHOOL</div></div></div>
     ${better?'<div class="tc-best">NEW BEST!</div>':''}
@@ -698,6 +727,119 @@ async function saveReplay(){
   try{ const file=new File([blob],fname,{type:blob.type}); if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:'Swish School replay'}); return; } }catch(e){ if(e.name==='AbortError') return; }
   const a=document.createElement('a'); a.href=recURL; a.download=fname; document.body.appendChild(a); a.click(); a.remove();
 }
+
+/* ---------------- How to Shoot (Coach Behn B.E.E.F.) ---------------- */
+// Steps follow Sarah Behn's coaching guide (Balance, Eyes, Elbow, Follow-through + "Bend and Extend", "pat the spider",
+// "all four to the floor", chicken wing / rocking the baby). "Pizza tray" is our kid word for her "load the gun".
+const STEPS=[
+ {id:'balance', t:'Balance', cue:'Feet wide, knees soft!', checks:['stance','knees'],
+  why:'Every good shot starts from the floor. If her base wobbles, the ball wobbles.',
+  doit:['Feet shoulder-width apart, toes pointing at the rim.','Slight athletic bend in the knees — not a deep squat.','Weight on the balls of her feet, like she is ready to jump.'],
+  says:['Feet wide like your shoulders.','Knees soft, ready to jump.','Stand on your toes, not your heels.'],
+  watch:['Feet touching or too wide.','Standing straight-legged and stiff.','Rocking back on her heels.'],
+  drill:'Statue test: she gets in her stance and you give a gentle push on her shoulder from the side. If she stays put, her balance is good. 5 pushes, then shoot.'},
+ {id:'eyes', t:'Eyes', cue:'Eyes on the front rim!', checks:[],
+  why:'Her eyes aim the shot. She should find the target before the ball moves and keep looking at it until the ball gets there.',
+  doit:['Pick the target first: the center of the front of the rim.','Eyes stay on the target the whole shot — not on the ball in the air.'],
+  says:['Find the rim first.','Eyes on the front of the rim.','Don\'t watch the ball — watch the target.'],
+  watch:['Looking at the ball while it flies.','Looking down at her hands while she sets up.'],
+  drill:'At home with no hoop: put a piece of tape on the wall about rim height as her "front rim". She says "rim!" out loud when her eyes lock on, then shoots. The app can\'t see her eyes, so this one is on you.'},
+ {id:'tray', t:'Pizza Tray', cue:'Pizza tray!', checks:['setL'],
+  why:'How the ball sits in her hand decides how it leaves her hand. Ball on the fingertips with the palm up underneath gives a quick, straight release.',
+  doit:['Middle finger on the air hole (or the middle of a seam).','Palm up, under the ball, wrist bent back — like carrying a pizza tray.','Ball sits on the fingertips and pads, with a little space under the palm.','Guide hand rests on the side of the ball — gentle, like patting a spider.'],
+  says:['Pizza tray!','Middle finger on the air hole.','Guide hand just pats the spider — it doesn\'t push.'],
+  watch:['Palm on top of the ball (slow release).','Ball jammed in the palm.','Guide hand thumb pushing the ball sideways.'],
+  drill:'Pizza tray walk: she carries the ball on her shooting hand, wrist bent back, around the foyer without it falling. Then 10 one-hand flips straight up from the tray, catching it on the tray.'},
+ {id:'elbow', t:'Elbow in an L', cue:'Make an L — no chicken wing!', checks:['elbow','setL','path'],
+  why:'The elbow is the steering wheel. Elbow under the ball points the shot straight; a flared-out elbow sends it sideways.',
+  doit:['Shooting elbow bends into an "L" (a right angle) under the ball.','Elbow points at the rim, not out to the side.','Forearm stands straight up and down under the ball.'],
+  says:['Make an L!','No chicken wing — elbow in.','Elbow points at the rim.'],
+  watch:['"Chicken wing": elbow sticking out to the side.','Ball held behind her head.','Arm too bent (squished L) or too straight (no L at all).'],
+  drill:'Mirror Ls: she stands facing a mirror (or the iPad in Front View) and shows you 10 Ls. Elbow under the ball, forearm straight up. Fix any chicken wing before shooting.'},
+ {id:'legs', t:'Bend & Extend', cue:'Bend and extend!', checks:['knees','rock','high'],
+  why:'Shooting power comes from the legs, not the arms. She bends, then pushes up through her legs as the ball goes up — one smooth motion.',
+  doit:['Bend the knees a little more right before the shot.','Push up through the legs as the ball rises.','The ball goes straight up from the L — no dipping it back down.','Release the ball high, above her forehead.'],
+  says:['Bend and extend!','Legs first, then the ball.','Straight up — don\'t rock the baby.'],
+  watch:['All arms, no legs (stiff knees).','"Rocking the baby": the elbow dips or swings before going up.','Shooting from her chest instead of above her head.'],
+  drill:'Bend-and-extend reps: 10 slow shots where she says "bend" on the way down and "extend" on the way up. Speed up only when every rep is smooth.'},
+ {id:'follow', t:'Follow-Through', cue:'All four to the floor — hold it!', checks:['follow','ext','high','path'],
+  why:'The follow-through shows where the ball really went. Holding it builds the habit and gives the shot backspin.',
+  doit:['Arm goes straight up — elbow finishes up by her eyebrow, arm straight.','Wrist snaps over the top.','"All four to the floor": after the release, all four fingers point down at the floor.','Hold it for 2–3 seconds — until the ball lands.'],
+  says:['Snap the wrist!','All four to the floor.','Hold it… hold it… now!'],
+  watch:['Pulling the arm back down right away.','Fingers pointing at the rim instead of down.','Arm finishing low or bent.'],
+  drill:'Cookie jar holds: 10 shots straight up to herself. On each one she freezes the follow-through and counts "one-Mississippi, two-Mississippi" before catching. The app checks the 2-second hold.'},
+ {id:'land', t:'Land Balanced', cue:'Land where you jumped!', checks:['legs','drift'],
+  why:'A balanced landing means a balanced shot. Kicking a leg out or fading sideways pulls the ball off line.',
+  doit:['Jump straight up, not forward or sideways.','Legs stay under her body in the air — no kicks.','Land on the same spot, on both feet, balanced.'],
+  says:['Straight up, straight down.','Keep your legs quiet.','Land on your spot.'],
+  watch:['One leg kicking out to the side.','Fading backward or drifting left/right.','Landing on one foot.'],
+  drill:'Spot landings: put a piece of tape on the floor. She shoots from the tape and must land on it every time. 10 in a row = done.'},
+ {id:'routine', t:'Daily Routine', cue:'Close, one hand, every day!', checks:[],
+  why:'Coach Behn\'s main habit: lots of short, perfect, one-hand shots. Good form close to the rim first, then move back.',
+  doit:['Warm-up: 10 pizza-tray flips straight up.','One-hand form shots: guide hand behind her back. At a hoop: 50–100 shots from 1–2 feet. At home: a Swish School 25 or 50 round.','Add the guide hand only when the one-hand shot is smooth.','Finish with 10 perfect two-hand form shots.'],
+  says:['Close and perfect first.','One hand — guide hand behind your back.','Every rep counts.'],
+  watch:['Backing up before the close shot is perfect.','Rushing reps.'],
+  drill:'Swish School plan: Mon/Wed/Fri — 25 shots Front View. Tue/Thu — 25 shots Side View. Weekend — 50 shots, her choice. Beat her best Form score.'}
+];
+const CHECK_INFO={
+ knees:{step:'legs', what:'Did she bend her knees before the shot and push up to straight legs by the release?', fix:'Bend first, then extend as the ball goes up. Legs before arms.'},
+ stance:{step:'balance', what:'Were her feet about shoulder-width apart before the shot?', fix:'Feet under her shoulders, toes to the rim.'},
+ elbow:{step:'elbow', what:'Front View: is her forearm straight up and down under the ball, or is the elbow winging out (chicken wing)?', fix:'Elbow in, under the ball, pointing at the rim.'},
+ setL:{step:'tray', what:'Side View: at the set point, does her elbow make an "L" (about 65–115°)?', fix:'Pizza tray, then make an L before going up.'},
+ rock:{step:'legs', what:'Side View: does the elbow go straight up, or does it dip back down first ("rocking the baby")?', fix:'From the L, straight up. No extra dip.'},
+ ext:{step:'follow', what:'Side View: is her arm nearly straight at the top?', fix:'Reach all the way up and snap the wrist.'},
+ high:{step:'follow', what:'Did the ball leave her hand above her forehead?', fix:'Shoot it up, not out from the chest.'},
+ follow:{step:'follow', what:'Did she hold her follow-through up for at least 2 seconds?', fix:'All four to the floor, count two Mississippi.'},
+ legs:{step:'land', what:'In the air, did a leg kick out to the side or up?', fix:'Legs quiet, under her body.'},
+ drift:{step:'land', what:'Did she land on the same spot she jumped from?', fix:'Jump straight up, land on your spot.'},
+ path:{step:'elbow', what:'Front View (ball path on): did the ball fly straight, or drift left/right after it left her hand?', fix:'Elbow in, pizza tray, guide hand only pats the spider.'}
+};
+const labelOf=k=>(SHOT_CHECKS.front.concat(SHOT_CHECKS.side).find(c=>c[0]===k)||[k,k])[1];
+let lCur=-1, lFrom='app';
+function openLearn(id){ $('learn').classList.remove('hidden'); if(id==null) renderLearnIndex(); else renderStep(STEPS.findIndex(s=>s.id===id)); }
+function closeLearn(){ try{ speechSynthesis.cancel(); }catch{} $('learn').classList.add('hidden'); }
+function renderLearnIndex(){
+  lCur=-1; $('lTitle').textContent='How to Shoot'; $('lPrev').classList.add('hidden'); $('lNext').classList.add('hidden');
+  $('lBody').innerHTML=`<div class="lintro"><b>Coach Behn's B.E.E.F.</b> — Balance, Eyes, Elbow, Follow-through. Teach one step at a time, in order. Move on only when the step feels easy. Tap a step for what to do, what to say, what to watch for, and a home drill.</div>`+
+    STEPS.map((st,i)=>`<button class="lstep" data-i="${i}"><span class="n">${i+1}</span><span><div class="t">${st.t}</div><div class="c">“${esc(st.cue)}”</div></span></button>`).join('');
+  $('learn').scrollTop=0;
+}
+function renderStep(i){
+  const st=STEPS[i]; if(!st) return renderLearnIndex(); lCur=i;
+  $('lTitle').textContent=(i+1)+'. '+st.t; $('lPrev').classList.remove('hidden'); $('lNext').classList.remove('hidden');
+  $('lPrev').disabled=i<=0; $('lNext').disabled=i>=STEPS.length-1;
+  const allK=SHOT_CHECKS.front.concat(SHOT_CHECKS.side).map(c=>c[0]);
+  const chips=st.checks.filter((k,j,a)=>a.indexOf(k)===j&&allK.includes(k)).map(k=>`<span class="chk">${esc(labelOf(k))}</span>`).join('') || '<span class="chk no">Not checked by the camera — coach it by eye</span>';
+  $('lBody').innerHTML=`
+    <div class="lcard"><div class="lcue">“${esc(st.cue)}”</div><p style="margin-top:8px">${esc(st.why)}</p></div>
+    <div class="lcard"><h4>What to do</h4><ul>${st.doit.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+    <div class="lcard"><h4>Coach says</h4>${st.says.map(x=>`<div class="says"><button data-say="${esc(x)}" aria-label="Say it">🔊</button><span>“${esc(x)}”</span></div>`).join('')}</div>
+    <div class="lcard"><h4>Watch for</h4><ul>${st.watch.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+    <div class="lcard"><h4>Drill</h4><p>${esc(st.drill)}</p></div>
+    <div class="lcard"><h4>Swish School checks this with</h4>${chips}</div>`;
+  $('learn').scrollTop=0;
+}
+function openCheck(k){
+  const ci=CHECK_INFO[k]; if(!ci) return; const st=STEPS.find(x=>x.id===ci.step);
+  const shots=R?R.shots.filter(s=>s.res[k]!=null):[], pct=shots.length?Math.round(shots.filter(s=>s.res[k]).length/shots.length*100)+'% this round':'';
+  $('chkCard').innerHTML=`<h3>${esc(labelOf(k))}</h3>${pct?`<div class="slbl">${pct}</div>`:''}
+    <p class="hint" style="color:var(--cream);font-size:18px">${esc(ci.what)}</p>
+    <div class="slbl">Fix</div><p class="hint" style="color:var(--cream);font-size:18px">${esc(ci.fix)}</p>
+    <div class="slbl">Drill</div><p class="hint" style="color:var(--cream);font-size:17px">${esc(st.drill)}</p>
+    <button class="go alt" id="chkLearn">📘 Step ${STEPS.indexOf(st)+1}: ${esc(st.t)}</button><button class="go" id="chkClose">Close</button>`;
+  $('chkSheet').classList.remove('hidden');
+  $('chkLearn').onclick=()=>{ $('chkSheet').classList.add('hidden'); openLearn(st.id); };
+  $('chkClose').onclick=()=>$('chkSheet').classList.add('hidden');
+}
+$('learnOpen').onclick=()=>{ if(busy()) return toast('Finish the round first'); openLearn(); };
+$('lBack').onclick=()=>{ if(lCur>=0) renderLearnIndex(); else closeLearn(); };
+$('lPrev').onclick=()=>renderStep(lCur-1);
+$('lNext').onclick=()=>renderStep(lCur+1);
+$('lBody').onclick=e=>{ const b=e.target.closest('.lstep'); if(b) return renderStep(+b.dataset.i);
+  const sp=e.target.closest('[data-say]'); if(sp){ ensureAudio(); const v=S.voice; S.voice=true; say(sp.dataset.say,{urgent:true}); S.voice=v; } };
+$('formList').onclick=e=>{ const r=e.target.closest('.frow'); if(r&&r.dataset.k) openCheck(r.dataset.k); };
+$('chkSheet').onclick=e=>{ if(e.target.id==='chkSheet') $('chkSheet').classList.add('hidden'); };
+$('learnBtn').onclick=()=>{ const k=$('learnBtn').dataset.k; const ci=CHECK_INFO[k]; openLearn(ci?ci.step:null); };
 
 /* ---------------- UI render ---------------- */
 function renderChips(){ $('chips').innerHTML=SETS.map(([n,l])=>`<button class="chip${n===S.n?' on':''}" data-n="${n}">${l}</button>`).join(''); }
