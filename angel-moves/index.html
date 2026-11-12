@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Angel Moves</title>
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<meta name="apple-mobile-web-app-title" content="Angel Moves">
+<style>
+  :root{--navy:#1b2a4a;--gold:#f5c400;--orange:#e8590c;--bg:#0c1d15;--card:#15302a;--muted:#9fc2b2}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:#fff}
+  header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;gap:10px}
+  h1{font-size:20px;margin:0;line-height:1.1}
+  h1 small{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-top:2px}
+  .me{display:flex;align-items:center;gap:6px;background:var(--card);padding:6px 8px;border-radius:14px}
+  .me .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+  .me button{width:40px;height:40px;border-radius:50%;border:2px solid #2c5446;background:#1c3d33;color:#fff;font-size:17px;font-weight:700}
+  .me button.sel{background:var(--gold);color:#1b1b1b;border-color:var(--gold)}
+  .me button.hide{display:none}
+  .me #lock{background:transparent;border:none;font-size:20px;width:36px}
+  .tabs{display:flex;gap:8px;padding:0 16px 8px}
+  .tabs button{flex:1;padding:10px 0;border-radius:12px;border:2px solid #2c5446;background:var(--card);color:#fff;font-size:18px;font-weight:800}
+  .tabs button.sel{border-color:var(--gold);color:var(--gold)}
+  main{display:flex;flex-wrap:wrap;gap:12px;padding:0 16px 16px}
+  .courtwrap{flex:1 1 440px;max-width:620px;margin:0 auto}
+  svg{width:100%;height:auto;display:block;border-radius:14px}
+  .side{flex:1 1 300px;display:flex;flex-direction:column;gap:10px}
+  .caption{background:var(--card);border-radius:14px;padding:14px;min-height:92px}
+  .caption .lab{font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.5px}
+  .caption .txt{font-size:22px;font-weight:700;margin-top:4px;line-height:1.25}
+  .caption .you{display:inline-block;margin-top:8px;background:var(--gold);color:#1b1b1b;font-weight:800;font-size:13px;padding:3px 9px;border-radius:8px}
+  .controls{display:flex;gap:8px}
+  .controls button{flex:1;padding:14px 0;border-radius:12px;border:none;font-size:17px;font-weight:800;background:#235043;color:#fff}
+  .controls #next{flex:2;background:var(--gold);color:#1b1b1b}
+  .controls button:disabled{opacity:.35}
+  .opts{display:none;flex-direction:column;gap:8px;background:var(--card);border-radius:14px;padding:12px}
+  .opts.show{display:flex}
+  .opts .h{font-size:14px;color:var(--muted);font-weight:700}
+  .opts button{text-align:left;padding:12px;border-radius:10px;border:2px solid #2c5446;background:#1c3d33;color:#fff;font-size:16px;font-weight:600}
+  .opts button.sel{border-color:var(--orange)}
+  .opts button.you{box-shadow:inset 4px 0 0 var(--gold)}
+  .steps{background:var(--card);border-radius:14px;padding:10px 12px;font-size:15px}
+  .steps .row{padding:6px 4px;color:var(--muted);display:flex;gap:8px}
+  .steps .row b{min-width:28px;color:#cfe3d9}
+  .steps .row.done{color:#e2efe8}
+  .steps .row.cur{color:#fff;font-weight:700;background:#215043;border-radius:8px}
+  .steps .row.you b{color:var(--gold)}
+  .job{font-size:14px;color:#e2efe8;background:#1c3d33;border-left:4px solid var(--gold);padding:10px 12px;border-radius:10px}
+  .job b{color:var(--gold)}
+  .row2{display:flex;gap:8px}
+  .row2 button{flex:1;padding:10px 0;border-radius:10px;border:2px solid #2c5446;background:transparent;color:#cfe3d9;font-size:14px;font-weight:700}
+  .row2 button.on{border-color:var(--gold);color:var(--gold)}
+  footer{color:#6f9483;font-size:12px;text-align:center;padding:0 16px 20px}
+  @keyframes pulse{0%{r:20;opacity:.9}100%{r:31;opacity:0}}
+  .ring{animation:pulse 1.4s ease-out infinite}
+</style>
+</head>
+<body>
+<header>
+  <h1>Angel Moves <small>Guardian Angels · Play 2 (Man-on-Man)</small></h1>
+  <div class="me" id="me"><span class="lbl">I'm</span></div>
+</header>
+<div class="tabs" id="tabs"></div>
+<main>
+  <div class="courtwrap">
+    <svg id="court" viewBox="0 0 500 480" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="aMove" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f4d3a"/></marker>
+        <marker id="aMe" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b07d00"/></marker>
+        <marker id="aPass" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e8590c"/></marker>
+      </defs>
+      <rect x="0" y="0" width="500" height="480" fill="#0c1d15"/>
+      <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ecc994"/><stop offset=".5" stop-color="#e2b97d"/><stop offset="1" stop-color="#eccb98"/></linearGradient>
+      <rect x="10" y="20" width="480" height="450" fill="url(#wood)" stroke="#fff" stroke-width="4"/>
+      <rect x="190" y="20" width="120" height="190" fill="#d9ad6f" stroke="#1f4d3a" stroke-width="3"/>
+      <circle cx="250" cy="210" r="60" fill="none" stroke="#1f4d3a" stroke-width="3"/>
+      <path d="M40 20 L40 60 A210 210 0 0 0 460 60 L460 20" fill="none" stroke="#1f4d3a" stroke-width="3"/>
+      <rect x="176" y="68" width="14" height="10" fill="#1f4d3a"/>
+      <rect x="310" y="68" width="14" height="10" fill="#1f4d3a"/>
+      <line x1="222" y1="40" x2="278" y2="40" stroke="#333" stroke-width="4"/>
+      <circle cx="250" cy="52" r="9" fill="none" stroke="#e8590c" stroke-width="3"/>
+      <path d="M190 470 A60 60 0 0 1 310 470" fill="none" stroke="#1f4d3a" stroke-width="3"/>
+      <text x="250" y="462" text-anchor="middle" font-size="30" font-weight="900" font-family="Georgia,serif" fill="#1f4d3a" opacity=".85">GA</text>
+      <g id="trails"></g>
+      <g id="players"></g>
+      <circle id="ball" r="7.5" fill="#e8590c" stroke="#5a2300" stroke-width="1.5"/>
+      <text id="shotTxt" x="250" y="100" text-anchor="middle" font-size="22" font-weight="900" fill="#e8590c" opacity="0">SHOT!</text>
+    </svg>
+  </div>
+  <div class="side">
+    <div class="caption" id="caption"></div>
+    <div class="controls">
+      <button id="back">◀ Back</button>
+      <button id="next">Next ▶</button>
+      <button id="restart">⟲</button>
+    </div>
+    <div class="row2">
+      <button id="auto">▶▶ Play all</button>
+      <button id="slow">🐢 Slow</button>
+    </div>
+    <div class="opts" id="opts"></div>
+    <div class="job" id="job"></div>
+    <div class="steps" id="steps"></div>
+  </div>
+</main>
+<footer>Spots are approximate. Always run it the way Coach teaches it.</footer>
+
+<script>
+const RIM=[250,52];
+const START={1:[255,350],2:[165,195],3:[165,150],4:[165,105]};
+const PICK_A={l:'A',t:'2 sets the pick for the 1',moves:[{p:2,to:[268,322],screen:true}]};
+const PLAYS=[
+ {id:'23',start:{...START,5:[390,165]},steps:[
+   PICK_A,
+   {l:'B',t:'1 moves right off the pick',moves:[{p:1,via:[[296,338]],to:[378,228]}]},
+   {l:'B1',t:'5 goes down to the "block" to set pick for the 3',moves:[{p:5,to:[322,86],screen:true}]},
+   {l:'C',t:'4 and 5 set picks for the 3',moves:[{p:4,to:[178,120],screen:true},{p:3,via:[[142,122],[150,70],[190,40],[250,30],[330,44],[366,72]],to:[374,112]}]},
+   {l:'D',t:'5 posts up and 4 flashes',moves:[{p:5,to:[324,160]},{p:4,to:[250,108]}]},
+   {l:'E',t:'1 passes the ball to the 3 on the right wing',pass:3}
+  ],alts:[
+   {l:'Alt 1',t:'3 catches and shoots',shot:true},
+   {l:'Alt 2',t:'3 passes to the 5 (down low)',pass:5},
+   {l:'Alt 3',t:'3 passes to the 4 (in the key)',pass:4},
+   {l:'Alt 4',t:'3 passes back to the 2',pass:2}
+  ]},
+ {id:'24',start:{...START,5:[365,175]},steps:[
+   PICK_A,
+   {l:'B',t:'1 moves right off the pick',moves:[{p:1,via:[[296,338]],to:[380,215]}]},
+   {l:'B1',t:'5 goes down to the opposite "block" to set pick for the 4',moves:[{p:5,to:[190,120],screen:true}]},
+   {l:'C',t:'4 goes off the pick set by the 5 to the right wing',moves:[{p:4,via:[[158,70],[200,40],[250,30],[315,42],[370,76]],to:[390,118]}]},
+   {l:'D',t:'5 flashes',moves:[{p:5,to:[250,110]}]},
+   {l:'E',t:'1 passes the ball to the 4',pass:4}
+  ],alts:[
+   {l:'Alt 1',t:'4 catches and shoots',shot:true},
+   {l:'Alt 2',t:'4 passes to the 5 (in the key)',pass:5},
+   {l:'Alt 3',t:'4 passes back to the 2',pass:2}
+  ]},
+ {id:'25',start:{...START,5:[375,135]},steps:[
+   PICK_A,
+   {l:'B',t:'1 moves right off the pick',moves:[{p:1,via:[[296,338]],to:[400,190]}]},
+   {l:'B1',t:'5 gets position ("posts up")',moves:[{p:5,to:[324,158]}]},
+   {l:'C',t:'1 passes the ball to the 5',pass:5}
+  ],alts:[
+   {l:'Alt 1',t:'5 goes to the basket',moves:[{p:5,to:[272,80]}],shot:true},
+   {l:'Alt 2',t:'5 passes to the 4 who flashes',moves:[{p:4,to:[242,110]}],pass:4},
+   {l:'Alt 3',t:'5 passes back to the 1',pass:1},
+   {l:'Alt 4',t:'5 passes back to the 2',pass:2}
+  ]}
+];
+
+// ---------- storage (safe) ----------
+function load(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+let playIdx=load('pb.play',0); if(!(playIdx>=0&&playIdx<PLAYS.length))playIdx=0;
+let me=null, locked=false;
+function loadPos(){const id=PLAYS[playIdx].id;me=load('pb.me.'+id,null);locked=load('pb.lock.'+id,false);if(!me)locked=false}
+loadPos();
+let k=0, alt=null, busy=false, slow=false, autoOn=false;
+
+const $=id=>document.getElementById(id);
+const NS='http://www.w3.org/2000/svg';
+const play=()=>PLAYS[playIdx];
+const seq=()=>alt==null?play().steps:play().steps.concat([play().alts[alt]]);
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+// ---------- geometry ----------
+function segLens(pts){const L=[0];for(let i=1;i<pts.length;i++)L.push(L[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));return L}
+function pointAt(pts,t){const L=segLens(pts),tot=L[L.length-1];if(tot===0)return pts[pts.length-1].slice();const d=t*tot;for(let i=1;i<pts.length;i++){if(d<=L[i]||i===pts.length-1){const s=(d-L[i-1])/((L[i]-L[i-1])||1);return[pts[i-1][0]+(pts[i][0]-pts[i-1][0])*s,pts[i-1][1]+(pts[i][1]-pts[i-1][1])*s]}}}
+function partial(pts,t){const L=segLens(pts),tot=L[L.length-1],d=t*tot,out=[pts[0]];for(let i=1;i<pts.length;i++){if(L[i]<d)out.push(pts[i]);else break}out.push(pointAt(pts,t));return out}
+function trim(pts,a,b){const L=segLens(pts),tot=L[L.length-1];if(tot<a+b+6)return null;const t0=a/tot,t1=1-b/tot;const p=partial(pts,t1);const st=pointAt(pts,t0);const out=[st];const L2=segLens(p);for(let i=1;i<p.length;i++)if(L2[i]>a)out.push(p[i]);return out}
+
+// ---------- state ----------
+function initial(){return{pos:clone(play().start),ball:1,trails:[]}}
+function apply(st,step,idx){
+  (step.moves||[]).forEach(m=>{const path=[st.pos[m.p],...(m.via||[]),m.to];st.trails.push({type:'move',p:m.p,pts:path,screen:!!m.screen,idx});st.pos[m.p]=m.to.slice()});
+  if(step.pass){st.trails.push({type:'pass',pts:[st.pos[st.ball],st.pos[step.pass]],idx});st.ball=step.pass}
+  if(step.shot){st.trails.push({type:'shot',pts:[st.pos[st.ball],RIM],idx});st.ball='rim'}
+}
+function stateAt(n){const st=initial(),s=seq();for(let i=0;i<n;i++)apply(st,s[i],i);return st}
+function ballXY(pos,ball){return ball==='rim'?RIM:[pos[ball][0]+13,pos[ball][1]-13]}
+function involves(step,before){return (step.moves||[]).some(m=>m.p==me)||(step.pass&&(step.pass==me||before.ball==me))||(step.shot&&before.ball==me)}
+
+// ---------- drawing ----------
+const playersG=$('players'),trailsG=$('trails'),ball=$('ball');
+function buildPlayers(){
+  playersG.innerHTML='';
+  for(let p=1;p<=5;p++){
+    const g=document.createElementNS(NS,'g');g.id='p'+p;
+    const isMe=p==me;
+    g.innerHTML=(isMe?'<circle class="ring" r="20" fill="none" stroke="#f5c400" stroke-width="3"/>':'')+
+      `<circle r="16" fill="${isMe?'#f5c400':'#1f5a3c'}" stroke="#fff" stroke-width="2.5"/>`+
+      `<text y="6.5" text-anchor="middle" font-size="19" font-weight="900" fill="${isMe?'#1b1b1b':'#fff'}">${p}</text>`;
+    playersG.appendChild(g);
+  }
+  // draw my player last so it sits on top
+  if(me)playersG.appendChild($('p'+me));
+}
+function trailSVG(tr,cur){
+  const op=cur?1:0.22;
+  if(tr.type==='move'){
+    const pts=trim(tr.pts,0,tr.screen?0:19);if(!pts)return'';
+    const col=tr.p==me?'#b07d00':'#1f4d3a';
+    let s=`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="${col}" stroke-width="3.5" stroke-linejoin="round" opacity="${op}" ${tr.screen?'':`marker-end="url(#${tr.p==me?'aMe':'aMove'})"`}/>`;
+    if(tr.screen&&tr.pts.length>1){
+      const e=tr.pts[tr.pts.length-1],q=tr.pts[tr.pts.length-2];let dx=e[0]-q[0],dy=e[1]-q[1];const L=Math.hypot(dx,dy)||1;dx/=L;dy/=L;
+      const cx=e[0]+dx*20,cy=e[1]+dy*20;
+      s+=`<line x1="${cx-dy*14}" y1="${cy+dx*14}" x2="${cx+dy*14}" y2="${cy-dx*14}" stroke="${col}" stroke-width="5" stroke-linecap="round" opacity="${op}"/>`;
+    }
+    return s;
+  }
+  const pts=trim(tr.pts,14,tr.type==='shot'?10:19);if(!pts)return'';
+  return `<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="#e8590c" stroke-width="3" stroke-dasharray="7 6" opacity="${op}" marker-end="url(#aPass)"/>`;
+}
+function draw(pos,bxy,trails,cur){
+  trailsG.innerHTML=trails.map(t=>trailSVG(t,t.idx===cur)).join('');
+  for(let p=1;p<=5;p++)$('p'+p).setAttribute('transform',`translate(${pos[p][0]},${pos[p][1]})`);
+  ball.setAttribute('cx',bxy[0]);ball.setAttribute('cy',bxy[1]);
+}
+function drawInstant(){const st=stateAt(k);draw(st.pos,ballXY(st.pos,st.ball),st.trails,k-1);$('shotTxt').setAttribute('opacity',st.ball==='rim'?1:0)}
+
+// ---------- animation ----------
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+function tween(ms,fn){return new Promise(r=>{const t0=performance.now();function f(now){const t=Math.min(1,(now-t0)/ms);fn(ease(t),t);t<1?requestAnimationFrame(f):r()}requestAnimationFrame(f)})}
+async function animateStep(i){
+  const step=seq()[i],st=stateAt(i),pos=clone(st.pos),base=st.trails;let holder=st.ball;
+  const sp=slow?1.9:1;
+  $('shotTxt').setAttribute('opacity',0);
+  if(step.moves&&step.moves.length){
+    const paths=step.moves.map(m=>({p:m.p,pts:[st.pos[m.p],...(m.via||[]),m.to],screen:!!m.screen}));
+    const longest=Math.max(...paths.map(x=>{const L=segLens(x.pts);return L[L.length-1]}));
+    await tween((900+longest*2.2)*sp,t=>{
+      const extra=paths.map(x=>{pos[x.p]=pointAt(x.pts,t);return{type:'move',p:x.p,pts:partial(x.pts,t),screen:x.screen&&t>.98,idx:i}});
+      draw(pos,ballXY(pos,holder),base.concat(extra),i);
+    });
+    paths.forEach(x=>base.push({type:'move',p:x.p,pts:x.pts,screen:x.screen,idx:i}));
+    if(step.pass||step.shot)await sleep(250*sp);
+  }
+  if(step.pass){
+    const a=ballXY(pos,holder),b=ballXY(pos,step.pass),from=pos[holder].slice(),to=pos[step.pass].slice();
+    await tween(750*sp,t=>{
+      const bp=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
+      draw(pos,bp,base.concat([{type:'pass',pts:partial([from,to],t),idx:i}]),i);
+    });
+    base.push({type:'pass',pts:[from,to],idx:i});holder=step.pass;
+  }
+  if(step.shot){
+    const a=ballXY(pos,holder),from=pos[holder].slice();
+    await tween(900*sp,(t,raw)=>{
+      const bp=[a[0]+(RIM[0]-a[0])*raw,a[1]+(RIM[1]-a[1])*raw-Math.sin(Math.PI*raw)*55];
+      draw(pos,bp,base.concat([{type:'shot',pts:partial([from,RIM],raw),idx:i}]),i);
+    });
+    $('shotTxt').setAttribute('opacity',1);
+  }
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+// ---------- UI ----------
+function buildMe(){
+  const box=$('me');box.innerHTML='<span class="lbl">I\'m</span>';
+  for(let p=1;p<=5;p++){const b=document.createElement('button');b.textContent=p;
+    b.className=(p==me?'sel':'')+(locked&&p!=me?' hide':'');
+    b.onclick=()=>{if(locked||busy)return;me=(me===p?null:p);save('pb.me.'+play().id,me);buildMe();buildPlayers();drawInstant();ui()};box.appendChild(b)}
+  const l=document.createElement('button');l.id='lock';l.textContent=locked?'🔒':'🔓';l.title=locked?'Unlock position':'Lock position';
+  l.onclick=()=>{if(!me&&!locked)return;locked=!locked;save('pb.lock.'+play().id,locked);buildMe()};box.appendChild(l);
+}
+function buildTabs(){
+  const t=$('tabs');t.innerHTML='';
+  PLAYS.forEach((p,i)=>{const b=document.createElement('button');b.textContent='"'+p.id+'"';b.className=i===playIdx?'sel':'';
+    b.onclick=()=>{if(busy)return;autoOn=false;playIdx=i;save('pb.play',i);k=0;alt=null;loadPos();buildMe();buildPlayers();buildTabs();drawInstant();ui()};t.appendChild(b)});
+}
+function ui(){
+  const p=play(),s=seq(),n=p.steps.length;
+  // caption
+  let lab,txt,you=false;
+  if(k===0){lab='READY';txt='Tap Next to start "'+p.id+'"'}
+  else{const st=s[k-1];lab='STEP '+st.l;txt=st.t;you=involves(st,stateAt(k-1))}
+  if(k===n&&alt==null){lab='STEP '+p.steps[n-1].l+' · DONE';txt='Now pick an option below 👇'}
+  $('caption').innerHTML=`<div class="lab">${lab}</div><div class="txt">${txt}</div>${you?'<span class="you">⭐ THAT\'S YOU!</span>':''}`;
+  // controls
+  $('back').disabled=busy||k===0;
+  $('next').disabled=busy||k>=s.length;
+  $('next').textContent=k===0?'Start ▶':'Next ▶';
+  $('restart').disabled=busy;
+  $('auto').classList.toggle('on',autoOn);$('slow').classList.toggle('on',slow);
+  // options
+  const o=$('opts');
+  if(k>=n){o.classList.add('show');
+    const before=stateAt(n);
+    o.innerHTML='<div class="h">OPTIONS — what happens next?</div>'+p.alts.map((a,i)=>`<button data-i="${i}" class="${alt===i?'sel':''} ${involves(a,before)?'you':''}">${a.l} — ${a.t}</button>`).join('');
+    o.querySelectorAll('button').forEach(b=>b.onclick=()=>chooseAlt(+b.dataset.i));
+  }else o.classList.remove('show');
+  // my job
+  const mine=[];let st=initial();
+  p.steps.forEach((x,i)=>{if(involves(x,st))mine.push(x.l+') '+x.t);apply(st,x,i)});
+  const altMine=p.alts.filter(a=>involves(a,stateAt(n))).map(a=>a.l+': '+a.t);
+  $('job').innerHTML=!me?'<b>Tap your number</b> in the top right to highlight your moves (tap it again to watch everyone).':`<b>Your job as the ${me}:</b><br>`+(mine.length?mine.join('<br>'):'Hold your spot and stay ready.')+(altMine.length?'<br><b>Options with you:</b> '+altMine.join(' · '):'');
+  // step list
+  let before=initial();
+  $('steps').innerHTML=p.steps.map((x,i)=>{const y=involves(x,before);apply(before,x,i);
+    return `<div class="row ${i<k?'done':''} ${i===k-1?'cur':''} ${y?'you':''}"><b>${x.l}</b><span>${x.t}${y?' ⭐':''}</span></div>`}).join('');
+}
+async function next(){
+  if(busy||k>=seq().length)return;
+  busy=true;ui();await animateStep(k);k++;busy=false;ui();
+}
+async function chooseAlt(i){
+  if(busy)return;autoOn=false;alt=i;k=play().steps.length;drawInstant();await next();
+}
+$('next').onclick=()=>{autoOn=false;next()};
+$('back').onclick=()=>{if(busy||k===0)return;autoOn=false;k--;if(k<=play().steps.length)alt=null;drawInstant();ui()};
+$('restart').onclick=()=>{if(busy)return;autoOn=false;k=0;alt=null;drawInstant();ui()};
+$('slow').onclick=()=>{slow=!slow;ui()};
+$('auto').onclick=async()=>{
+  if(busy)return;
+  if(k>=play().steps.length){k=0;alt=null;drawInstant()}
+  autoOn=true;ui();
+  while(autoOn&&k<play().steps.length){await next();if(!autoOn)break;await sleep(slow?900:500)}
+  autoOn=false;ui();
+};
+
+buildMe();buildTabs();buildPlayers();drawInstant();ui();
+</script>
+</body>
+</html>
