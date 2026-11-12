@@ -507,6 +507,7 @@ const SHOT_CUES={knees:'Bend and extend! Use your legs.', stance:'Balance. Feet 
   setL:'Make an L under the ball. Pizza tray!', rock:"Don't rock the baby! Elbow goes straight up.", drift:'Balance! Land right where you jumped.', path:'Shoot it straight! Elbow in, pizza tray.', legs:'Keep your legs under you.'};
 const SAY_LAB={knees:'bend and extend', stance:'your balance', elbow:'no chicken wing', path:'shooting it straight', high:'releasing it high', follow:'holding your follow through', legs:'keeping your legs quiet', drift:'landing on your spot', setL:'your L under the ball', rock:'not rocking the baby', ext:'getting your arm straight up'};
 const FOLLOW_SECS=2;
+const ELBOW_OUT=.45; // chicken wing = elbow more than ~half a shoulder-width outside her shoulder line
 const ang=(a,b,c)=>{ const v1x=a.x-b.x,v1y=a.y-b.y,v2x=c.x-b.x,v2y=c.y-b.y; const d=Math.hypot(v1x,v1y)*Math.hypot(v2x,v2y); return d?Math.acos(Math.max(-1,Math.min(1,(v1x*v2x+v1y*v2y)/d)))*180/Math.PI:180; };
 const med=a=>{ if(!a.length) return null; const b=[...a].sort((x,y)=>x-y); return b[b.length>>1]; };
 const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
@@ -557,13 +558,20 @@ function evalShot(pre,U){
   if(view==='front'&&preA.length>3){ const r=med(preA.map(f=>Math.abs(f.aL.x-f.aR.x)))/sw; res.stance=r>=.55&&r<=1.8; }
   // elbow in (front): forearm close to vertical at the set point
   if(view==='front'){
-    let set=U.slice(0,pi+1).filter(f=>f.armOK&&f.el.y>f.wr.y&&f.elb<135);
-    if(!set.length){ const c=U.slice(0,pi+1).filter(f=>f.el.y>f.wr.y); if(c.length) set=[c.reduce((a,b)=>b.elb<a.elb?b:a)]; }
+    // Stop judging the elbow BEFORE the release: drop the last ~100 ms where the arm is snapping straight
+    // (the elbow naturally swings as the arm extends; that is not a chicken wing). Nothing after release is checked.
+    const preRel=U.slice(0,Math.max(1,pi-2));
+    let set=preRel.filter(f=>f.armOK&&f.el.y>f.wr.y&&f.elb<135);
+    if(!set.length){ const c=preRel.filter(f=>f.el.y>f.wr.y); if(c.length) set=[c.reduce((a,b)=>b.elb<a.elb?b:a)]; }
     // Chicken wing = at the set point, the elbow sticks OUT to the side past her shoulder line (like a wing).
     // Elbow tucked next to her body or under the ball sits at/inside the shoulder line = fine.
     // Measured in shoulder-widths so distance from the iPad doesn't matter. (Old check used forearm tilt angle,
     // which false-flagged a tucked elbow pointing at the camera because the forearm looks short on screen.)
-    if(set.length){ const out=med(set.map(f=>(Math.abs(f.el.x-f.shMid)-Math.abs(f.sh.x-f.shMid))/f.sw)); res.elbow=out<=.25; why.elbow=Math.round(out*100)+'% out'; }
+    // Reference = her hips (they don't move when the arm goes up) and her shoulder width measured while she stood square
+    // before the shot (shoulders look narrower once she lifts/turns, which made the old number jumpy).
+    // Only judge the true set point: ball up at/above her face.
+    const top=set.filter(f=>f.wr.y<=f.nose.y+.02), use=top.length?top:set;
+    if(use.length){ const out=med(use.map(f=>(Math.abs(f.el.x-f.midX)-sw/2)/sw)); res.elbow=out<=ELBOW_OUT; why.elbow=Math.round(out*100); }
   }
   if(view==='side'){
     // "L" at the set point: tightest elbow angle once the ball is above her shoulder
@@ -618,13 +626,20 @@ function evalShot(pre,U){
   R.shots.push({res,score}); R.reps=R.shots.length; R.all=R.reps; R.score+=score;
   R.streak = score===100 ? R.streak+1 : 0; R.best=Math.max(R.best,R.streak);
   shot.last={res,why,score,t:performance.now()};
+  if(S.debug&&why.elbow!=null) toast('Elbow out: '+why.elbow+'  (flags over '+Math.round(ELBOW_OUT*100)+')');
   const miss=SHOT_PRIORITY[view].find(k=>res[k]===false);
   // ONE short critique per shot: either praise, or the single most important fix (2-4 words)
   const SHORT={elbow:'Elbow in.', stance:'Feet shoulder width.', path:'Shoot it straight.', high:'Release higher.', follow:'Hold your follow through.',
     legs:'Legs quiet.', drift:'Land on your spot.', setL:'Make an L.', rock:'Straight up, no dip.', ext:'Arm straight up.'};
   if(!miss){ beep(1100,.15,.3); pop(R.streak>=3?'ON FIRE!':'PERFECT FORM','#5ff0a0',null,.25,true); say(R.streak>=3?'On fire!':'Perfect!',{urgent:true}); }
   else { beep(520,.12,.25); pop(({path:'STRAIGHT!',follow:'HOLD IT!',elbow:'CHICKEN WING!',rock:'ROCKING!',setL:'MAKE AN L!',knees:'BEND & EXTEND!',legs:'LEGS!',high:'HIGHER!',ext:'ARM UP!',drift:'BALANCE!',stance:'BALANCE!'})[miss]||'FIX IT!','#ff5a4f',null,.25);
-    say(miss==='knees'?(why.knees==='extend'?'Push up through your legs.':'Bend your knees.'):SHORT[miss],{urgent:true}); }
+    // Something she did RIGHT first, then the one fix. Rotate the praise so it doesn't repeat every shot.
+    const PRAISE={knees:'Great legs!', stance:'Good balance!', elbow:'Nice elbow!', path:'Straight shot!', high:'Nice high release!', follow:'Great follow through!',
+      legs:'Quiet legs!', drift:'Nice landing!', setL:'Nice L!', rock:'Smooth lift!', ext:'Nice extension!'};
+    const good=keys.filter(k=>res[k]&&PRAISE[k]), fresh=good.filter(k=>k!==shot.lastPraise), pk2=(fresh.length?fresh:good)[Math.floor(Math.random()*(fresh.length||good.length||1))];
+    shot.lastPraise=pk2;
+    const fix=miss==='knees'?(why.knees==='extend'?'Push up through your legs.':'Bend your knees.'):SHORT[miss];
+    say((pk2?PRAISE[pk2]+' ':'')+fix,{urgent:true}); }
   renderFormList(res,R.shots); updateBoard();
   if(R.reps>=R.def.target) later(()=>endSegment(),1600);
   else restBetween();
