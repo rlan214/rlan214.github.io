@@ -75,6 +75,9 @@ main{flex:1;display:grid;gap:14px;padding-bottom:16px;grid-template-columns:1fr}
 #cdOv{background:rgba(4,22,16,.62)}
 .cdDrill{font-family:var(--jersey);color:var(--gold);font-size:clamp(24px,4.5vw,40px);-webkit-text-stroke:1px #fff}
 .cdCue{font-size:clamp(18px,2.6vw,24px);font-weight:600;color:var(--cream);max-width:520px;line-height:1.25}
+#bigNum{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;pointer-events:none;font-family:var(--jersey);color:var(--gold);line-height:.8;
+  -webkit-text-stroke:6px #fff;text-shadow:0 10px 60px rgba(0,0,0,.8);opacity:0;transition:opacity .12s;overflow:hidden}
+#bigNum.on{opacity:.95} #bigNum.word{color:#5ff0a0}
 .cdNum{font-family:var(--jersey);font-size:clamp(90px,18vw,170px);color:var(--gold);line-height:1;-webkit-text-stroke:3px #fff;text-shadow:0 8px 40px rgba(0,0,0,.6)}
 .cdNext{font-size:20px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
 .calhint{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);padding:9px 18px;border-radius:999px;font-size:19px;font-weight:700;white-space:nowrap}
@@ -237,6 +240,7 @@ body.shotmode .formlist{display:flex}
         <button class="go alt full" id="doneBtn">Done</button>
       </div>
     </div>
+    <div id="bigNum"></div>
   </section>
 
   <section class="board">
@@ -334,7 +338,13 @@ let recorder=null, recChunks=[], recURL=null, recType='';
 function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove('show'),2400); }
 const fmt=s=>{ s=Math.max(0,s); const m=Math.floor(s/60), r=Math.floor(s%60); return m+':'+String(r).padStart(2,'0'); };
 const later=(fn,ms)=>{ const id=setTimeout(fn,ms); timers.push(id); return id; };
-function clearTimers(){ timers.forEach(clearTimeout); timers=[]; }
+function clearTimers(){ timers.forEach(clearTimeout); timers=[]; bigNum(''); }
+// Giant countdown that fills the camera box so she can read it from across the room (sized from the box itself)
+let bigT=null; function bigNum(t,ms=900){ const e=$('bigNum'); if(!e) return; clearTimeout(bigT);
+  if(!t){ e.classList.remove('on'); return; }
+  const st=e.parentElement, H=st.clientHeight, W=st.clientWidth, word=isNaN(+t);
+  e.style.fontSize=(word?Math.min(W*.30,H*.5):Math.min(H*1.25,W*1.6))+'px';
+  e.textContent=t; e.classList.toggle('word',word); e.classList.add('on'); bigT=setTimeout(()=>e.classList.remove('on'),ms); }
 function season(){ const d=new Date(), y=d.getFullYear(); return d.getMonth()>=6 ? `${y}-${String(y+1).slice(2)}` : `${y-1}-${String(y).slice(2)}`; }
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const VP_BASE='/swish-school/audio/';
@@ -551,7 +561,7 @@ function evalShot(pre,U){
   // knees
   // "Bend and Extend": legs load before the shot and are straight again by the release
   const atRel=U.slice(Math.max(0,pi-2),pi+2);
-  if(view==='front'){ const legs=rise.filter(f=>f.ankOK).map(f=>f.leg); if(base&&legs.length>3){ const depth=1-Math.min(...legs)/base, ext=Math.max(...atRel.map(f=>f.leg))/base; res.knees=depth>=.06&&ext>=.93; why.knees=depth<.06?'bend':'extend'; } }
+  if(view==='front'){ const legs=rise.filter(f=>f.ankOK).map(f=>f.leg); if(base&&legs.length>3){ const lo2=[...legs].sort((a,b)=>a-b)[1], depth=1-lo2/base, ext=Math.max(...atRel.map(f=>f.leg))/base; res.knees=depth>=.06&&ext>=.93; why.knees=depth<.06?'bend':'extend'; } }
   else { const ks=rise.map(f=>f.knee); if(ks.length>3){ const bent=Math.min(...ks)<=150, ext=Math.max(...atRel.map(f=>f.knee))>=160; res.knees=bent&&ext; why.knees=!bent?'bend':'extend'; } }
   // stance width (front): feet roughly shoulder width
   const preA=pre.filter(f=>f.ankOK), sw=med(pre.map(f=>f.sw))||pk.sw;
@@ -620,6 +630,8 @@ function evalShot(pre,U){
         shot.path={pts:[near,...flight],ok:res.path,t:performance.now()}; }
     }
   }
+  // No knee reading (legs not seen / no bend) = not a real form shot. Count it as a miss so arm-only reps can't score Perfect.
+  if(res.knees==null){ res.knees=false; why.knees='bend'; }
   // score + coach
   const keys=checksFor(view).map(c=>c[0]).filter(k=>res[k]!=null), passed=keys.filter(k=>res[k]).length;
   const score=keys.length?Math.round(passed/keys.length*100):0;
@@ -648,9 +660,9 @@ function evalShot(pre,U){
 function restBetween(){
   const secs=S.rest|0; if(!secs) return;
   const now=performance.now(), ms=secs*1000; R.ignoreUntil=now+ms; shot.st='wait'; shot.buf=[];
-  const cue=n=>()=>{ if(state!=='running') return; pop(String(n),'#f6c623',null,.35,true); beep(660); };
+  const cue=n=>()=>{ if(state!=='running') return; bigNum(String(n)); beep(660); };
   if(secs>=4){ later(cue(3),ms-3000); later(cue(2),ms-2000); later(cue(1),ms-1000); }
-  later(()=>{ if(state!=='running') return; pop('SHOOT!','#5ff0a0',null,.35,true); beep(1100,.3); say('Shoot!',{urgent:true}); },ms);
+  later(()=>{ if(state!=='running') return; bigNum('SHOOT!',700); beep(1100,.3); say('Shoot!',{urgent:true}); },ms);
 }
 function renderFormList(res,shots){
   const rows=checksFor(S.view).map(([k,lab])=>{
@@ -718,10 +730,10 @@ function startRun(){
   $('cdNext').textContent=(S.view==='front'?'FRONT VIEW':'SIDE VIEW')+' · STAND TALL FOR THE COUNT'; $('cdNum').textContent=''; $('cdOv').classList.remove('hidden');
   say('Get ready.',{urgent:true});
   const gap=1800;
-  later(()=>{ $('cdNum').textContent='3'; beep(660); },gap);
-  later(()=>{ $('cdNum').textContent='2'; beep(660); },gap+1000);
-  later(()=>{ $('cdNum').textContent='1'; beep(660); },gap+2000);
-  later(()=>{ $('cdNum').textContent='SHOOT!'; beep(1100,.3); say('Shoot!');
+  later(()=>{ $('cdNum').textContent=''; bigNum('3'); beep(660); },gap);
+  later(()=>{ bigNum('2'); beep(660); },gap+1000);
+  later(()=>{ bigNum('1'); beep(660); },gap+2000);
+  later(()=>{ bigNum('SHOOT!',700); beep(1100,.3); say('Shoot!');
     state='running'; R.t0=performance.now(); R.ignoreUntil=R.t0+150; setGo('STOP','stop');
     later(()=>{ if(state==='running') $('cdOv').classList.add('hidden'); },650);
   },gap+3000);
