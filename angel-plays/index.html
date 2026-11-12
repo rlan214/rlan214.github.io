@@ -9,20 +9,23 @@
 <link rel="icon" href="icon.png">
 <meta name="apple-mobile-web-app-title" content="Angel Plays">
 <style>
-  :root{--navy:#1b2a4a;--gold:#f5c400;--orange:#e8590c;--bg:#0c1d15;--card:#15302a;--muted:#9fc2b2}
+  :root{--gold:#f5c400;--orange:#e8590c;--bg:#0c1d15;--card:#15302a;--muted:#9fc2b2}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:#fff}
-  header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;gap:10px}
+  header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;gap:10px}
   h1{font-size:20px;margin:0;line-height:1.1}
   h1 small{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-top:2px}
-  .me{display:flex;align-items:center;gap:6px;background:var(--card);padding:6px 8px;border-radius:14px}
+  .me{display:flex;align-items:center;gap:5px;background:var(--card);padding:6px 8px;border-radius:14px}
   .me .lbl{font-size:13px;color:var(--muted);margin-right:2px}
-  .me button{width:40px;height:40px;border-radius:50%;border:2px solid #2c5446;background:#1c3d33;color:#fff;font-size:17px;font-weight:700}
+  .me button{width:38px;height:38px;border-radius:50%;border:2px solid #2c5446;background:#1c3d33;color:#fff;font-size:17px;font-weight:700}
   .me button.sel{background:var(--gold);color:#1b1b1b;border-color:var(--gold)}
   .me button.hide{display:none}
-  .me #lock{background:transparent;border:none;font-size:20px;width:36px}
-  .tabs{display:flex;gap:8px;padding:0 16px 8px}
-  .tabs button{flex:1;padding:10px 0;border-radius:12px;border:2px solid #2c5446;background:var(--card);color:#fff;font-size:18px;font-weight:800}
+  .me #lock{background:transparent;border:none;font-size:20px;width:34px}
+  .sets{display:flex;gap:6px;padding:0 16px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .sets button{flex:0 0 auto;padding:8px 12px;border-radius:20px;border:2px solid #2c5446;background:transparent;color:#cfe3d9;font-size:14px;font-weight:700;white-space:nowrap}
+  .sets button.sel{background:#1f5a3c;border-color:var(--gold);color:#fff}
+  .tabs{display:flex;gap:8px;padding:0 16px 8px;flex-wrap:wrap}
+  .tabs button{flex:1 1 90px;padding:10px 6px;border-radius:12px;border:2px solid #2c5446;background:var(--card);color:#fff;font-size:16px;font-weight:800}
   .tabs button.sel{border-color:var(--gold);color:var(--gold)}
   main{display:flex;flex-wrap:wrap;gap:12px;padding:0 16px 16px}
   .courtwrap{flex:1 1 440px;max-width:620px;margin:0 auto}
@@ -30,7 +33,7 @@
   .side{flex:1 1 300px;display:flex;flex-direction:column;gap:10px}
   .caption{background:var(--card);border-radius:14px;padding:14px;min-height:92px}
   .caption .lab{font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.5px}
-  .caption .txt{font-size:22px;font-weight:700;margin-top:4px;line-height:1.25}
+  .caption .txt{font-size:21px;font-weight:700;margin-top:4px;line-height:1.25}
   .caption .you{display:inline-block;margin-top:8px;background:var(--gold);color:#1b1b1b;font-weight:800;font-size:13px;padding:3px 9px;border-radius:8px}
   .controls{display:flex;gap:8px}
   .controls button{flex:1;padding:14px 0;border-radius:12px;border:none;font-size:17px;font-weight:800;background:#235043;color:#fff}
@@ -44,12 +47,14 @@
   .opts button.you{box-shadow:inset 4px 0 0 var(--gold)}
   .steps{background:var(--card);border-radius:14px;padding:10px 12px;font-size:15px}
   .steps .row{padding:6px 4px;color:var(--muted);display:flex;gap:8px}
-  .steps .row b{min-width:28px;color:#cfe3d9}
+  .steps .row b{min-width:34px;color:#cfe3d9;font-size:13px;padding-top:1px}
   .steps .row.done{color:#e2efe8}
   .steps .row.cur{color:#fff;font-weight:700;background:#215043;border-radius:8px}
   .steps .row.you b{color:var(--gold)}
-  .job{font-size:14px;color:#e2efe8;background:#1c3d33;border-left:4px solid var(--gold);padding:10px 12px;border-radius:10px}
+  .job{font-size:14px;color:#e2efe8;background:#1c3d33;border-left:4px solid var(--gold);padding:10px 12px;border-radius:10px;line-height:1.45}
   .job b{color:var(--gold)}
+  .note{font-size:13px;color:#ffd9b8;background:#3a2a17;border-left:4px solid var(--orange);padding:9px 12px;border-radius:10px;display:none}
+  .note.show{display:block}
   .row2{display:flex;gap:8px}
   .row2 button{flex:1;padding:10px 0;border-radius:10px;border:2px solid #2c5446;background:transparent;color:#cfe3d9;font-size:14px;font-weight:700}
   .row2 button.on{border-color:var(--gold);color:var(--gold)}
@@ -60,21 +65,23 @@
 </head>
 <body>
 <header>
-  <h1>Angel Plays <small>Guardian Angels · Play 2 (Man-on-Man)</small></h1>
-  <div class="me" id="me"><span class="lbl">I'm</span></div>
+  <h1>Angel Plays <small id="sub">Guardian Angels Playbook 2026–27</small></h1>
+  <div class="me" id="me"></div>
 </header>
+<div class="sets" id="sets"></div>
 <div class="tabs" id="tabs"></div>
 <main>
   <div class="courtwrap">
-    <svg id="court" viewBox="0 0 500 480" xmlns="http://www.w3.org/2000/svg">
+    <svg id="court" viewBox="0 -30 500 510" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <marker id="aMove" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f4d3a"/></marker>
         <marker id="aMe" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b07d00"/></marker>
         <marker id="aPass" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e8590c"/></marker>
+        <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ecc994"/><stop offset=".5" stop-color="#e2b97d"/><stop offset="1" stop-color="#eccb98"/></linearGradient>
       </defs>
-      <rect x="0" y="0" width="500" height="480" fill="#0c1d15"/>
-      <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ecc994"/><stop offset=".5" stop-color="#e2b97d"/><stop offset="1" stop-color="#eccb98"/></linearGradient>
-      <rect x="10" y="20" width="480" height="450" fill="url(#wood)" stroke="#fff" stroke-width="4"/>
+      <rect x="0" y="-40" width="500" height="1000" fill="#0c1d15"/>
+      <text x="250" y="-10" text-anchor="middle" font-size="11" fill="#6f9483" font-weight="700" letter-spacing="2">OUT OF BOUNDS</text>
+      <rect x="10" y="20" width="480" height="900" fill="url(#wood)" stroke="#fff" stroke-width="4"/>
       <rect x="190" y="20" width="120" height="190" fill="#d9ad6f" stroke="#1f4d3a" stroke-width="3"/>
       <circle cx="250" cy="210" r="60" fill="none" stroke="#1f4d3a" stroke-width="3"/>
       <path d="M40 20 L40 60 A210 210 0 0 0 460 60 L460 20" fill="none" stroke="#1f4d3a" stroke-width="3"/>
@@ -82,8 +89,10 @@
       <rect x="310" y="68" width="14" height="10" fill="#1f4d3a"/>
       <line x1="222" y1="40" x2="278" y2="40" stroke="#333" stroke-width="4"/>
       <circle cx="250" cy="52" r="9" fill="none" stroke="#e8590c" stroke-width="3"/>
-      <path d="M190 470 A60 60 0 0 1 310 470" fill="none" stroke="#1f4d3a" stroke-width="3"/>
+      <line x1="10" y1="470" x2="490" y2="470" stroke="#1f4d3a" stroke-width="3"/>
+      <circle cx="250" cy="470" r="60" fill="none" stroke="#1f4d3a" stroke-width="3"/>
       <text x="250" y="462" text-anchor="middle" font-size="30" font-weight="900" font-family="Georgia,serif" fill="#1f4d3a" opacity=".85">GA</text>
+      <text x="250" y="560" text-anchor="middle" font-size="14" font-weight="800" fill="#1f4d3a" opacity=".6" letter-spacing="2">▼ UP THE COURT ▼</text>
       <g id="trails"></g>
       <g id="players"></g>
       <circle id="ball" r="7.5" fill="#e8590c" stroke="#5a2300" stroke-width="1.5"/>
@@ -102,6 +111,7 @@
       <button id="slow">🐢 Slow</button>
     </div>
     <div class="opts" id="opts"></div>
+    <div class="note" id="note"></div>
     <div class="job" id="job"></div>
     <div class="steps" id="steps"></div>
   </div>
@@ -110,10 +120,15 @@
 
 <script>
 const RIM=[250,52];
-const START={1:[255,350],2:[165,195],3:[165,150],4:[165,105]};
+// ===================== PLAY DATA =====================
+// step: {l,t, moves:[{p,to,via,screen}], pass:n, shot:true}
+// play/option node: {steps:[...], alts:[node...]}  (an option without steps is itself one step)
+
+// ---- Man-on-Man "2" ----
+const S2={1:[255,350],2:[165,195],3:[165,150],4:[165,105]};
 const PICK_A={l:'A',t:'2 sets the pick for the 1',moves:[{p:2,to:[268,322],screen:true}]};
-const PLAYS=[
- {id:'23',start:{...START,5:[390,165]},steps:[
+const MAN2=[
+ {id:'23',name:'"23"',start:{...S2,5:[390,165]},steps:[
    PICK_A,
    {l:'B',t:'1 moves right off the pick',moves:[{p:1,via:[[296,338]],to:[378,228]}]},
    {l:'B1',t:'5 goes down to the "block" to set pick for the 3',moves:[{p:5,to:[322,86],screen:true}]},
@@ -126,7 +141,7 @@ const PLAYS=[
    {l:'Alt 3',t:'3 passes to the 4 (in the key)',pass:4},
    {l:'Alt 4',t:'3 passes back to the 2',pass:2}
   ]},
- {id:'24',start:{...START,5:[365,175]},steps:[
+ {id:'24',name:'"24"',start:{...S2,5:[365,175]},steps:[
    PICK_A,
    {l:'B',t:'1 moves right off the pick',moves:[{p:1,via:[[296,338]],to:[380,215]}]},
    {l:'B1',t:'5 goes down to the opposite "block" to set pick for the 4',moves:[{p:5,to:[190,120],screen:true}]},
@@ -138,7 +153,7 @@ const PLAYS=[
    {l:'Alt 2',t:'4 passes to the 5 (in the key)',pass:5},
    {l:'Alt 3',t:'4 passes back to the 2',pass:2}
   ]},
- {id:'25',start:{...START,5:[375,135]},steps:[
+ {id:'25',name:'"25"',start:{...S2,5:[375,135]},steps:[
    PICK_A,
    {l:'B',t:'1 moves right off the pick',moves:[{p:1,via:[[296,338]],to:[400,190]}]},
    {l:'B1',t:'5 gets position ("posts up")',moves:[{p:5,to:[324,158]}]},
@@ -151,30 +166,229 @@ const PLAYS=[
   ]}
 ];
 
-// ---------- storage (safe) ----------
+// ---- Zone Offense "1" (1-3-1), right side; left side is built as its mirror ----
+const Z_CRASH=[{p:1,to:[205,78]},{p:5,to:[250,100]},{p:3,to:[305,62]}];
+const ZONE_R={id:'1R',name:'Pass right',start:{1:[255,330],2:[60,215],3:[330,75],4:[440,215],5:[240,250]},steps:[
+   {l:'A',t:'1 passes ball to the 4 on the right wing',pass:4},
+   {l:'B',t:'1 cuts towards the basket; if the 1 does not receive the pass, clear out and replace the 2 on the left wing',moves:[{p:1,via:[[300,260],[298,140]],to:[268,88]}]},
+   {l:'C',t:'As soon as the 1 passes to the 4, the 3 cuts out wide',moves:[{p:3,to:[445,70]}]},
+   {l:'D',t:'The 2 replaces the 1 on top (and the 1 finishes clearing out to the left wing)',moves:[{p:2,via:[[150,300]],to:[255,330]},{p:1,via:[[200,70],[110,130]],to:[60,215]}]}
+  ],alts:[
+   {l:'Alt #1',t:'The 4 shoots, drives, or passes back to the 2',alts:[
+     {l:'Shoot',t:'4 shoots; 1, 5 and 3 get position for a possible rebound',moves:Z_CRASH,shot:true},
+     {l:'Drive',t:'4 drives to the basket; 1, 5 and 3 get position for a possible rebound',moves:[{p:4,via:[[380,150]],to:[292,82]},...Z_CRASH],shot:true},
+     {l:'Pass back',t:'4 passes back to the 2',pass:2}
+   ]},
+   {l:'Alt #2',t:'The 4 passes to the 3 in the corner',steps:[
+     {l:'A',t:'After the 4 receives the pass from the 1, the 4 passes the ball to the 3',pass:3},
+     {l:'B–D',t:'4 cuts to the basket. 1 replaces the 2 on top, 2 replaces the 4 on the right wing',moves:[{p:4,via:[[360,160],[310,100]],to:[262,82]},{p:1,via:[[130,300]],to:[255,330]},{p:2,via:[[380,300]],to:[440,215]}]},
+     {l:'E',t:'The 4 cut and cleared, so the 5 moves down low',moves:[{p:5,to:[326,135]}]}
+    ],alts:[
+     {l:'Pass to the 4',t:'3 passes to the 4 cutting thru',pass:4,shot:true},
+     {l:'Shoot',t:'3 shoots',shot:true},
+     {l:'Pass to the 5',t:'3 passes to the 5 down low',pass:5},
+     {l:'No pass',t:'4 does not get the pass: clear out and replace the 1 on the left wing',moves:[{p:4,via:[[200,75],[110,130]],to:[60,215]}]}
+   ]},
+   {l:'Alt #3',t:'The 4 passes to the 5 at the high post',steps:[
+     {l:'A',t:'After the 4 receives the pass from the 1, the 4 passes the ball to the 5',pass:5},
+     {l:'B–D',t:'4 cuts to the basket. 1 replaces the 2 on top, 2 replaces the 4 on the right wing',moves:[{p:4,via:[[360,160],[310,100]],to:[262,82]},{p:1,via:[[130,300]],to:[255,330]},{p:2,via:[[380,300]],to:[440,215]}]},
+     {l:'E',t:'The 3 cuts to the basket',moves:[{p:3,via:[[400,95]],to:[300,92]}]}
+    ],alts:[
+     {l:'Pass to the 4',t:'5 passes to the 4 cutting to the basket',pass:4,shot:true},
+     {l:'Pass to the 3',t:'5 passes to the 3 cutting to the basket',pass:3,shot:true},
+     {l:'Shoot',t:'5 shoots from the top of the key',shot:true}
+   ]}
+  ]};
+
+function mirrorPlay(src,id,name){
+  const sw={2:4,4:2},mp=n=>sw[n]||n,mx=pt=>[500-pt[0],pt[1]];
+  const tx=t=>t.replace(/\b(2|4)\b/g,d=>d==='2'?'4':'2').replace(/\b(left|right)\b/g,w=>w==='left'?'right':'left');
+  const node=s=>{const o={...s};if(s.t)o.t=tx(s.t);
+    if(s.moves)o.moves=s.moves.map(m=>({...m,p:mp(m.p),to:mx(m.to),via:m.via&&m.via.map(mx)}));
+    if(s.pass)o.pass=mp(s.pass);if(s.steps)o.steps=s.steps.map(node);if(s.alts)o.alts=s.alts.map(node);return o};
+  const r=node(src);r.id=id;r.name=name;r.start={};for(const k in src.start)r.start[mp(+k)]=mx(src.start[k]);return r;
+}
+
+const SETS=[
+ {name:'Zone "1"',sub:'1-3-1 Zone Offense',plays:[ZONE_R,mirrorPlay(ZONE_R,'1L','Pass left')]},
+ {name:'Man "2"',sub:'Man-on-Man Offense',plays:MAN2},
+ {name:'Man "3"',sub:'Man-on-Man Offense',plays:[
+  {id:'15',name:'"15"',start:{1:[250,375],2:[165,195],3:[165,150],4:[165,105],5:[400,212]},steps:[
+    {l:'A',t:'5 sets pick for 1',moves:[{p:5,to:[318,262],screen:true}]},
+    {l:'B',t:'1 cuts right off the pick',moves:[{p:1,via:[[300,300]],to:[352,175]}]},
+    {l:'C',t:'5 rolls to the basket after 1 cuts off the pick; if 5 does not get the pass back from the 1, then clear out',moves:[{p:5,via:[[285,160]],to:[258,72]}]},
+    {l:'D',t:'4 cuts to the opposite block; 3 cuts to the opposite elbow; 2 replaces 1 (5 clears out)',moves:[{p:4,via:[[250,95]],to:[324,80]},{p:3,to:[318,205]},{p:2,to:[262,300]},{p:5,to:[178,95]}]}
+   ],alts:[
+    {l:'Drive',t:'1 drives to the basket',moves:[{p:1,via:[[330,130]],to:[285,78]}],shot:true},
+    {l:'Pass to the 4',t:'1 passes to the 4 on the block',pass:4},
+    {l:'Pass to the 3',t:'1 passes to the 3 at the elbow',pass:3},
+    {l:'Reset',t:'1 passes back to the 2 up top and resets',pass:2}
+   ]},
+  {id:'55',name:'"55"',start:{1:[250,385],2:[170,172],3:[170,134],4:[170,96],5:[396,190]},steps:[
+    {l:'A',t:'5 sets pick for 1',moves:[{p:5,to:[312,236],screen:true}]},
+    {l:'B',t:'1 cuts left off the pick',moves:[{p:1,via:[[300,262]],to:[182,212]}]},
+    {l:'C',t:'5 stays up top after the pick'},
+    {l:'D',t:'4 and 2 combine to set a pick for the 3',moves:[{p:4,to:[172,104],screen:true},{p:2,to:[172,164],screen:true},{p:3,to:[90,134]}]},
+    {l:'E',t:'1 passes to the 3',pass:3}
+   ],alts:[
+    {l:'Shoot',t:'3 shoots',shot:true},
+    {l:'Drive',t:'3 drives to the basket',moves:[{p:3,via:[[140,95]],to:[220,72]}],shot:true},
+    {l:'Restart',t:'3 passes back up top and restarts',pass:5}
+   ]}
+ ]},
+ {name:'Man "4"',sub:'Man-on-Man Offense',plays:[
+  {id:'51',name:'"51"',start:{1:[245,385],2:[162,86],3:[322,84],4:[150,222],5:[355,222]},steps:[
+    {l:'A',t:'5 sets pick for 1 AND 3 sets pick for the 2',moves:[{p:5,to:[292,285],screen:true},{p:3,to:[200,88],screen:true}]},
+    {l:'B',t:'1 cuts right off the pick (2 runs the baseline off the 3\'s pick)',moves:[{p:1,via:[[310,320]],to:[342,168]},{p:2,via:[[175,40],[250,32]],to:[372,92]}]},
+    {l:'C',t:'5 rolls to the basket after 1 cuts off the pick; if 5 does not get the pass back from the 1, then clear out (to weak side block)',moves:[{p:5,to:[252,74]}]},
+    {l:'D',t:'After 3 sets the pick for the 2, the 3 goes off of the pick set by the 4',moves:[{p:4,to:[150,196],screen:true},{p:3,via:[[150,150],[118,240],[170,262]],to:[210,205]}]}
+   ],alts:[
+    {l:'Drive',t:'1 drives to the basket',moves:[{p:1,via:[[320,120]],to:[285,80]}],shot:true},
+    {l:'Pass to the 5',t:'1 passes to the 5 rolling to the basket',pass:5,shot:true},
+    {l:'Pass to the 2',t:'1 passes to the 2 for a "catch-and-shoot"',pass:2,shot:true},
+    {l:'Pass to the 3',t:'1 passes back to the 3 for a "catch-and-shoot"',pass:3,shot:true}
+   ]},
+  {id:'41',name:'"41"',note:'⚠️ The book says "1 cuts <b>right</b>" on "41", but the diagram shows the 1 going <b>left</b> off the 4\'s pick. This follows the diagram, so check with Coach.',
+   start:{1:[255,390],2:[162,106],3:[322,106],4:[152,225],5:[345,222]},steps:[
+    {l:'A',t:'4 sets pick for 1 AND 2 sets pick for the 3',moves:[{p:4,to:[202,286],screen:true},{p:2,to:[298,104],screen:true}]},
+    {l:'B',t:'1 cuts off the pick (3 runs the baseline off the 2\'s pick)',moves:[{p:1,via:[[190,320]],to:[140,178]},{p:3,via:[[325,40],[250,32]],to:[115,100]}]},
+    {l:'C',t:'4 rolls to the basket after 1 cuts off the pick; if 4 does not get the pass back from the 1, then clear out (to weak side block)',moves:[{p:4,to:[230,82]}]},
+    {l:'D',t:'After 2 sets the pick for the 3, the 2 goes off of the pick set by the 5',moves:[{p:5,to:[350,200],screen:true},{p:2,via:[[340,140],[385,230],[340,262]],to:[290,205]}]}
+   ],alts:[
+    {l:'Drive',t:'1 drives to the basket',moves:[{p:1,via:[[170,140]],to:[208,122]}],shot:true},
+    {l:'Pass to the 4',t:'1 passes to the 4 rolling to the basket',pass:4,shot:true},
+    {l:'Pass to the 3',t:'1 passes to the 3 for a "catch-and-shoot"',pass:3,shot:true},
+    {l:'Pass to the 2',t:'1 passes back to the 2 for a "catch-and-shoot"',pass:2,shot:true}
+   ]}
+ ]},
+ {name:'Press Break',sub:'Press Break (full court)',plays:(()=>{
+  const PA={1:[150,-2],5:[170,218],4:[330,220],3:[100,350],2:[395,350]};
+  const PA_AB=[{l:'A',t:'4 breaks left',moves:[{p:4,to:[150,104]}]},{l:'B',t:'5 breaks right',moves:[{p:5,to:[285,88]}]}];
+  const runUp={l:'E',t:'1 takes the pass and dribbles up the court with the 3 & 2',moves:[{p:1,to:[240,560]},{p:3,to:[90,580]},{p:2,to:[410,580]}]};
+  const PB={1:[160,-2],5:[70,220],2:[183,225],3:[318,225],4:[440,222]};
+  const PB_AB=[{l:'A',t:'2 sets a pick for the 3, the 5 does a "V" cut back to the ball, and the 4 cuts in towards the inbound',moves:[{p:2,to:[290,224],screen:true},{p:5,to:[88,168]},{p:4,to:[400,198]}]},
+    {l:'B',t:'3 cuts off of the pick',moves:[{p:3,via:[[255,245]],to:[165,175]}]}];
+  const rel=l=>({l,t:'4 releases up the court once the ball is progressing',moves:[{p:4,to:[420,560]}]});
+  const C_E=to=>({l:'E',t:'1 breaks up court to take a pass',moves:[{p:1,via:[[205,60]],to}]});
+  const C_F=who=>[{l:'Dribble',t:who+' dribbles up the court',moves:[{p:who,to:[190,570]}]},{l:'Pass ahead',t:who+' passes ahead to the 2',pass:2}];
+  return [
+  {id:'PA1',name:'A · back to the 1',view:'full',start:PA,steps:PA_AB,alts:[
+    {l:'C',t:'1 passes to the 4',steps:[{l:'C',t:'1 passes to the 4',pass:4},{l:'D',t:'1 steps in and cuts; 4 passes back to the 1 after the cut',moves:[{p:1,via:[[190,95]],to:[210,232]}],pass:1},runUp]},
+    {l:'C Alt',t:'1 passes to the 5',steps:[{l:'C',t:'1 passes to the 5',pass:5},{l:'D',t:'1 steps in and cuts; 5 passes back to the 1 after the cut',moves:[{p:1,via:[[190,95]],to:[210,232]}],pass:1},runUp]}
+  ]},
+  {id:'PA2',name:'A · 2 at foul line',view:'full',start:{...PA,2:[385,340],3:[100,345]},steps:[...PA_AB,
+    {l:'C',t:'2 breaks to the foul line',moves:[{p:2,to:[258,212]}]},
+    {l:'D',t:'1 passes to the 2',pass:2}],alts:[
+    {l:'Dribble',t:'2 turns and dribbles up the court',moves:[{p:2,to:[250,570]}]},
+    {l:'Pass to the 1',t:'2 turns and passes to the 1 cutting thru',moves:[{p:1,via:[[185,100]],to:[232,370]}],pass:1},
+    {l:'Pass to the 3',t:'2 turns and passes to the 3',moves:[{p:3,to:[100,470]}],pass:3}
+  ]},
+  {id:'PB1',name:'B · to the 5',view:'full',start:PB,steps:[...PB_AB,
+    {l:'C',t:'1 passes the ball to the 5',pass:5},
+    {l:'D',t:'1 finds a soft spot in the key',moves:[{p:1,to:[215,62]}]},
+    {l:'E',t:'The 3 did not get the inbound pass, so the 3 cuts up the court to get a pass from the 5',moves:[{p:3,to:[150,292]}]},
+    {l:'F',t:'2 cuts up the court after the 3 to get a pass from the 5',moves:[{p:2,via:[[230,280]],to:[160,370]}]}],alts:[
+    {l:'G',t:'5 passes to the 3',steps:[{l:'G',t:'5 passes to the 3',pass:3},rel('H')]},
+    {l:'G',t:'5 passes to the 2 heading up court',steps:[{l:'G',t:'5 passes to the 2 heading up court',pass:2},rel('H')]},
+    {l:'G Alt',t:'5 passes back to the 1, who swings it to the 4',steps:[{l:'G',t:'5 passes back to the 1',pass:1},{l:'G',t:'1 swings it to the 4',pass:4},rel('H')]}
+  ]},
+  {id:'PB2',name:'B · to the 3',view:'full',note:'Page 19\'s step text is a little jumbled (E and F repeat lines from page 18). This follows the arrows on the diagram.',start:PB,steps:[...PB_AB,
+    {l:'C',t:'1 passes the ball to the 3',pass:3},
+    {l:'D',t:'1 finds a soft spot in the key; the 2 and the 5 start up the court',moves:[{p:1,to:[215,62]},{p:2,to:[290,335]},{p:5,to:[85,350]}]}],alts:[
+    {l:'E',t:'3 passes to the 5 cutting up the court',steps:[{l:'E',t:'3 passes to the 5 cutting up the court',pass:5},rel('F')]},
+    {l:'E Alt',t:'3 passes to the 2 cutting up the court',steps:[{l:'E',t:'3 passes to the 2 cutting up the court',pass:2},rel('F')]}
+  ]},
+  {id:'PC',name:'C',view:'full',note:'⚠️ Step B in the book says the <b>3</b> does the "V" cut, but the diagram shows the <b>2</b> doing it. This follows the diagram, so check with Coach.',
+   start:{1:[185,-3],2:[55,223],5:[165,225],4:[305,222],3:[450,220]},steps:[
+    {l:'A',t:'5 sets a pick for the 4 and the 3',moves:[{p:5,to:[182,180],screen:true},{p:4,via:[[235,200]],to:[140,168]},{p:3,via:[[300,195]],to:[105,150]}]},
+    {l:'B',t:'2 does a "V" cut up the court',moves:[{p:2,via:[[68,165]],to:[70,385]}]}],alts:[
+    {l:'D',t:'1 passes to the 4',steps:[{l:'D',t:'1 passes the ball in to the 4',pass:4},C_E([235,380])],alts:C_F(4)},
+    {l:'D',t:'1 passes to the 3',steps:[{l:'D',t:'1 passes the ball in to the 3',pass:3},C_E([235,380])],alts:C_F(3)},
+    {l:'C',t:'4 and 3 are covered: the 5 breaks down',steps:[
+      {l:'C',t:'The 4 and the 3 did not get the inbound pass, so the 5 breaks down towards the inbound and the 4 and 3 circle back',moves:[{p:5,to:[232,105]},{p:4,to:[100,310]},{p:3,to:[140,355]}]},
+      {l:'D',t:'1 passes the ball in to the 5',pass:5},C_E([262,360])]}
+  ]}
+ ]})()},
+ {name:'Out-of-Bounds',sub:'Offensive Out-of-Bounds',plays:(()=>{
+  const circle=(l,pts)=>({l,t:'After the 1 passes the ball in, the 1 circles around the strong side as an outlet',moves:[{p:1,via:pts.slice(0,-1),to:pts[pts.length-1]}]});
+  const C1=circle('E',[[105,135],[165,285],[222,250]]);
+  const C2=circle('E',[[80,170],[172,302],[208,268]]);
+  const C3=circle('F',[[90,163],[175,294],[205,272]]);
+  return [
+  {id:'STK',name:'Stack',note:'ℹ️ The book only shows arrows for "Stack" (no written steps). The rest is the typical youth "Stack" play: the first players split, the 3rd cuts to the rim, the last one is the safety. <b>Check with Coach.</b>',
+   start:{1:[176,-3],5:[165,104],4:[165,145],3:[165,182],2:[165,220]},steps:[
+    {l:'A',t:'5 cuts into the lane',moves:[{p:5,to:[218,128]}]},
+    {l:'B',t:'4 pops out to the wing',moves:[{p:4,to:[100,140]}]},
+    {l:'C',t:'(Typical) 3 cuts to the basket',moves:[{p:3,via:[[205,140]],to:[262,78]}]},
+    {l:'D',t:'2 drifts out as the safety',moves:[{p:2,to:[125,272]}]}],alts:[
+    {l:'Pass to the 3',t:'1 passes to the 3 cutting for a layup',pass:3,shot:true},
+    {l:'Pass to the 5',t:'1 passes to the 5 in the lane',pass:5},
+    {l:'Pass to the 4',t:'1 passes to the 4 on the wing',pass:4},
+    {l:'Safety',t:'1 passes out to the 2 (safety)',pass:2}
+  ]},
+  {id:'BOX1',name:'Box 1',start:{1:[168,-3],2:[172,110],4:[175,220],3:[328,110],5:[328,218]},steps:[
+    {l:'A',t:'2 sets a pick for the 4 and the 3 sets the pick for the 5',moves:[{p:2,to:[175,182],screen:true},{p:3,to:[328,182],screen:true}]},
+    {l:'B',t:'4 and the 5 break towards the inbound',moves:[{p:4,via:[[150,195]],to:[128,138]},{p:5,via:[[300,200]],to:[272,138]}]}],alts:[
+    {l:'C',t:'1 passes to the 4',steps:[{l:'C',t:'1 passes the ball to the 4',pass:4},C1]},
+    {l:'C',t:'1 passes to the 5',steps:[{l:'C',t:'1 passes the ball to the 5',pass:5},C1]},
+    {l:'D',t:'4 and 5 are covered: the 3 breaks down',steps:[
+      {l:'D',t:'The pass does not go to the 4 or 5, so the 5 clears out and the 3 breaks down towards the basket',moves:[{p:5,via:[[330,100],[420,110]],to:[400,175]},{p:3,to:[282,100]}]},
+      {l:'D',t:'1 passes to the 3',pass:3},C1]}
+  ]},
+  {id:'BOX2',name:'Box 2',start:{1:[177,-3],2:[163,100],3:[332,105],4:[170,210],5:[332,210]},steps:[
+    {l:'A',t:'2 sets a pick for the 3 and the 4 sets the pick for the 5',moves:[{p:2,to:[298,100],screen:true},{p:4,to:[298,210],screen:true}]},
+    {l:'B',t:'3 and the 5 break towards the strong side',moves:[{p:3,to:[120,108]},{p:5,to:[112,212]}]}],alts:[
+    {l:'C',t:'1 passes to the 3',steps:[{l:'C',t:'1 passes the ball to the 3',pass:3},C2]},
+    {l:'C',t:'1 passes to the 5',steps:[{l:'C',t:'1 passes the ball to the 5',pass:5},C2]},
+    {l:'D',t:'3 and 5 are covered: the 4 cuts down',steps:[
+      {l:'D',t:'The pass does not go to the 3 or 5, so the 4 cuts down towards the basket',moves:[{p:4,to:[258,130]}]},
+      {l:'D',t:'1 passes to the 4',pass:4},C2]}
+  ]},
+  {id:'ARC',name:'Arc',start:{1:[175,-3],2:[120,214],5:[148,228],3:[172,244],4:[198,262]},steps:[
+    {l:'A',t:'2 cuts right off of the 5',moves:[{p:2,via:[[175,200]],to:[218,138]}]},
+    {l:'B',t:'3 cuts off of the 5',moves:[{p:3,via:[[150,210]],to:[112,160]}]},
+    {l:'C',t:'5 comes hard to the inbound',moves:[{p:5,to:[150,112]}]},
+    {l:'D',t:'4 finds a soft spot up high',moves:[{p:4,to:[295,330]}]}],alts:[
+    {l:'E',t:'1 passes to the 5 (first choice)',steps:[{l:'E',t:'1 passes to the 5 (first choice)',pass:5},C3]},
+    {l:'E',t:'1 passes to the 2',steps:[{l:'E',t:'1 passes to the 2',pass:2},C3]},
+    {l:'E',t:'1 passes to the 3',steps:[{l:'E',t:'1 passes to the 3',pass:3},C3]}
+  ]}
+ ]})()},
+];
+// =====================================================
+
+const PLAYS=[];SETS.forEach((s,si)=>s.plays.forEach(p=>{p.set=si;PLAYS.push(p)}));
+
 function load(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 
-let playIdx=load('pb.play',0); if(!(playIdx>=0&&playIdx<PLAYS.length))playIdx=0;
-let me=null, locked=false;
+let playIdx=load('pb.play2',0); if(!(playIdx>=0&&playIdx<PLAYS.length))playIdx=0;
+let me=null, locked=false, k=0, path=[], busy=false, slow=false, autoOn=false;
 function loadPos(){const id=PLAYS[playIdx].id;me=load('pb.me.'+id,null);locked=load('pb.lock.'+id,false);if(!me)locked=false}
 loadPos();
-let k=0, alt=null, busy=false, slow=false, autoOn=false;
 
 const $=id=>document.getElementById(id);
 const NS='http://www.w3.org/2000/svg';
 const play=()=>PLAYS[playIdx];
-const seq=()=>alt==null?play().steps:play().steps.concat([play().alts[alt]]);
 const clone=o=>JSON.parse(JSON.stringify(o));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+// ---------- tree helpers ----------
+const stepsOf=n=>n.steps?n.steps:[n];
+function nodeAt(p){let n=play();for(const i of p)n=n.alts[i];return n}
+function seqFor(p){const out=play().steps.map(s=>({...s}));let n=play();
+  for(const i of p){n=n.alts[i];const pre=n.steps?n.l:null;stepsOf(n).forEach(s=>out.push({...s,pre}))}return out}
+const seq=()=>seqFor(path);
+const lenFor=p=>seqFor(p).length;
 
 // ---------- geometry ----------
 function segLens(pts){const L=[0];for(let i=1;i<pts.length;i++)L.push(L[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));return L}
 function pointAt(pts,t){const L=segLens(pts),tot=L[L.length-1];if(tot===0)return pts[pts.length-1].slice();const d=t*tot;for(let i=1;i<pts.length;i++){if(d<=L[i]||i===pts.length-1){const s=(d-L[i-1])/((L[i]-L[i-1])||1);return[pts[i-1][0]+(pts[i][0]-pts[i-1][0])*s,pts[i-1][1]+(pts[i][1]-pts[i-1][1])*s]}}}
 function partial(pts,t){const L=segLens(pts),tot=L[L.length-1],d=t*tot,out=[pts[0]];for(let i=1;i<pts.length;i++){if(L[i]<d)out.push(pts[i]);else break}out.push(pointAt(pts,t));return out}
-function trim(pts,a,b){const L=segLens(pts),tot=L[L.length-1];if(tot<a+b+6)return null;const t0=a/tot,t1=1-b/tot;const p=partial(pts,t1);const st=pointAt(pts,t0);const out=[st];const L2=segLens(p);for(let i=1;i<p.length;i++)if(L2[i]>a)out.push(p[i]);return out}
+function trim(pts,a,b){const L=segLens(pts),tot=L[L.length-1];if(tot<a+b+6)return null;const t0=a/tot,t1=1-b/tot;const p=partial(pts,t1);const out=[pointAt(pts,t0)];const L2=segLens(p);for(let i=1;i<p.length;i++)if(L2[i]>a)out.push(p[i]);return out}
 
 // ---------- state ----------
-function initial(){return{pos:clone(play().start),ball:1,trails:[]}}
+function initial(){return{pos:clone(play().start),ball:play().ball||1,trails:[]}}
 function apply(st,step,idx){
   (step.moves||[]).forEach(m=>{const path=[st.pos[m.p],...(m.via||[]),m.to];st.trails.push({type:'move',p:m.p,pts:path,screen:!!m.screen,idx});st.pos[m.p]=m.to.slice()});
   if(step.pass){st.trails.push({type:'pass',pts:[st.pos[st.ball],st.pos[step.pass]],idx});st.ball=step.pass}
@@ -183,20 +397,20 @@ function apply(st,step,idx){
 function stateAt(n){const st=initial(),s=seq();for(let i=0;i<n;i++)apply(st,s[i],i);return st}
 function ballXY(pos,ball){return ball==='rim'?RIM:[pos[ball][0]+13,pos[ball][1]-13]}
 function involves(step,before){return (step.moves||[]).some(m=>m.p==me)||(step.pass&&(step.pass==me||before.ball==me))||(step.shot&&before.ball==me)}
+function nodeInvolves(n,before){const st=clone(before);return stepsOf(n).some(s=>{const r=involves(s,st);apply(st,s,0);return r})}
 
 // ---------- drawing ----------
 const playersG=$('players'),trailsG=$('trails'),ball=$('ball');
+function setView(){$('court').setAttribute('viewBox',play().view==='full'?'0 -30 500 700':'0 -30 500 510')}
 function buildPlayers(){
   playersG.innerHTML='';
   for(let p=1;p<=5;p++){
-    const g=document.createElementNS(NS,'g');g.id='p'+p;
-    const isMe=p==me;
+    const g=document.createElementNS(NS,'g');g.id='p'+p;const isMe=p==me;
     g.innerHTML=(isMe?'<circle class="ring" r="20" fill="none" stroke="#f5c400" stroke-width="3"/>':'')+
       `<circle r="16" fill="${isMe?'#f5c400':'#1f5a3c'}" stroke="#fff" stroke-width="2.5"/>`+
       `<text y="6.5" text-anchor="middle" font-size="19" font-weight="900" fill="${isMe?'#1b1b1b':'#fff'}">${p}</text>`;
     playersG.appendChild(g);
   }
-  // draw my player last so it sits on top
   if(me)playersG.appendChild($('p'+me));
 }
 function trailSVG(tr,cur){
@@ -229,6 +443,8 @@ async function animateStep(i){
   const step=seq()[i],st=stateAt(i),pos=clone(st.pos),base=st.trails;let holder=st.ball;
   const sp=slow?1.9:1;
   $('shotTxt').setAttribute('opacity',0);
+  draw(pos,ballXY(pos,holder),base,i);
+  if(!(step.moves&&step.moves.length)&&!step.pass&&!step.shot){await sleep(500*sp);return}
   if(step.moves&&step.moves.length){
     const paths=step.moves.map(m=>({p:m.p,pts:[st.pos[m.p],...(m.via||[]),m.to],screen:!!m.screen}));
     const longest=Math.max(...paths.map(x=>{const L=segLens(x.pts);return L[L.length-1]}));
@@ -246,6 +462,7 @@ async function animateStep(i){
       draw(pos,bp,base.concat([{type:'pass',pts:partial([from,to],t),idx:i}]),i);
     });
     base.push({type:'pass',pts:[from,to],idx:i});holder=step.pass;
+    if(step.shot)await sleep(250*sp);
   }
   if(step.shot){
     const a=ballXY(pos,holder),from=pos[holder].slice();
@@ -256,7 +473,6 @@ async function animateStep(i){
     $('shotTxt').setAttribute('opacity',1);
   }
 }
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 // ---------- UI ----------
 function buildMe(){
@@ -267,62 +483,76 @@ function buildMe(){
   const l=document.createElement('button');l.id='lock';l.textContent=locked?'🔒':'🔓';l.title=locked?'Unlock position':'Lock position';
   l.onclick=()=>{if(!me&&!locked)return;locked=!locked;save('pb.lock.'+play().id,locked);buildMe()};box.appendChild(l);
 }
-function buildTabs(){
+function selectPlay(i){if(busy)return;autoOn=false;playIdx=i;save('pb.play2',i);k=0;path=[];loadPos();setView();buildMe();buildPlayers();buildNav();drawInstant();ui()}
+function buildNav(){
+  const cs=play().set;
+  const s=$('sets');s.innerHTML='';
+  SETS.forEach((st,si)=>{const b=document.createElement('button');b.textContent=st.name;b.className=si===cs?'sel':'';
+    b.onclick=()=>selectPlay(PLAYS.findIndex(p=>p.set===si));s.appendChild(b)});
   const t=$('tabs');t.innerHTML='';
-  PLAYS.forEach((p,i)=>{const b=document.createElement('button');b.textContent='"'+p.id+'"';b.className=i===playIdx?'sel':'';
-    b.onclick=()=>{if(busy)return;autoOn=false;playIdx=i;save('pb.play',i);k=0;alt=null;loadPos();buildMe();buildPlayers();buildTabs();drawInstant();ui()};t.appendChild(b)});
+  PLAYS.forEach((p,i)=>{if(p.set!==cs)return;const b=document.createElement('button');b.textContent=p.name;b.className=i===playIdx?'sel':'';
+    b.onclick=()=>selectPlay(i);t.appendChild(b)});
+  $('sub').textContent='Guardian Angels · '+SETS[cs].sub;
+}
+function optionInfo(){
+  const L=seq().length;if(k!==L)return null;
+  const cur=nodeAt(path);
+  if(cur.alts)return{base:path.slice(),alts:cur.alts,sel:null};
+  if(path.length){const base=path.slice(0,-1);return{base,alts:nodeAt(base).alts,sel:path[path.length-1]}}
+  return null;
 }
 function ui(){
-  const p=play(),s=seq(),n=p.steps.length;
-  // caption
+  const p=play(),s=seq(),L=s.length;
   let lab,txt,you=false;
-  if(k===0){lab='READY';txt='Tap Next to start "'+p.id+'"'}
-  else{const st=s[k-1];lab='STEP '+st.l;txt=st.t;you=involves(st,stateAt(k-1))}
-  if(k===n&&alt==null){lab='STEP '+p.steps[n-1].l+' · DONE';txt='Now pick an option below 👇'}
+  if(k===0){lab='READY';txt='Tap Start to run '+p.name}
+  else{const st=s[k-1];lab='STEP '+(st.pre?st.pre+' · ':'')+st.l;txt=st.t;you=involves(st,stateAt(k-1))}
+  const oi=optionInfo();
+  if(oi&&oi.sel===null){lab+=' · DONE';txt+='<br><span style="font-size:16px;color:#9fc2b2">Now pick an option below 👇</span>'}
   $('caption').innerHTML=`<div class="lab">${lab}</div><div class="txt">${txt}</div>${you?'<span class="you">⭐ THAT\'S YOU!</span>':''}`;
-  // controls
   $('back').disabled=busy||k===0;
-  $('next').disabled=busy||k>=s.length;
+  $('next').disabled=busy||k>=L;
   $('next').textContent=k===0?'Start ▶':'Next ▶';
   $('restart').disabled=busy;
   $('auto').classList.toggle('on',autoOn);$('slow').classList.toggle('on',slow);
-  // options
   const o=$('opts');
-  if(k>=n){o.classList.add('show');
-    const before=stateAt(n);
-    o.innerHTML='<div class="h">OPTIONS — what happens next?</div>'+p.alts.map((a,i)=>`<button data-i="${i}" class="${alt===i?'sel':''} ${involves(a,before)?'you':''}">${a.l} — ${a.t}</button>`).join('');
-    o.querySelectorAll('button').forEach(b=>b.onclick=()=>chooseAlt(+b.dataset.i));
+  if(oi){o.classList.add('show');
+    const before=stateAt(lenFor(oi.base));
+    o.innerHTML='<div class="h">OPTIONS — what happens next?</div>'+oi.alts.map((a,i)=>`<button data-i="${i}" class="${oi.sel===i?'sel':''} ${me&&nodeInvolves(a,before)?'you':''}">${a.l} — ${a.t}</button>`).join('');
+    o.querySelectorAll('button').forEach(b=>b.onclick=()=>chooseAlt(oi.base,+b.dataset.i));
   }else o.classList.remove('show');
-  // my job
-  const mine=[];let st=initial();
-  p.steps.forEach((x,i)=>{if(involves(x,st))mine.push(x.l+') '+x.t);apply(st,x,i)});
-  const altMine=p.alts.filter(a=>involves(a,stateAt(n))).map(a=>a.l+': '+a.t);
-  $('job').innerHTML=!me?'<b>Tap your number</b> in the top right to highlight your moves (tap it again to watch everyone).':`<b>Your job as the ${me}:</b><br>`+(mine.length?mine.join('<br>'):'Hold your spot and stay ready.')+(altMine.length?'<br><b>Options with you:</b> '+altMine.join(' · '):'');
-  // step list
+  const n=$('note');if(p.note){n.innerHTML=p.note;n.classList.add('show')}else n.classList.remove('show');
+  if(!me){$('job').innerHTML='<b>Tap your number</b> in the top right to highlight your moves (tap it again to watch everyone).'}
+  else{
+    const mine=[];let st=initial();
+    p.steps.forEach((x,i)=>{if(involves(x,st))mine.push(x.l+') '+x.t);apply(st,x,i)});
+    const altMine=(p.alts||[]).filter(a=>nodeInvolves(a,st)).map(a=>a.l);
+    $('job').innerHTML=`<b>Your job as the ${me}:</b><br>`+(mine.length?mine.join('<br>'):'Hold your spot and stay ready.')+(altMine.length?'<br><b>Options with you:</b> '+altMine.join(' · '):'');
+  }
   let before=initial();
-  $('steps').innerHTML=p.steps.map((x,i)=>{const y=involves(x,before);apply(before,x,i);
-    return `<div class="row ${i<k?'done':''} ${i===k-1?'cur':''} ${y?'you':''}"><b>${x.l}</b><span>${x.t}${y?' ⭐':''}</span></div>`}).join('');
+  $('steps').innerHTML=s.map((x,i)=>{const y=me&&involves(x,before);apply(before,x,i);
+    return `<div class="row ${i<k?'done':''} ${i===k-1?'cur':''} ${y?'you':''}"><b>${x.pre?x.pre.replace('Alt ','')+'·':''}${x.l}</b><span>${x.t}${y?' ⭐':''}</span></div>`}).join('');
 }
 async function next(){
   if(busy||k>=seq().length)return;
   busy=true;ui();await animateStep(k);k++;busy=false;ui();
 }
-async function chooseAlt(i){
-  if(busy)return;autoOn=false;alt=i;k=play().steps.length;drawInstant();await next();
+async function chooseAlt(base,i){
+  if(busy)return;autoOn=false;path=base.concat([i]);k=lenFor(base);drawInstant();
+  const L=seq().length;while(k<L){await next();if(k<L)await sleep(slow?700:400)}
 }
 $('next').onclick=()=>{autoOn=false;next()};
-$('back').onclick=()=>{if(busy||k===0)return;autoOn=false;k--;if(k<=play().steps.length)alt=null;drawInstant();ui()};
-$('restart').onclick=()=>{if(busy)return;autoOn=false;k=0;alt=null;drawInstant();ui()};
+$('back').onclick=()=>{if(busy||k===0)return;autoOn=false;k--;while(path.length&&k<=lenFor(path.slice(0,-1)))path.pop();drawInstant();ui()};
+$('restart').onclick=()=>{if(busy)return;autoOn=false;k=0;path=[];drawInstant();ui()};
 $('slow').onclick=()=>{slow=!slow;ui()};
 $('auto').onclick=async()=>{
   if(busy)return;
-  if(k>=play().steps.length){k=0;alt=null;drawInstant()}
+  if(k>=play().steps.length){k=0;path=[];drawInstant()}
   autoOn=true;ui();
   while(autoOn&&k<play().steps.length){await next();if(!autoOn)break;await sleep(slow?900:500)}
   autoOn=false;ui();
 };
 
-buildMe();buildTabs();buildPlayers();drawInstant();ui();
+setView();buildMe();buildNav();buildPlayers();drawInstant();ui();
 </script>
 </body>
 </html>
