@@ -275,6 +275,9 @@ body.shotmode .formlist{display:flex}
     <div class="slbl">Coach</div>
     <div class="segc lvl" id="vpSeg"><button data-v="lily">Lily</button><button data-v="harry">Harry</button><button data-v="device">iPad</button></div>
     <p class="hint">Lily and Harry are recorded coach voices. Any line without a recording uses the iPad voice.</p>
+    <div class="slbl">Time between shots</div>
+    <div class="segc" id="restSeg"><button data-r="0">Off</button><button data-r="5">5s</button><button data-r="10">10s</button><button data-r="15">15s</button></div>
+    <p class="hint">After each shot: one short tip, then quiet, then 3 beeps and "Shoot!" The camera only watches for a shot after "Shoot!", so grabbing the ball doesn't count.</p>
     <label class="row"><input type="checkbox" id="optRec"> Record replay video</label>
     <label class="row"><input type="checkbox" id="optDbg"> Show all body points</label>
     <p class="coachnote">Coaching follows Coach Sarah Behn's B.E.E.F.: Balance, Eyes on the front rim, Elbow in an L (pizza tray, no chicken wing), Follow-through — all four to the floor, hold 2–3 seconds.</p>
@@ -314,7 +317,7 @@ const store = {
   set(k,v){ try{ localStorage.setItem('ss1.'+k, JSON.stringify(v)); }catch{} }
 };
 const S = { voice:store.get('voice',true), vpack:store.get('vpack','lily'), rec:store.get('rec',true), debug:store.get('debug',false), facing:store.get('facing','user'),
-  view:store.get('view','front'), ballPath:store.get('ballPath',true), hand:store.get('hand','right'), n:store.get('n',10), name:store.get('name','Kryslana') };
+  view:store.get('view','front'), ballPath:store.get('ballPath',true), hand:store.get('hand','right'), n:store.get('n',10), rest:store.get('rest',10), name:store.get('name','Kryslana') };
 let pbs = store.get('pbs',{});
 const pbKey = () => S.view+'-'+S.n;
 
@@ -521,12 +524,13 @@ function shotFrame(now,ar){
   const hipL=P(23), hipR=P(24), kL=P(25), kR=P(26), aL=P(27), aR=P(28);
   const legSide = (hipL.v+kL.v+aL.v) >= (hipR.v+kR.v+aR.v) ? [hipL,kL,aL] : [hipR,kR,aR];
   const hipY=(hipL.y+hipR.y)/2;
-  return { t:now, sh, el, wr, nose, aL, aR, midX:(hipL.x+hipR.x)/2,
+  return { t:now, sh, el, wr, nose, aL, aR, midX:(hipL.x+hipR.x)/2, shMid:(P(11).x+P(12).x)/2,
     sw:Math.max(.03,Math.abs(P(11).x-P(12).x)), leg:Math.max(aL.y,aR.y)-hipY,
     knee:ang(...legSide), elb:ang(sh,el,wr), ankOK:Math.min(aL.v,aR.v)>.35, armOK:Math.min(sh.v,el.v,wr.v)>.3 };
 }
 function shotUpdate(now,ar){
-  if(state!=='running'||!R||R.def.kind!=='shot'||now<R.ignoreUntil||R.shots.length>=R.def.target) { shot.st='wait'; shot.buf=[]; return; }
+  if(state!=='running'||!R||R.def.kind!=='shot'||R.shots.length>=R.def.target) { shot.st='wait'; shot.buf=[]; return; }
+  if(now<R.ignoreUntil){ shot.st='wait'; const g=shotFrame(now,ar); if(g){ shot.buf.push(g); while(shot.buf.length&&now-shot.buf[0].t>1600) shot.buf.shift(); } return; }
   const f=shotFrame(now,ar); if(!f) return;
   shot.lastSeenHands=f.armOK;
   if(shot.st==='wait'){
@@ -540,7 +544,7 @@ function shotUpdate(now,ar){
 }
 function evalShot(pre,U){
   const minY=Math.min(...U.map(f=>f.wr.y)); const pi=U.findIndex(f=>f.wr.y<=minY+.015); const pk=U[pi]; // release = first moment the hand reaches the top
-  if(pk.wr.y > pk.nose.y){ pop('SHOOT IT UP!','#ff5a4f',null,.25); say('Shoot it up, over your head!',{key:'notshot',gap:4000}); return; } // arms never got over her head — not a shot
+  if(pk.wr.y > pk.nose.y){ pop('SHOOT IT UP!','#ff5a4f',null,.25); return; } // arms never got over her head — not a shot
   const view=S.view, res={}, why={};
   const base=body.base, rise=[...pre,...U.slice(0,pi+1)];
   // knees
@@ -555,9 +559,11 @@ function evalShot(pre,U){
   if(view==='front'){
     let set=U.slice(0,pi+1).filter(f=>f.armOK&&f.el.y>f.wr.y&&f.elb<135);
     if(!set.length){ const c=U.slice(0,pi+1).filter(f=>f.el.y>f.wr.y); if(c.length) set=[c.reduce((a,b)=>b.elb<a.elb?b:a)]; }
-    // Chicken wing = elbow pushed OUT past the wrist (away from her body), sized to her shoulder width.
-    // (Old check used forearm tilt angle, which blows up when a good elbow points at the camera and the forearm looks short.)
-    if(set.length){ const out=med(set.map(f=>(Math.abs(f.el.x-f.midX)-Math.abs(f.wr.x-f.midX))/f.sw)); res.elbow=out<=.4; why.elbow=Math.round(out*100)+'% sw'; }
+    // Chicken wing = at the set point, the elbow sticks OUT to the side past her shoulder line (like a wing).
+    // Elbow tucked next to her body or under the ball sits at/inside the shoulder line = fine.
+    // Measured in shoulder-widths so distance from the iPad doesn't matter. (Old check used forearm tilt angle,
+    // which false-flagged a tucked elbow pointing at the camera because the forearm looks short on screen.)
+    if(set.length){ const out=med(set.map(f=>(Math.abs(f.el.x-f.shMid)-Math.abs(f.sh.x-f.shMid))/f.sw)); res.elbow=out<=.25; why.elbow=Math.round(out*100)+'% out'; }
   }
   if(view==='side'){
     // "L" at the set point: tightest elbow angle once the ball is above her shoulder
@@ -613,10 +619,23 @@ function evalShot(pre,U){
   R.streak = score===100 ? R.streak+1 : 0; R.best=Math.max(R.best,R.streak);
   shot.last={res,why,score,t:performance.now()};
   const miss=SHOT_PRIORITY[view].find(k=>res[k]===false);
-  if(!miss){ beep(1100,.15,.3); pop(R.streak>=3?'ON FIRE!':'PERFECT FORM','#5ff0a0',null,.25,true); say(R.streak>=3?'Perfect again! On fire!':'Perfect form!',{urgent:true}); }
-  else { beep(520,.12,.25); pop(({path:'STRAIGHT!',follow:'HOLD IT!',elbow:'CHICKEN WING!',rock:'ROCKING!',setL:'MAKE AN L!',knees:'BEND & EXTEND!',legs:'LEGS!',high:'HIGHER!',ext:'ARM UP!',drift:'BALANCE!',stance:'BALANCE!'})[miss]||'FIX IT!','#ff5a4f',null,.25); say((score>=70?'Good shot. ':'')+(miss==='legs'&&why.legs?why.legs: miss==='knees'&&why.knees==='extend'?'Extend! Push up through your legs.' : miss==='knees'&&why.knees==='bend'?'Bend your knees first!' : miss==='path'?('Ball went to your '+why.path+'. Shoot it straight! Elbow in, pizza tray.') : SHOT_CUES[miss]),{urgent:true}); }
+  // ONE short critique per shot: either praise, or the single most important fix (2-4 words)
+  const SHORT={elbow:'Elbow in.', stance:'Feet shoulder width.', path:'Shoot it straight.', high:'Release higher.', follow:'Hold your follow through.',
+    legs:'Legs quiet.', drift:'Land on your spot.', setL:'Make an L.', rock:'Straight up, no dip.', ext:'Arm straight up.'};
+  if(!miss){ beep(1100,.15,.3); pop(R.streak>=3?'ON FIRE!':'PERFECT FORM','#5ff0a0',null,.25,true); say(R.streak>=3?'On fire!':'Perfect!',{urgent:true}); }
+  else { beep(520,.12,.25); pop(({path:'STRAIGHT!',follow:'HOLD IT!',elbow:'CHICKEN WING!',rock:'ROCKING!',setL:'MAKE AN L!',knees:'BEND & EXTEND!',legs:'LEGS!',high:'HIGHER!',ext:'ARM UP!',drift:'BALANCE!',stance:'BALANCE!'})[miss]||'FIX IT!','#ff5a4f',null,.25);
+    say(miss==='knees'?(why.knees==='extend'?'Push up through your legs.':'Bend your knees.'):SHORT[miss],{urgent:true}); }
   renderFormList(res,R.shots); updateBoard();
   if(R.reps>=R.def.target) later(()=>endSegment(),1600);
+  else restBetween();
+}
+// Rest between shots: camera ignores her (no fake shots while she grabs the ball), then "3, 2, 1, Shoot!"
+function restBetween(){
+  const secs=S.rest|0; if(!secs) return;
+  const now=performance.now(), ms=secs*1000; R.ignoreUntil=now+ms; shot.st='wait'; shot.buf=[];
+  const cue=n=>()=>{ if(state!=='running') return; pop(String(n),'#f6c623',null,.35,true); beep(660); };
+  if(secs>=4){ later(cue(3),ms-3000); later(cue(2),ms-2000); later(cue(1),ms-1000); }
+  later(()=>{ if(state!=='running') return; pop('SHOOT!','#5ff0a0',null,.35,true); beep(1100,.3); say('Shoot!',{urgent:true}); },ms);
 }
 function renderFormList(res,shots){
   const rows=checksFor(S.view).map(([k,lab])=>{
@@ -682,11 +701,11 @@ function startRun(){
   state='countdown'; setGo('CANCEL','stop'); startRecorder();
   $('cdDrill').textContent=S.n+' Form Shots'; $('cdCue').textContent='Balance. Eyes on the front rim. Pizza tray, elbow in an L. Hold it — all four to the floor!';
   $('cdNext').textContent=(S.view==='front'?'FRONT VIEW':'SIDE VIEW')+' · STAND TALL FOR THE COUNT'; $('cdNum').textContent=''; $('cdOv').classList.remove('hidden');
-  say('Stand tall. '+R.def.cue,{urgent:true});
-  const gap=3200;
-  later(()=>{ $('cdNum').textContent='3'; beep(660); say('3'); },gap);
-  later(()=>{ $('cdNum').textContent='2'; beep(660); say('2'); },gap+1000);
-  later(()=>{ $('cdNum').textContent='1'; beep(660); say('1'); },gap+2000);
+  say('Get ready.',{urgent:true});
+  const gap=1800;
+  later(()=>{ $('cdNum').textContent='3'; beep(660); },gap);
+  later(()=>{ $('cdNum').textContent='2'; beep(660); },gap+1000);
+  later(()=>{ $('cdNum').textContent='1'; beep(660); },gap+2000);
   later(()=>{ $('cdNum').textContent='SHOOT!'; beep(1100,.3); say('Shoot!');
     state='running'; R.t0=performance.now(); R.ignoreUntil=R.t0+150; setGo('STOP','stop');
     later(()=>{ if(state==='running') $('cdOv').classList.add('hidden'); },650);
@@ -871,6 +890,7 @@ function renderSettings(){
   document.querySelectorAll('#camSeg button').forEach(b=>b.classList.toggle('on',b.dataset.f===S.facing));
   document.querySelectorAll('#vpSeg button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.vpack));
   document.querySelectorAll('#handSeg button').forEach(b=>b.classList.toggle('on',b.dataset.h===S.hand));
+  document.querySelectorAll('#restSeg button').forEach(b=>b.classList.toggle('on',+b.dataset.r===S.rest));
   $('optBall').checked=S.ballPath; $('optVoice').checked=S.voice; $('optRec').checked=S.rec; $('optDbg').checked=S.debug; $('inName').value=S.name;
 }
 function openSheet(){ renderSettings(); $('sheet').classList.remove('hidden'); }
@@ -887,6 +907,7 @@ $('saveVid').onclick=saveReplay;
 $('chips').onclick=e=>{ const b=e.target.closest('.chip'); if(!b) return; if(busy()) return toast('Finish the round first'); S.n=+b.dataset.n; store.set('n',S.n); state='idle'; $('resOv').classList.add('hidden'); renderInfo(); };
 $('viewSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; if(busy()) return toast('Finish the round first'); S.view=b.dataset.v; store.set('view',S.view); state='idle'; $('resOv').classList.add('hidden'); renderInfo(); };
 $('handSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; if(busy()) return toast('Finish the round first'); S.hand=b.dataset.h; store.set('hand',S.hand); renderSettings(); };
+$('restSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; S.rest=+b.dataset.r; store.set('rest',S.rest); renderSettings(); };
 $('vpSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; S.vpack=b.dataset.v; store.set('vpack',S.vpack);
   document.querySelectorAll('#vpSeg button').forEach(x=>x.classList.toggle('on',x.dataset.v===S.vpack)); vpLoad();
   if(S.voice){ ensureAudio(); setTimeout(()=>say('Coach is on!',{urgent:true}),vpOn()?600:0); } };
