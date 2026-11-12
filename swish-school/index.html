@@ -139,6 +139,7 @@ main{flex:1;display:grid;gap:14px;padding-bottom:16px;grid-template-columns:1fr}
 
 /* sheets */
 .sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+#replaySheet,#chkSheet{z-index:28} /* above the results card (20) so they are not hidden behind it */
 .sheetcard{background:var(--green);border:2px solid var(--line);border-radius:20px;padding:20px;width:100%;max-width:460px;display:flex;flex-direction:column;gap:11px;max-height:100%;overflow:auto}
 .sheetcard h3{font-family:var(--jersey);font-size:26px;color:var(--gold)}
 .slbl{font-size:14px;font-weight:800;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
@@ -554,7 +555,9 @@ function evalShot(pre,U){
   if(view==='front'){
     let set=U.slice(0,pi+1).filter(f=>f.armOK&&f.el.y>f.wr.y&&f.elb<135);
     if(!set.length){ const c=U.slice(0,pi+1).filter(f=>f.el.y>f.wr.y); if(c.length) set=[c.reduce((a,b)=>b.elb<a.elb?b:a)]; }
-    if(set.length){ const tilt=med(set.map(f=>Math.atan2(Math.abs(f.wr.x-f.el.x),f.el.y-f.wr.y)*180/Math.PI)); res.elbow=tilt<=22; why.elbow=Math.round(tilt)+'°'; }
+    // Chicken wing = elbow pushed OUT past the wrist (away from her body), sized to her shoulder width.
+    // (Old check used forearm tilt angle, which blows up when a good elbow points at the camera and the forearm looks short.)
+    if(set.length){ const out=med(set.map(f=>(Math.abs(f.el.x-f.midX)-Math.abs(f.wr.x-f.midX))/f.sw)); res.elbow=out<=.4; why.elbow=Math.round(out*100)+'% sw'; }
   }
   if(view==='side'){
     // "L" at the set point: tightest elbow angle once the ball is above her shoulder
