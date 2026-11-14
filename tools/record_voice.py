@@ -2,6 +2,7 @@
 """Record ElevenLabs voice clips for an app on this site.
 
     python3 tools/record_voice.py <app-folder> [--dry]
+    python3 tools/record_voice.py ~/dribble-dash      (app in its own repo)
 
 Reads <app>/audio/phrases.json  {"key the app says": "text to record"}
   and <app>/audio/voices.json   {"pack-id": {"voice_id": "...", "name": "..."}}
@@ -17,7 +18,8 @@ DRY = "--dry" in sys.argv
 if not args:
     sys.exit("Usage: python3 tools/record_voice.py <app-folder> [--dry]")
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-APP = os.path.join(ROOT, args[0].strip("/"))
+_a = os.path.expanduser(args[0])
+APP = _a.rstrip("/") if os.path.isabs(_a) else os.path.join(ROOT, _a.strip("/"))  # absolute path = an app in its own repo (e.g. ~/dribble-dash)
 AUD = os.path.join(APP, "audio")
 PHRASES = json.load(open(os.path.join(AUD, "phrases.json")))
 VOICES = json.load(open(os.path.join(AUD, "voices.json")))
