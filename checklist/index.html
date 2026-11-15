@@ -224,7 +224,7 @@ const CATS = {
   workout:  {label:'Workout',  color:'var(--workout)',  emoji:'⚽'},
   homework: {label:'Homework', color:'var(--homework)', emoji:'📚'},
 };
-const EMOJIS = ['🛏️','🦷','🚿','👕','🧺','🧹','🍽️','🗑️','🐶','🐱','🌱','🧸','🎒','👟','📚','✏️','📖','🧮','🎹','⚽','🏀','🏐','🏃','🤸','💪','🧘','💧','🥦','🙏','⭐'];
+const EMOJIS = ['🛏️','🦷','🚿','👕','🧺','🧹','🍽️','🗑️','🐶','🐱','🌱','🧸','🎒','👟','📚','✏️','📖','🧮','🎹','⚽','🏀','🏐','🏃','🤸','💪','🧘','💧','🥦','🙏','🔤','🔢','🚀','⭐'];
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 function blank(){
@@ -246,6 +246,18 @@ function normalize(r){
     const ky = r.kids.find(k => k.id === 'kryslana');
     if (ky && !ky.items.find(it => it.id === 'stretch')) ky.items.push({id:'stretch', t:'Splits stretch', e:'🤸', c:'workout'});
     r.stretchAdded = true;
+  }
+  // one-time: Rico's daily routine (prayer, bed, 15 min ABC Rocket, 15 min 123 Rocket)
+  if (!r.ricoDailyAdded){
+    const ri = r.kids.find(k => k.id === 'rico');
+    if (ri){
+      [{id:'prayer',  t:'Daily prayer',             e:'🙏', c:'chore'},
+       {id:'makebed', t:'Make bed',                 e:'🛏️', c:'chore'},
+       {id:'abc15',   t:'ABC Rocket for 15 minutes', e:'🔤', c:'homework'},
+       {id:'math15',  t:'123 Rocket for 15 minutes', e:'🔢', c:'homework'}]
+        .forEach(it => { if (!ri.items.find(x => x.id === it.id)) ri.items.push(it); });
+    }
+    r.ricoDailyAdded = true;
   }
   return r;
 }
