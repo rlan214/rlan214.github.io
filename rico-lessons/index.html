@@ -9,6 +9,8 @@
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
 <title>Rico Lessons</title>
+<script src="../shared/seasons.js" data-key="rl_theme" defer></script>
+<script src="../shared/parent-text.js" defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -123,7 +125,7 @@ header p{margin:2px 0 0;color:var(--soft);font-size:15px}
   </section>
 
   <section id="learn" class="hidden">
-    <div class="row"><button class="btn teal" id="singBtn">▶ Sing the days</button><button class="btn" id="learnDone">I did it! ⭐</button></div>
+    <div class="row"><button class="btn" id="videoBtn" style="background:#ff4b4b;color:#fff">📺 Watch Ms. Rachel</button><button class="btn teal" id="singBtn">▶ Sing the days</button><button class="btn" id="learnDone">I did it! ⭐</button></div>
     <div class="week" id="learnWeek"></div>
   </section>
 
@@ -184,6 +186,7 @@ function show(id){cur=id;["lessons","home","learn","quiz","results"].forEach(s=>
 $("backBtn").onclick=()=>{hush();singing=false;cur==="home"?goLessons():goHome()};
 
 /* ---------- lessons (add future lessons here) ---------- */
+/* Add new lessons at the END of this list - the screen shows them newest first (latest on top). */
 const LESSONS=[
   {id:"days",t:"Days of the Week",d:"Sing, order, next day, today & tomorrow",ico:"📅",open:goHome}
 ];
@@ -194,13 +197,20 @@ function goLessons(){show("lessons");$("title").textContent="Rico Lessons";$("su
   $("plan").innerHTML=`<h2>${n>=PLAN.length?"🎉 Today's lesson is done!":"Today's lesson: Days of the Week"}</h2>
     <div style="color:var(--soft)">${n} of ${PLAN.length} done today</div>
     <div class="chk">${PLAN.map(p=>`<span class="${done.includes(p)?"done":""}">${done.includes(p)?"✓ ":""}${ACTS[p].t}</span>`).join("")}</div>`;
-  $("lessonList").innerHTML=LESSONS.map((L,k)=>`<button class="lesson" data-k="${k}"><div class="lico">${L.ico}</div><div><b>${L.t}</b><span>${L.d}</span></div></button>`).join("")
+  $("lessonList").innerHTML=LESSONS.map((L,k)=>[L,k]).reverse().map(([L,k])=>`<button class="lesson" data-k="${k}"><div class="lico">${L.ico}</div><div><b>${L.t}</b><span>${L.d}</span></div></button>`).join("")
     +`<div class="lesson soon"><div class="lico">📚</div><div><b>More lessons coming</b><span>New lessons show up here</span></div></div>`;
-  $("lessonList").querySelectorAll("button.lesson").forEach(b=>b.onclick=()=>{say("Days of the week!");LESSONS[b.dataset.k].open()});
+  $("lessonList").querySelectorAll("button.lesson").forEach(b=>b.onclick=()=>{const L=LESSONS[b.dataset.k];say(L.t+"!");L.open()});
 }
 
 /* ---------- days of the week: activity menu ---------- */
+const VIDEO_ID="cEUmApg_cXs"; /* Ms. Rachel - Days of the Week song (Netflix Jr) */
+/* Opens the YouTube app so his YouTube Premium account is used (no ads). Falls back to the web page if the app isn't installed. */
+function watchVideo(){hush();singing=false;markDone("video");
+  let left=false;const off=()=>{if(document.hidden)left=true};document.addEventListener("visibilitychange",off);
+  location.href="youtube://www.youtube.com/watch?v="+VIDEO_ID;
+  setTimeout(()=>{document.removeEventListener("visibilitychange",off);if(!left)window.open("https://www.youtube.com/watch?v="+VIDEO_ID,"_blank")},1500)}
 const ACTS={
+  video:{t:"Watch the Song",d:"Ms. Rachel sings the days",ai:"📺",go:watchVideo},
   learn:{t:"Sing the Days",d:"Hear all 7 days",ai:"🎵",go:openLearn},
   next:{t:"What Comes Next?",d:"Find the next day",ai:"➡️",go:()=>startQuiz("next")},
   order:{t:"Day Train",d:"Put the days in order",ai:"🚂",go:startOrder},
@@ -309,9 +319,12 @@ function finish(mode,good,total){lastMode=mode;
   const left=PLAN.filter(p=>!doneToday().includes(p));
   say(($("resTitle").textContent)+(left.length?"":" You finished today's lesson!"));
   if(s===3||!left.length)confetti();
+  const tm=new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+  window.ParentText&&ParentText.ready(`Rico finished Days of the Week: ${ACTS[mode].t} ${"⭐".repeat(s)}${mode==="learn"?"":` (${good} of ${total} first try)`} at ${tm}.`+(left.length?"":" That's all of today's lesson! 🎉"));
 }
 $("againBtn").onclick=()=>ACTS[lastMode].go();
 $("menuBtn").onclick=goHome;
+$("videoBtn").onclick=watchVideo;
 function confetti(){const c=["#e94b3c","#f28c28","#f2c12e","#3dae5a","#2f80d1","#8a5cd0","#f06aa8"];for(let i=0;i<70;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=c[i%7];d.style.animationDuration=(1.8+Math.random()*1.8)+"s";d.style.animationDelay=Math.random()*.6+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),4500)}}
 
 goLessons();

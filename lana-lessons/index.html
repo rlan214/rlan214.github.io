@@ -9,6 +9,8 @@
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
 <title>Lana Lessons</title>
+<script src="../shared/seasons.js" data-key="ll_theme" defer></script>
+<script src="../shared/parent-text.js" defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -320,12 +322,13 @@ $("backBtn").onclick=()=>{speechSynthesis?.cancel?.();cur==="home"?goLessons():g
 
 /* ---------- lessons ---------- */
 // Add future subjects here. Each lesson opens its own screen set.
+/* Add new lessons at the END of this list - the screen shows them newest first (latest on top). */
 const LESSONS=[
  {id:"northeast",ico:"🧭",t:"Northeast States",d:"11 states · capitals · abbreviations · map test",open:()=>goHome(),
   best:()=>{const b=store.get("cc_best",{});return b.mix!=null?`Big Test best ${b.mix}%`:(Object.keys(b).length?"Started":"")}},
 ];
 function goLessons(){show("lessons");
-  $("lessonList").innerHTML=LESSONS.map((L,k)=>{const b=L.best?L.best():"";return `<button class="lesson" data-k="${k}"><div class="lico">${L.ico}</div><div><b>${L.t}</b><span>${L.d}</span>${b?`<div><span class="lbest">${b}</span></div>`:""}</div></button>`}).join("")
+  $("lessonList").innerHTML=LESSONS.map((L,k)=>[L,k]).reverse().map(([L,k])=>{const b=L.best?L.best():"";return `<button class="lesson" data-k="${k}"><div class="lico">${L.ico}</div><div><b>${L.t}</b><span>${L.d}</span>${b?`<div><span class="lbest">${b}</span></div>`:""}</div></button>`}).join("")
    +`<div class="lesson soon"><div class="lico">📚</div><div><b>More lessons coming</b><span>New subjects show up here</span></div></div>`;
   $("lessonList").querySelectorAll("button.lesson").forEach(b=>b.onclick=()=>LESSONS[b.dataset.k].open());
 }
@@ -456,6 +459,8 @@ function finish(){
   $("rMissed").innerHTML=m.map(n=>`<span>${n} · ${byName[n].cap} · ${byName[n].ab}</span>`).join("");
   $("againBtn").onclick=()=>startQuiz(Q.mode);
   show("results");if(stars===3)confetti();
+  const md=MODES.find(x=>x.id===Q.mode),tm=new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+  window.ParentText&&ParentText.ready(`Lana finished Northeast States: ${md?md.t:"practice"}, ${Q.right} of ${Q.list.length} right (${pct}%) ${"★".repeat(stars)} at ${tm}.`+(m.length?` Needs practice: ${m.join(", ")}.`:""));
 }
 function confetti(){const c=["#ef6a4c","#1f9e8f","#f3b43f","#b9c7ef","#f5b8d0"];for(let i=0;i<70;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=c[i%5];d.style.animationDuration=(1.8+Math.random()*1.8)+"s";d.style.animationDelay=Math.random()*.6+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),4500)}}
 
