@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cut,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Rico Lessons">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<title>Rico Lessons</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#eef6fb; --paper2:#dcebf5; --ink:#1f2f4a; --soft:#5b6b85; --line:#bcd3e3;
+  --coral:#ef6a4c; --teal:#1f9e8f; --gold:#f3b43f; --sky:#cfe6ef; --good:#2fa66a; --bad:#e0503a;
+  --d0:#f06aa8; --d1:#e94b3c; --d2:#f28c28; --d3:#f2c12e; --d4:#3dae5a; --d5:#2f80d1; --d6:#8a5cd0;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{background:var(--paper);color:var(--ink);font-family:Nunito,system-ui,sans-serif;
+  background-image:radial-gradient(circle at 12% 8%,#fff 0,transparent 40%),radial-gradient(circle at 90% 92%,#d6e9f5 0,transparent 45%);
+  -webkit-user-select:none;user-select:none;overflow-x:hidden}
+.app{max-width:900px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) 16px 40px}
+h1,h2,h3,.btn,.big,.pill{font-family:"Baloo 2",Nunito,sans-serif}
+header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+header .logo{width:52px;height:52px;flex:none;border-radius:14px}
+header h1{font-size:30px;margin:0;line-height:1}
+header p{margin:2px 0 0;color:var(--soft);font-size:15px}
+.back{border:0;background:#fff;border-radius:14px;padding:8px 14px;font:800 16px Nunito;color:var(--ink);box-shadow:0 2px 0 var(--line);margin-left:auto}
+.stars{background:var(--gold);border:2px solid var(--ink);border-radius:14px;padding:4px 10px;font:800 18px "Baloo 2";white-space:nowrap}
+.hidden{display:none!important}
+
+/* lessons */
+.plan{background:#fff;border:3px solid var(--ink);border-radius:22px;padding:16px 18px;box-shadow:0 6px 0 var(--ink);margin-bottom:18px}
+.plan h2{margin:0 0 4px;font-size:24px}
+.plan .chk{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.plan .chk span{border:2px solid var(--line);border-radius:12px;padding:4px 10px;font-weight:800;font-size:15px;color:var(--soft)}
+.plan .chk span.done{background:var(--good);border-color:var(--good);color:#fff}
+.lessons{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.lesson{border:3px solid var(--ink);border-radius:22px;padding:18px;background:#fff;text-align:left;font:inherit;color:inherit;box-shadow:0 6px 0 var(--ink);display:flex;gap:14px;align-items:center}
+.lesson:active{transform:translateY(5px);box-shadow:0 1px 0 var(--ink)}
+.lesson .lico{width:72px;height:72px;flex:none;border-radius:18px;background:var(--sky);display:flex;align-items:center;justify-content:center;font-size:40px;border:2px solid var(--ink)}
+.lesson b{display:block;font-family:"Baloo 2";font-size:24px;line-height:1.1}
+.lesson span{color:var(--soft);font-size:15px}
+.lesson.soon{border-style:dashed;box-shadow:none;background:transparent;opacity:.7}
+
+/* activity menu */
+.todaybox{background:#fff;border:3px solid var(--ink);border-radius:22px;padding:14px;text-align:center;margin-bottom:16px;box-shadow:0 6px 0 var(--ink)}
+.todaybox .big{font-size:22px;color:var(--soft)}
+.todaybox .day{font-size:46px;line-height:1.1;font-weight:800}
+.acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.act{border:3px solid var(--ink);border-radius:20px;padding:16px;background:#fff;font:inherit;color:inherit;box-shadow:0 5px 0 var(--ink);display:flex;gap:12px;align-items:center;text-align:left;position:relative}
+.act:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+.act .ai{font-size:38px}
+.act b{font-family:"Baloo 2";font-size:22px;display:block;line-height:1.1}
+.act span{color:var(--soft);font-size:14px}
+.act .tick{position:absolute;top:-10px;right:-8px;background:var(--good);color:#fff;border:2px solid var(--ink);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:800}
+
+/* day pills */
+.week{display:flex;flex-direction:column;gap:10px}
+.pill{border:3px solid var(--ink);border-radius:20px;padding:10px 18px;font-size:32px;font-weight:800;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.25);box-shadow:0 5px 0 var(--ink);display:flex;align-items:center;gap:14px;transition:transform .15s}
+.pill:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+.pill .n{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:24px;flex:none}
+.pill .tag{margin-left:auto;font-size:15px;background:#fff;color:var(--ink);text-shadow:none;border-radius:10px;padding:2px 10px}
+.pill.lit{transform:scale(1.05);outline:6px solid var(--gold)}
+.pill.plain{background:#fff!important;color:var(--ink);text-shadow:none}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:14px 0}
+.btn{border:3px solid var(--ink);border-radius:18px;padding:12px 22px;font-size:24px;font-weight:800;background:var(--gold);color:var(--ink);box-shadow:0 5px 0 var(--ink)}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+.btn.teal{background:var(--teal);color:#fff}
+
+/* questions */
+.qhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.prog{flex:1;height:14px;background:#fff;border:2px solid var(--ink);border-radius:10px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--teal);transition:width .3s}
+.ask{display:flex;align-items:center;gap:12px;background:#fff;border:3px solid var(--ink);border-radius:22px;padding:14px 16px;margin-bottom:14px}
+.ask .t{font-family:"Baloo 2";font-size:28px;font-weight:800;line-height:1.15;flex:1}
+.spk{border:3px solid var(--ink);background:var(--sky);border-radius:50%;width:64px;height:64px;font-size:30px;flex:none;box-shadow:0 4px 0 var(--ink)}
+.spk:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.seq{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:6px 0 16px}
+.seq .pill{font-size:22px;padding:6px 14px;box-shadow:0 3px 0 var(--ink)}
+.seq .blank{border:3px dashed var(--ink);border-radius:20px;padding:6px 26px;font:800 26px "Baloo 2";background:#fff}
+.choices{display:grid;gap:12px}
+.choices .pill{justify-content:center}
+.pill.ok{outline:6px solid var(--good)}
+.pill.no{opacity:.35;animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.mini{display:flex;gap:4px;justify-content:center;margin:0 0 14px}
+.mini div{width:44px;height:44px;border-radius:10px;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font:800 15px "Baloo 2";color:#fff}
+.mini div.today{outline:4px solid var(--ink);transform:scale(1.15)}
+.train{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:64px;background:#fff;border:3px dashed var(--line);border-radius:20px;padding:10px;margin-bottom:14px}
+.train .pill{font-size:20px;padding:6px 12px;box-shadow:none}
+.pool{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.pool .pill{justify-content:center;font-size:28px}
+.pool .pill.used{visibility:hidden}
+
+/* results */
+.res{text-align:center;background:#fff;border:3px solid var(--ink);border-radius:26px;padding:26px;box-shadow:0 6px 0 var(--ink)}
+.res .big{font-size:44px;font-weight:800}
+.res .st{font-size:54px;letter-spacing:4px}
+.confetti{position:fixed;top:-12px;width:12px;height:16px;border-radius:3px;z-index:99;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <img class="logo" src="icon.png" alt="">
+    <div><h1 id="title">Rico Lessons</h1><p id="sub">Pick a lesson</p></div>
+    <span class="stars" id="starCount">⭐ 0</span>
+    <button class="back hidden" id="backBtn">◀ Lessons</button>
+  </header>
+
+  <section id="lessons">
+    <div class="plan" id="plan"></div>
+    <div class="lessons" id="lessonList"></div>
+  </section>
+
+  <section id="home" class="hidden">
+    <div class="todaybox"><div class="big">Today is</div><div class="day" id="todayDay"></div></div>
+    <div class="acts" id="acts"></div>
+  </section>
+
+  <section id="learn" class="hidden">
+    <div class="row"><button class="btn teal" id="singBtn">▶ Sing the days</button><button class="btn" id="learnDone">I did it! ⭐</button></div>
+    <div class="week" id="learnWeek"></div>
+  </section>
+
+  <section id="quiz" class="hidden">
+    <div class="qhead"><div class="prog"><i id="progBar"></i></div><b id="progTxt"></b></div>
+    <div class="ask"><div class="t" id="qText"></div><button class="spk" id="qSpeak">🔊</button></div>
+    <div id="qBody"></div>
+  </section>
+
+  <section id="results" class="hidden">
+    <div class="res">
+      <div class="st" id="resStars"></div>
+      <div class="big" id="resTitle"></div>
+      <p id="resSub" style="font-size:20px;color:var(--soft)"></p>
+      <div class="row"><button class="btn teal" id="againBtn">Play again</button><button class="btn" id="menuBtn">More games</button></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const todayKey=()=>{const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
+
+/* ---------- voice (same picker as ABC Rocket) ---------- */
+const HAS_TTS="speechSynthesis" in window;
+const NOVELTY=/albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|grandma|grandpa|eddy|flo|reed|rocko|sandy|shelley/i;
+let voices=[];
+function loadVoices(){if(!HAS_TTS)return;voices=(speechSynthesis.getVoices()||[]).filter(v=>/^en[-_]/i.test(v.lang)||v.lang==="en")}
+if(HAS_TTS){loadVoices();speechSynthesis.onvoiceschanged=loadVoices;setTimeout(loadVoices,600)}
+function voiceRank(v){let r=10;if(/premium/i.test(v.name))r=0;else if(/enhanced/i.test(v.name))r=1;else if(/samantha|ava|allison|susan|zoe|nicky|evan|nathan|joelle/i.test(v.name))r=3;if(NOVELTY.test(v.name))r+=50;if(!/en[-_]US/i.test(v.lang))r+=4;return r}
+const bestVoice=()=>voices.slice().sort((a,b)=>voiceRank(a)-voiceRank(b))[0]||null;
+function utt(t,rate=.85){const u=new SpeechSynthesisUtterance(t);const v=bestVoice();if(v){u.voice=v;u.lang=v.lang}else u.lang="en-US";u.rate=rate;return u}
+function say(t){if(!HAS_TTS)return;try{speechSynthesis.cancel();speechSynthesis.speak(utt(t))}catch(e){}}
+function hush(){if(HAS_TTS)try{speechSynthesis.cancel()}catch(e){}}
+
+/* ---------- data ---------- */
+const DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const col=i=>`var(--d${i})`;
+const isWeekend=i=>i===0||i===6;
+const today=()=>new Date().getDay();
+let stars=store.get("rl_stars",0);
+function addStars(n){stars+=n;store.set("rl_stars",stars);$("starCount").textContent="⭐ "+stars}
+function doneToday(){const d=store.get("rl_done",{});return d[todayKey()]||[]}
+function markDone(id){const d=store.get("rl_done",{});const k=todayKey();d[k]=[...new Set([...(d[k]||[]),id])];
+  const keys=Object.keys(d);if(keys.length>60)delete d[keys[0]];store.set("rl_done",d)}
+
+function pillHTML(i,{tag="",plain=false,extra=""}={}){
+  return `<button class="pill${plain?" plain":""}" data-d="${i}" style="background:${col(i)}" ${extra}>${plain?"":`<span class="n">${i+1}</span>`}${DAYS[i]}${tag?`<span class="tag">${tag}</span>`:""}</button>`}
+
+/* ---------- navigation ---------- */
+let cur="lessons";
+function show(id){cur=id;["lessons","home","learn","quiz","results"].forEach(s=>$(s).classList.toggle("hidden",s!==id));
+  $("backBtn").classList.toggle("hidden",id==="lessons");
+  $("backBtn").textContent=id==="home"?"◀ Lessons":"⌂ Back";
+  $("starCount").textContent="⭐ "+stars;window.scrollTo(0,0)}
+$("backBtn").onclick=()=>{hush();singing=false;cur==="home"?goLessons():goHome()};
+
+/* ---------- lessons (add future lessons here) ---------- */
+const LESSONS=[
+  {id:"days",t:"Days of the Week",d:"Sing, order, next day, today & tomorrow",ico:"📅",open:goHome}
+];
+// Daily plan: which activities count as today's lesson
+const PLAN=["learn","next","order","today"];
+function goLessons(){show("lessons");$("title").textContent="Rico Lessons";$("sub").textContent="Pick a lesson";
+  const done=doneToday(),n=PLAN.filter(p=>done.includes(p)).length;
+  $("plan").innerHTML=`<h2>${n>=PLAN.length?"🎉 Today's lesson is done!":"Today's lesson: Days of the Week"}</h2>
+    <div style="color:var(--soft)">${n} of ${PLAN.length} done today</div>
+    <div class="chk">${PLAN.map(p=>`<span class="${done.includes(p)?"done":""}">${done.includes(p)?"✓ ":""}${ACTS[p].t}</span>`).join("")}</div>`;
+  $("lessonList").innerHTML=LESSONS.map((L,k)=>`<button class="lesson" data-k="${k}"><div class="lico">${L.ico}</div><div><b>${L.t}</b><span>${L.d}</span></div></button>`).join("")
+    +`<div class="lesson soon"><div class="lico">📚</div><div><b>More lessons coming</b><span>New lessons show up here</span></div></div>`;
+  $("lessonList").querySelectorAll("button.lesson").forEach(b=>b.onclick=()=>{say("Days of the week!");LESSONS[b.dataset.k].open()});
+}
+
+/* ---------- days of the week: activity menu ---------- */
+const ACTS={
+  learn:{t:"Sing the Days",d:"Hear all 7 days",ai:"🎵",go:openLearn},
+  next:{t:"What Comes Next?",d:"Find the next day",ai:"➡️",go:()=>startQuiz("next")},
+  order:{t:"Day Train",d:"Put the days in order",ai:"🚂",go:startOrder},
+  today:{t:"Today & Tomorrow",d:"Yesterday, today, tomorrow",ai:"☀️",go:()=>startQuiz("today")},
+  listen:{t:"Listen & Find",d:"Hear a day, tap it",ai:"👂",go:()=>startQuiz("listen")}
+};
+function goHome(){show("home");$("title").textContent="Days of the Week";$("sub").textContent="7 days in a week";
+  const t=today();$("todayDay").textContent=DAYS[t];$("todayDay").style.color=col(t);
+  const done=doneToday();
+  $("acts").innerHTML=Object.entries(ACTS).map(([k,a])=>`<button class="act" data-k="${k}"><div class="ai">${a.ai}</div><div><b>${a.t}</b><span>${a.d}</span></div>${done.includes(k)?'<div class="tick">✓</div>':""}</button>`).join("");
+  $("acts").querySelectorAll(".act").forEach(b=>b.onclick=()=>ACTS[b.dataset.k].go());
+}
+
+/* ---------- learn / sing ---------- */
+let singing=false;
+function openLearn(){show("learn");$("title").textContent="Sing the Days";$("sub").textContent="Tap a day to hear it";
+  const t=today();
+  $("learnWeek").innerHTML=DAYS.map((_,i)=>pillHTML(i,{tag:i===t?"Today":isWeekend(i)?"Weekend":""})).join("");
+  $("learnWeek").querySelectorAll(".pill").forEach(b=>b.onclick=()=>{const i=+b.dataset.d;light(i);
+    say(`${DAYS[i]}. ${i===t?"Today is "+DAYS[i]+"!":""} ${isWeekend(i)?"It's the weekend!":""}`)});
+  setTimeout(sing,400);
+}
+function light(i){$("learnWeek").querySelectorAll(".pill").forEach(p=>p.classList.toggle("lit",+p.dataset.d===i))}
+function sing(){if(!HAS_TTS)return;hush();singing=true;
+  const lines=["There are seven days in a week.",...DAYS,"Seven days in a week!"];
+  lines.forEach((l,k)=>{const u=utt(l,.8);const di=DAYS.indexOf(l);
+    u.onstart=()=>{if(singing&&cur==="learn")light(di)};
+    if(k===lines.length-1)u.onend=()=>{singing=false;light(-1)};
+    speechSynthesis.speak(u)});
+}
+$("singBtn").onclick=sing;
+$("learnDone").onclick=()=>{hush();singing=false;markDone("learn");addStars(3);finish("learn",1,1)};
+
+/* ---------- quizzes: next / today / listen ---------- */
+let Q=null;
+function startQuiz(mode){Q={mode,i:0,n:mode==="today"?5:6,good:0,missed:false,qs:makeQs(mode)};
+  show("quiz");$("title").textContent=ACTS[mode].t;$("sub").textContent=ACTS[mode].d;nextQ()}
+function makeQs(mode){const out=[];const t=today();
+  if(mode==="next"){const starts=shuffle([0,1,2,3,4,5,6]).slice(0,6);
+    starts.forEach(s=>{const len=2+(Math.random()<.5?1:0);const seq=[...Array(len)].map((_,k)=>(s+k)%7);const ans=(s+len)%7;
+      out.push({text:"What day comes next?",speak:seq.map(d=>DAYS[d]).join(", ")+", ... What day comes next?",seq,ans})})}
+  if(mode==="today"){
+    out.push({text:"What day is today?",speak:"What day is today?",ans:t,mini:true});
+    out.push({text:"What day is tomorrow?",speak:`Today is ${DAYS[t]}. What day is tomorrow?`,ans:(t+1)%7,mini:true});
+    out.push({text:"What day was yesterday?",speak:`Today is ${DAYS[t]}. What day was yesterday?`,ans:(t+6)%7,mini:true});
+    const we=Math.random()<.5?0:6;
+    out.push({text:"Which day is the weekend?",speak:"No school! Which day is the weekend?",ans:we,pool:shuffle([1,2,3,4,5]).slice(0,2).concat(we)});
+    const s=shuffle([0,1,2,3,4,5,6])[0];
+    out.push({text:`What comes after ${DAYS[s]}?`,speak:`What day comes after ${DAYS[s]}?`,ans:(s+1)%7,seq:[s]});
+  }
+  if(mode==="listen"){shuffle([0,1,2,3,4,5,6]).slice(0,6).forEach(d=>out.push({text:"Tap the day you hear!",speak:`Find ${DAYS[d]}. ${DAYS[d]}.`,ans:d,plain:true}))}
+  return out}
+function nextQ(){if(Q.i>=Q.qs.length)return finish(Q.mode,Q.good,Q.qs.length);
+  const q=Q.qs[Q.i];Q.missed=false;
+  $("progBar").style.width=(Q.i/Q.qs.length*100)+"%";$("progTxt").textContent=(Q.i+1)+"/"+Q.qs.length;
+  $("qText").textContent=q.text;
+  const pool=q.pool||shuffle([q.ans,...shuffle([0,1,2,3,4,5,6].filter(d=>d!==q.ans&&!(q.seq||[]).includes(d))).slice(0,2)]);
+  let h="";
+  if(q.mini){const t=today();h+=`<div class="mini">${DAYS.map((d,i)=>`<div class="${i===t?"today":""}" style="background:${col(i)}">${d.slice(0,3)}</div>`).join("")}</div>`}
+  if(q.seq)h+=`<div class="seq">${q.seq.map(d=>pillHTML(d)).join("")}<div class="blank">?</div></div>`;
+  h+=`<div class="choices">${shuffle(pool).map(d=>pillHTML(d,{plain:q.plain})).join("")}</div>`;
+  $("qBody").innerHTML=h;
+  $("qBody").querySelectorAll(".choices .pill").forEach(b=>b.onclick=()=>answer(b,+b.dataset.d));
+  $("qBody").querySelectorAll(".seq .pill").forEach(b=>b.onclick=()=>say(DAYS[+b.dataset.d]));
+  $("qSpeak").onclick=()=>say(q.speak);
+  say(q.speak);
+}
+let lock=false;
+function answer(b,d){if(lock)return;const q=Q.qs[Q.i];
+  if(d===q.ans){lock=true;b.classList.add("ok");if(!Q.missed)Q.good++;
+    const bl=$("qBody").querySelector(".blank");if(bl){bl.outerHTML=pillHTML(d)}
+    say(shuffle(["Yes! ","Great job! ","You got it! ","Awesome! "])[0]+DAYS[d]+"!");
+    setTimeout(()=>{lock=false;Q.i++;nextQ()},1700)}
+  else{Q.missed=true;b.classList.add("no");b.disabled=true;say(`That's ${DAYS[d]}. Try again!`)}
+}
+
+/* ---------- day train (order) ---------- */
+let O=null;
+function startOrder(){O={next:0,miss:0};show("quiz");$("title").textContent="Day Train";$("sub").textContent="Put the days in order";
+  $("progBar").style.width="0%";$("progTxt").textContent="0/7";
+  $("qText").textContent="Tap the days in order. Start with Sunday!";
+  $("qBody").innerHTML=`<div class="train" id="train">🚂</div><div class="pool">${shuffle([0,1,2,3,4,5,6]).map(d=>pillHTML(d,{plain:true})).join("")}</div>`;
+  $("qBody").querySelectorAll(".pool .pill").forEach(b=>b.onclick=()=>orderTap(b,+b.dataset.d));
+  $("qSpeak").onclick=()=>say(O.next===0?"Find Sunday. Sunday starts the week!":`${DAYS[O.next-1]}. What comes next?`);
+  say("Let's build the day train! Find Sunday. Sunday starts the week!");
+}
+function orderTap(b,d){
+  if(d===O.next){b.classList.add("used");$("train").insertAdjacentHTML("beforeend",pillHTML(d));O.next++;
+    $("progBar").style.width=(O.next/7*100)+"%";$("progTxt").textContent=O.next+"/7";
+    if(O.next===7){say("Choo choo! Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday!");
+      setTimeout(()=>finish("order",Math.max(0,7-O.miss),7),5200)}
+    else say(DAYS[d])}
+  else{O.miss++;b.classList.add("no");setTimeout(()=>b.classList.remove("no"),400);
+    say(O.next===0?"Not that one. Find Sunday!":`Hmm, that's ${DAYS[d]}. What comes after ${DAYS[O.next-1]}?`)}
+}
+
+/* ---------- results ---------- */
+let lastMode=null;
+function finish(mode,good,total){lastMode=mode;
+  const s=mode==="learn"?3:good>=total?3:good>=total*.6?2:1;
+  if(mode!=="learn"){addStars(s);markDone(mode)}
+  show("results");$("progBar").style.width="100%";
+  $("resStars").textContent="⭐".repeat(s);
+  $("resTitle").textContent=s===3?"Super job, Rico!":s===2?"Nice work, Rico!":"Good try, Rico!";
+  $("resSub").textContent=mode==="learn"?"You sang all 7 days!":`${good} of ${total} on the first try`;
+  const left=PLAN.filter(p=>!doneToday().includes(p));
+  say(($("resTitle").textContent)+(left.length?"":" You finished today's lesson!"));
+  if(s===3||!left.length)confetti();
+}
+$("againBtn").onclick=()=>ACTS[lastMode].go();
+$("menuBtn").onclick=goHome;
+function confetti(){const c=["#e94b3c","#f28c28","#f2c12e","#3dae5a","#2f80d1","#8a5cd0","#f06aa8"];for(let i=0;i<70;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=c[i%7];d.style.animationDuration=(1.8+Math.random()*1.8)+"s";d.style.animationDelay=Math.random()*.6+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),4500)}}
+
+goLessons();
+</script>
+</body>
+</html>
