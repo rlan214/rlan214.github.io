@@ -275,6 +275,12 @@ function normalize(r){
     if (ky && !ky.items.find(x => x.id === 'declam')) ky.items.push({id:'declam', t:'Declamation practice', e:'🎤', c:'homework'});
     r.declamAdded = true;
   }
+  // one-time: Kryslana's KKPM song and dance practice
+  if (!r.kkpmAdded){
+    const ky = r.kids.find(k => k.id === 'kryslana');
+    if (ky && !ky.items.find(x => x.id === 'kkpm')) ky.items.push({id:'kkpm', t:'Practice KKPM song and dance', e:'💃', c:'homework'});
+    r.kkpmAdded = true;
+  }
   return r;
 }
 
