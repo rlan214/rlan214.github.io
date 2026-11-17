@@ -259,6 +259,22 @@ function normalize(r){
     }
     r.ricoDailyAdded = true;
   }
+  // one-time: Kryslana's volleyball reps (10 serves, 10 returns)
+  if (!r.vballAdded){
+    const ky = r.kids.find(k => k.id === 'kryslana');
+    if (ky){
+      [{id:'vserve',  t:'10 volleyball serves',  e:'🏐', c:'workout'},
+       {id:'vreturn', t:'10 volleyball returns', e:'🏐', c:'workout'}]
+        .forEach(it => { if (!ky.items.find(x => x.id === it.id)) ky.items.push(it); });
+    }
+    r.vballAdded = true;
+  }
+  // one-time: Kryslana's declamation practice (opens Declamation Dojo)
+  if (!r.declamAdded){
+    const ky = r.kids.find(k => k.id === 'kryslana');
+    if (ky && !ky.items.find(x => x.id === 'declam')) ky.items.push({id:'declam', t:'Declamation practice', e:'🎤', c:'homework'});
+    r.declamAdded = true;
+  }
   return r;
 }
 
@@ -523,7 +539,7 @@ function vKid(){
       if (!list.length) return '';
       return `<div class="group" style="--gc:${CATS[c].color}"><h3><span class="dot"></span>${CATS[c].label}</h3>
         ${list.map(it => `<button class="item ${p.done[it.id]?'on':''}" data-act="tick" data-id="${it.id}">
-          <span class="em">${esc(it.e || CATS[c].emoji)}</span><span class="tx">${esc(it.t)}</span><span class="box">${p.done[it.id]?'✔':''}</span></button>${it.id === 'stretch' && !p.done[it.id] ? `<a class="btn golink" href="stretch.html?kid=${encodeURIComponent(k.id)}">▶ Start stretch</a>` : ''}`).join('')}
+          <span class="em">${esc(it.e || CATS[c].emoji)}</span><span class="tx">${esc(it.t)}</span><span class="box">${p.done[it.id]?'✔':''}</span></button>${it.id === 'stretch' && !p.done[it.id] ? `<a class="btn golink" href="stretch.html?kid=${encodeURIComponent(k.id)}">▶ Start stretch</a>` : ''}${it.id === 'declam' && !p.done[it.id] ? `<a class="btn golink" href="/declamation-dojo/">▶ Open Declamation Dojo</a>` : ''}`).join('')}
       </div>`;
     }).join('');
   }
