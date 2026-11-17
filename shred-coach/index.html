@@ -439,7 +439,7 @@ function resolveName(e){
   if(e.kn){ const m=s.swaps["knee|"+s.split+"|"+e.n]; return {name:m||e.kn,why:"Knee mode"} }
   const manual=s.swaps[s.split+"|"+e.n];
   if(manual) return {name:manual,why:"manual"};
-  if(s.dbMode && needs(e.n).some(k=>HEAVY.includes(k))){
+  if(s.dbMode && !homeKey() && needs(e.n).some(k=>HEAVY.includes(k))){
     const d=alts.find(a=>needs(a).includes("db")&&canDo(a)) || alts.find(a=>canDo(a)&&!needs(a).some(k=>HEAVY.includes(k)));
     if(d) return {name:d,why:"Dumbbell mode"};
   }
@@ -578,6 +578,8 @@ const EXTRA = {
  home:{name:"Home · No equipment",home:1,ex:[X("Diamond Push-Ups",4,BW,40,0,"A1"),X("Inverted Row",4,BW,40,0,"A2"),X("Pike Push-Ups",3,BW,40,0,"B1"),X("Sliding Lat Pulldown",3,BW,40,0,"B2"),X("Towel Biceps Curl",2,BW,40,0,"C1"),X("Towel Triceps Extension",2,BW,40,0,"C2"),X("Assisted Pistol Squat",3,BW+"/leg",45),X("Bodyweight Bulgarian Split Squat",3,BW+"/leg",45),X("Sliding Hamstring Curl",4,BW,105)]},
  abs1:{name:"Abs · Day 1",circuit:1,ex:[X("Weighted Crunch",3,"8-15",SS,0,"C1"),X("Reverse Crunch",3,"8-15",90,0,"C2")]},
  abs2:{name:"Abs · Day 2",circuit:1,ex:[X("Hanging Leg Raise",3,"8-15",SS,0,"C1"),X("Cable Crunch",3,"8-15",90,0,"C2")]},
+ shoulder:{name:"Shoulder warm-up (daily)",ex:[X("Arm Circles",1,"5",15,"5 forward, 5 backward."),X("Band Over-and-Backs",1,"5",15,"Light band, wide grip, straight arms up over your head and back down."),X("Band Pull-Aparts",2,"10-15",30,"Arms straight in front, pull the band to your chest by squeezing your shoulder blades."),X("Band External Rotations",2,"10/side",30,"Elbow pinned to your side with a towel under it, rotate out. Light band."),X("Band Internal Rotations",1,"10/side",30,"Band anchored to the side, elbow pinned, rotate in across your stomach. Light."),X("Wall Slides",1,"10",30,"Back and arms flat on the wall, slide up and down without your low back arching.")]},
+ shoulder3:{name:"Shoulder strength (3×/wk)",ex:[X("Side-Lying Dumbbell External Rotation",3,"12-20/side",45,"Towel under the elbow, 2-5 lb, rotate up slowly. Mild ache ≤3/10 that's gone by tomorrow is OK; sharp pain = stop."),X("Band Internal Rotation (strength)",3,"12-20/side",45,"Cable or band at elbow height, arm at your side, rotate in."),X("Rope Face Pulls (light)",3,"12-20",45,"Cable with rope at face height, finish with hands rotated back. Light, slow."),X("Prone Y Raise",2,"12-20",45,"Chest down on the incline bench, 2-5 lb, thumbs up, raise into a Y."),X("Prone T Raise",2,"12-20",45,"Chest down on the incline bench, 2-5 lb, arms straight out to the sides."),X("Thumbs-Up Scaption",2,"12-20",45,"Arms ~30° in front of your body, thumbs up, only to shoulder height. Never thumbs-down (empty can)."),X("Push-Up Plus",2,"12-20",45,"At the top, push further so your shoulder blades spread apart. Knees down is fine.")]},
  prehab:{name:"Prehab (5 min)",ex:[X("(Weighted) Prone Arm Circles",2,"10-15",45),X("Wall Slides",2,"10-15",45),X("Banded Hip Abductions",2,"10-15",45,"Mini-band at knees. One set leaning forward, one leaning back."),X("Dead Hang",1,"10-60s",45)]}
 };
 const STRETCH = [["Cat-cow","60 s"],["World's greatest stretch","30 s / side"],["Deep (Asian) squat","30 s hold + 30 s rocking"],["Half-kneeling thoracic rotations","30 s"],["Wall slides","60 s"]];
@@ -652,16 +654,140 @@ const ymd = d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const TODAY = ymd(new Date());
 const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const slug = n=>n.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+
+/* ===================== HOME PROGRAMS =====================
+   BWS Intermediate home PDFs (Resistance Bands / Dumbbells / Bodyweight), 5-day Upper/Lower/Push/Pull/Legs.
+   "full" = as written in the PDF. "ss" = 30-min superset version paired by Claude (not an official BWS version).
+   Knee mode hides Lower + Legs (PT days) instead of swapping them. Logs follow the exercise name. */
+const HP_NAMES={UP:"Upper",L1:"Lower",PU:"Push",PL:"Pull",L2:"Legs"};
+function hpSS(full,plan){ const all=Object.values(full).flat(); const out={};
+  for(const k in plan) out[k]=plan[k].map(([n,tag])=>{ const e=all.find(x=>x.n===n); return X(n,Math.min(e.s,3),e.r,tag?SS:60,e.note,tag||undefined) });
+  return out }
+const HP_BANDS_FULL={
+ UP:[X("Banded Close-Grip Push-Ups",4,"8-15",120,"Band around your hands and across your back, narrow or diamond grip."),
+     X("Kneeling One-Arm Banded Row",3,"8-15/side",120,"Knot the band in the door hinge gap, kneel, row with the elbow tucked. Or loop it around a fixture."),
+     X("Standing Banded Shoulder Press",3,"8-15",120,"Stand on the band, press overhead. Shoulder not 100%: start with a light band."),
+     X("Single-Arm Banded Lat Pulldown",3,"8-15/side",120,"Knot the band over the top of a closed door, kneel, pull the elbow down to your side. Pull-ups work too."),
+     X("Dip Push-Ups",3,"8-15",120,"Hands on two stacks of books or upright dumbbells, press down to lift your chest, let your legs slide. Shoulder flares up: skip this one."),
+     X("Kneeling One-Arm Dumbbell Delt Row",3,"8-15/side",120,"Hand and knee on the bench, row with the elbow high at shoulder height. Band version: loop it around a fixture.")],
+ L1:[X("Resistance Band Paused Squat",4,"8-15",150,"Stand on the band, loop it behind your neck, pause 2-3 s at the bottom."),
+     X("Resistance Band Deadlift",4,"8-15",150,"Stand on the band, hold an end in each hand, conventional deadlift."),
+     X("Assisted Single-Leg Lunge",4,"8-15/leg",120,"Hold a table edge, back foot elevated, push up with the front leg."),
+     X("Single-Leg Weighted Calf Raise",4,"8-15/leg",75,"On a step, weight in one hand, other hand on something for balance.")],
+ PU:[X("Decline Close-Grip Banded Push-Ups",3,"8-15",120,"Band across your back, narrow grip, feet elevated."),
+     X("Banded Close-Grip Push-Ups",3,"8-15",120,"Band around your hands and across your back, narrow or diamond grip."),
+     X("Resistance Band Lateral Raise",4,"8-15",105,"Stand on the band, slight forward lean, raise your arms out to the sides."),
+     X("Standing Underhand Band Fly",2,"8-15/side",105,"Stand on the band, underhand grip, raise one arm up and across your body."),
+     X("Banded Overhead Triceps Extension",3,"8-15",105,"Stand on the band, hold the end behind you, extend overhead."),
+     X("Banded Triceps Pushdowns",3,"8-15",105,"Knot the band over the top of a door, push down to straight arms.")],
+ PL:[X("Straight-Arm Banded Pulldowns",3,"8-15",120,"Band over the top of the door, straight arms, pull down to your hips. Pull-up bar: do pull-ups."),
+     X("Bent-Over Resistance Band Row",3,"8-15",120,"Stand on the band, hinge at the hips, knees soft, row."),
+     X("Standing Banded Reverse Fly",3,"8-15",120,"Arms straight in front, spread the band apart."),
+     X("Banded Face Pulls",4,"8-15",75,"Band over the top of the door, pull to your face and finish in a W."),
+     X("Single-Arm Banded Curl",3,"8-15/side",105,"Stand on the band, elbow locked at your side, one arm at a time."),
+     X("Single-Arm Banded Hammer Curl",3,"8-15/side",105,"Same as the curl with a neutral (hammer) grip."),
+     X("Wall Slides",2,"5-10",60,"Back flat on the wall, slide your arms up and down. Pull-up bar: scapular pull-ups.")],
+ L2:[X("Resistance Band Paused Squat",4,"8-15",150,"Stand on the band, loop it behind your neck, pause 2-3 s at the bottom."),
+     X("Banded Bulgarian Split Squat",4,"8-15/leg",60,"Band under the front foot, back foot on a chair or bench."),
+     X("Lying Reverse Hyperextensions",3,"8-15",120,"Upper body on a bench, squeeze glutes and hamstrings to lift your legs to parallel."),
+     X("Sliding Hamstring Curls",3,"8-15",105,"Feet on towels on a smooth floor, hips up, curl heels to your butt."),
+     X("Seated Bodyweight Calf Raise",4,"8-15",75,"Hold something for support, squat down, calf raise.")]
+};
+const HP_DB_FULL={
+ UP:[X("Flat Dumbbell Press",4,"8-15",120,"Floor press if no bench."),
+     X("Chest-Supported Dumbbell Row with External Rotation",3,"8-15",120,"Squeeze the shoulder blades, turn wrists out at the top."),
+     X("Standing Dumbbell Shoulder Press",3,"8-15",120,"Straight line overhead, core and glutes tight, elbows not flared."),
+     X("Dumbbell Pullovers",3,"8-15",120,"Upper back on the bench, reach back, pull with your lats. Pull-up bar: do pull-ups."),
+     X("Dip Push-Ups",3,"8-15",120,"Hands on two stacks of books or upright dumbbells, press down to lift your chest, let your legs slide. Shoulder flares up: skip it."),
+     X("Single-Arm Dumbbell Rear Delt Row",3,"8-15/side",120,"Hand and knee on the bench, row with the elbow high at shoulder height.")],
+ L1:[X("Dumbbell Paused Goblet Squat",4,"8-15",150,"At least parallel, pause at the bottom."),
+     X("Dumbbell Romanian Deadlift",4,"8-15",120,"Lower to shin level, soft knees, pull up with the hamstrings."),
+     X("Dumbbell Single-Leg Hip Thrust",4,"8-15/leg",120,"Floor if no bench."),
+     X("Single-Leg Weighted Calf Raise",4,"8-15/leg",75,"On a step, weight in one hand, other hand on something for balance.")],
+ PU:[X("Incline Dumbbell Press",3,"8-15",120,"Shoulder blades back, chest up, elbows tucked."),
+     X("Flat Dumbbell Press",3,"8-15",120,"Floor press if no bench."),
+     X("Dumbbell Lateral Raise",4,"8-15",105,"Raise out to the sides, thumbs turned slightly up."),
+     X("Standing Underhand Dumbbell Fly",2,"8-15",105,"Arms out, underhand grip, squeeze the chest to bring them in and up."),
+     X("Incline Dumbbell Overhead Extension",3,"8-15",105,"~30° bench, arms overhead and back, elbows locked in place."),
+     X("Close-Grip Dumbbell Press",3,"8-15",105,"Neutral grip, elbows tucked to your sides.")],
+ PL:[X("Dumbbell Pullovers",3,"8-15",120,"Upper back on the bench, reach back, pull with your lats. Pull-up bar: do chin-ups."),
+     X("Single-Arm Dumbbell Row",3,"8-15/side",120,"Hand and knee on the bench, back flat, row up and back."),
+     X("Dumbbell Reverse Fly",3,"8-15",120,"Hinge over, soft elbows, pinkies to the ceiling."),
+     X("Dumbbell Face Pulls",4,"8-15",75,"Chest down on the incline bench, raise into a W. Or the band version."),
+     X("Incline Dumbbell Curl",3,"8-15",105,"30° bench, arms hang straight, elbows locked."),
+     X("Hammer Curls",3,"8-15",105,"Neutral grip, elbows locked, one at a time."),
+     X("Wall Slides",2,"5-10",60,"Back flat on the wall, slide your arms up and down. Pull-up bar: scapular pull-ups.")],
+ L2:[X("Dumbbell Squat",4,"8-15",150),
+     X("Dumbbell Bulgarian Split Squat",4,"8-15/leg",60,"Back foot on a chair or bench."),
+     X("Lying Reverse Hyperextensions",3,"8-15",120,"Upper body on a bench, squeeze glutes and hamstrings to lift your legs to parallel."),
+     X("Sliding Hamstring Curls",3,"8-15",105,"Feet on towels on a smooth floor, hips up, curl heels to your butt."),
+     X("Seated Bodyweight Calf Raise",4,"8-15",75,"Hold something for support, squat down, calf raise.")]
+};
+const HP_BW_FULL={
+ UP:[X("Close-Grip Push-Ups",3,"8-15",120,"Too easy: weighted backpack or a band across your back."),
+     X("Bed Sheet Inverted Row",3,"8-15",120,"Sheet knotted in a closed door, lean back, row. Closer to the door = harder."),
+     X("Pike Push-Ups",3,"8-15",120,"Hips high, lower your head toward the floor in front of your hands."),
+     X("Bed Sheet Lat Pull-Down",3,"8-15",120,"Kneel facing the door, pull to raise your body. Pull-up bar: do pull-ups."),
+     X("Dip Push-Ups",3,"8-15",120,"Hands on two stacks of books, press down to lift your chest, let your legs slide. Shoulder flares up: skip it."),
+     X("Bed Sheet High Row",3,"8-15",120,"Elbows high at shoulder height, palms down.")],
+ L1:[X("Heel-Elevated Slow Eccentric Goblet Squat",4,"8-15",120,"Heels on a book, 3 s down."),
+     X("Lying Reverse Hyperextensions",4,"8-15",120,"Upper body on a bench or couch, squeeze glutes and hamstrings to lift your legs to parallel."),
+     X("Assisted Single-Leg Lunge",3,"8-15/leg",60,"Hold a table edge, back foot elevated, push up with the front leg."),
+     X("Single-Leg Weighted Calf Raise",4,"8-15/leg",75,"On a step, weight in one hand, other hand on something for balance.")],
+ PU:[X("Decline Close-Grip Push-Ups",3,"8-15",120,"Feet elevated. Too easy: backpack or band."),
+     X("Close-Grip Push-Ups",3,"8-15",120,"Too easy: weighted backpack or a band across your back."),
+     X("Sliding Lateral Raises",4,"8-15/side",45,"Forearm on a cloth against the door frame, lean in, slide up and down."),
+     X("Inner Chest Push-Ups",2,"8-15/side",120,"One hand on a stack of books, push up and twist toward that arm."),
+     X("Bodyweight Triceps Extensions",3,"8-15",105,"Hands on the floor in front of your head, forearms down, press up to straight arms."),
+     X("Bed Sheet Overhead Triceps Extensions",3,"8-15",105,"Or hands against a table edge or wall.")],
+ PL:[X("Straight-Arm Bed Sheet Pull-Down",3,"8-15",120,"Let your body fall forward with arms overhead, pull back with your lats. Pull-up bar: chin-ups."),
+     X("Bed Sheet Inverted Row",3,"8-15",120,"Sheet knotted in a closed door, lean back, row. Closer to the door = harder."),
+     X("Bed Sheet Reverse Fly",3,"8-15",120,"Lean back, straight arms, spread them out to the sides to lift your body."),
+     X("Bed Sheet Face Pulls",4,"8-15",75,"Pull to your face and finish in a W. No setup: lying prone arm circles."),
+     X("Bed Sheet Curls",3,"8-15",120,"Or standing towel curls."),
+     X("Bed Sheet Hammer Curls",3,"8-15",105,"Neutral grip. Or standing towel hammer curls."),
+     X("Wall Slides",2,"5-10",60,"Back flat on the wall, slide your arms up and down.")],
+ L2:[X("Paused Goblet Squat",4,"8-15",120,"Weighted object at your chest, pause at the bottom."),
+     X("Weighted Deficit Bulgarian Split Squat",4,"8-15/leg",60,"Front foot on a book, back foot on a chair."),
+     X("Weighted Single-Leg Hip Thrust",4,"8-15/leg",120,"Back on the couch or bench, thrust hips to the ceiling."),
+     X("Sliding Hamstring Curls",3,"8-15",105,"Feet on towels on a smooth floor, hips up, curl heels to your butt."),
+     X("Seated Bodyweight Calf Raise",4,"8-15",75,"Hold something for support, squat down, calf raise.")]
+};
+const HP_SCHED={1:"UP",2:"L1",4:"PU",5:"PL",6:"L2"}, HP_KNEE_SCHED={1:"UP",3:"PU",5:"PL"};
+const HOME_PROGS={
+ bands:{label:"Resistance bands (BWS home)",full:HP_BANDS_FULL,ss:hpSS(HP_BANDS_FULL,{
+   UP:[["Banded Close-Grip Push-Ups","A1"],["Kneeling One-Arm Banded Row","A2"],["Standing Banded Shoulder Press","B1"],["Single-Arm Banded Lat Pulldown","B2"],["Dip Push-Ups","C1"],["Kneeling One-Arm Dumbbell Delt Row","C2"]],
+   L1:[["Resistance Band Paused Squat","A1"],["Resistance Band Deadlift","A2"],["Assisted Single-Leg Lunge","B1"],["Single-Leg Weighted Calf Raise","B2"]],
+   PU:[["Decline Close-Grip Banded Push-Ups","A1"],["Resistance Band Lateral Raise","A2"],["Banded Close-Grip Push-Ups","B1"],["Banded Overhead Triceps Extension","B2"],["Standing Underhand Band Fly","C1"],["Banded Triceps Pushdowns","C2"]],
+   PL:[["Straight-Arm Banded Pulldowns","A1"],["Banded Face Pulls","A2"],["Bent-Over Resistance Band Row","B1"],["Single-Arm Banded Curl","B2"],["Standing Banded Reverse Fly","C1"],["Single-Arm Banded Hammer Curl","C2"]],
+   L2:[["Resistance Band Paused Squat","A1"],["Lying Reverse Hyperextensions","A2"],["Banded Bulgarian Split Squat","B1"],["Sliding Hamstring Curls","B2"],["Seated Bodyweight Calf Raise",""]]})},
+ db:{label:"Dumbbells only (BWS home)",full:HP_DB_FULL,ss:hpSS(HP_DB_FULL,{
+   UP:[["Flat Dumbbell Press","A1"],["Chest-Supported Dumbbell Row with External Rotation","A2"],["Standing Dumbbell Shoulder Press","B1"],["Dumbbell Pullovers","B2"],["Dip Push-Ups","C1"],["Single-Arm Dumbbell Rear Delt Row","C2"]],
+   L1:[["Dumbbell Paused Goblet Squat","A1"],["Dumbbell Romanian Deadlift","A2"],["Dumbbell Single-Leg Hip Thrust","B1"],["Single-Leg Weighted Calf Raise","B2"]],
+   PU:[["Incline Dumbbell Press","A1"],["Dumbbell Lateral Raise","A2"],["Flat Dumbbell Press","B1"],["Incline Dumbbell Overhead Extension","B2"],["Standing Underhand Dumbbell Fly","C1"],["Close-Grip Dumbbell Press","C2"]],
+   PL:[["Dumbbell Pullovers","A1"],["Dumbbell Face Pulls","A2"],["Single-Arm Dumbbell Row","B1"],["Incline Dumbbell Curl","B2"],["Dumbbell Reverse Fly","C1"],["Hammer Curls","C2"]],
+   L2:[["Dumbbell Squat","A1"],["Lying Reverse Hyperextensions","A2"],["Dumbbell Bulgarian Split Squat","B1"],["Sliding Hamstring Curls","B2"],["Seated Bodyweight Calf Raise",""]]})},
+ bw:{label:"Bodyweight (BWS home)",full:HP_BW_FULL,ss:hpSS(HP_BW_FULL,{
+   UP:[["Close-Grip Push-Ups","A1"],["Bed Sheet Inverted Row","A2"],["Pike Push-Ups","B1"],["Bed Sheet Lat Pull-Down","B2"],["Dip Push-Ups","C1"],["Bed Sheet High Row","C2"]],
+   L1:[["Heel-Elevated Slow Eccentric Goblet Squat","A1"],["Lying Reverse Hyperextensions","A2"],["Assisted Single-Leg Lunge","B1"],["Single-Leg Weighted Calf Raise","B2"]],
+   PU:[["Decline Close-Grip Push-Ups","A1"],["Sliding Lateral Raises","A2"],["Close-Grip Push-Ups","B1"],["Bodyweight Triceps Extensions","B2"],["Inner Chest Push-Ups","C1"],["Bed Sheet Overhead Triceps Extensions","C2"]],
+   PL:[["Straight-Arm Bed Sheet Pull-Down","A1"],["Bed Sheet Face Pulls","A2"],["Bed Sheet Inverted Row","B1"],["Bed Sheet Curls","B2"],["Bed Sheet Reverse Fly","C1"],["Bed Sheet Hammer Curls","C2"]],
+   L2:[["Paused Goblet Squat","A1"],["Weighted Single-Leg Hip Thrust","A2"],["Weighted Deficit Bulgarian Split Squat","B1"],["Sliding Hamstring Curls","B2"],["Seated Bodyweight Calf Raise",""]]})}
+};
+for(const h in HOME_PROGS) Object.assign(HOME_PROGS[h],{home:h,keys:["UP","L1","PU","PL","L2"],names:HP_NAMES,sched:HP_SCHED,abs:[3,0],prehab:[3,0]});
+function homeKey(){ const h=settings().home; return HOME_PROGS[h]?h:"" }
+function homeProg(h){ const P=HOME_PROGS[h]; if(!kneeMode()) return P; return Object.assign({},P,{keys:P.keys.filter(k=>!/^L/.test(k)),sched:HP_KNEE_SCHED,noLower:1}) }
+function schedKey(){ const h=homeKey(); return h? "h_"+h+(kneeMode()?"k":"") : settings().split }
 function settings(){ const s=Object.assign({split:"4",ver:"1",start:TODAY,verStart:TODAY,wt:"17:30",wake:"06:30",bed:"22:30",bw:"",sched:null,swaps:{}},get("settings")); s.swaps=s.swaps||{}; return s }
-function prog(){ const s=settings(); return PROGRAMS[s.split] }
-function schedule(){ const s=settings(), p=prog(); const sc={}; for(let d=0;d<7;d++){ sc[d]= s.sched&&s.sched[s.split]&&s.sched[s.split][d]!==undefined ? s.sched[s.split][d] : (p.sched[d]||"") } return sc }
-function workout(key){ return kneeify(workout0(key)) }
-function workout0(key){ const s=settings(), p=prog(); if(EXTRA[key]) return EXTRA[key]; const len=s.len||"full"; const ex= len==="30"? TS30[s.split][key] : len==="15"? TS15[s.split][key] : p.v[s.ver][key]; return {name:p.names[key]+(len==="full"?"":" · "+len+" min"), ex} }
+function prog(){ const s=settings(), h=homeKey(); if(h) return homeProg(h); return PROGRAMS[s.split] }
+function schedule(){ const s=settings(), p=prog(), sk=schedKey(); const sc={}; for(let d=0;d<7;d++){ let v= s.sched&&s.sched[sk]&&s.sched[sk][d]!==undefined ? s.sched[sk][d] : (p.sched[d]||""); if(v&&!p.keys.includes(v)&&!EXTRA[v]) v=""; sc[d]=v } return sc }
+function workout(key){ const w=workout0(key); return homeKey()&&!EXTRA[key]? w : kneeify(w) }
+function workout0(key){ const s=settings(), p=prog(); if(EXTRA[key]) return EXTRA[key]; const len=s.len||"full"; const h=homeKey(); if(h){ const P=HOME_PROGS[h], ss=len!=="full"; return {name:P.names[key]+(ss?" · 30 min supersets":""), ex:(ss?P.ss:P.full)[key]||[], homeProg:h} } const ex= len==="30"? TS30[s.split][key] : len==="15"? TS15[s.split][key] : p.v[s.ver][key]; return {name:p.names[key]+(len==="full"?"":" · "+len+" min"), ex} }
 function warmType(key){ if(prog()===PROGRAMS[3]) return "both"; return /^L/.test(key)?"lower":"upper" }
 function weeksSince(d){ const st=new Date(d+"T00:00"); const n=Math.floor((new Date(TODAY+"T00:00")-st)/864e5); return n<0?1:Math.floor(n/7)+1 }
 function weekNo(){ return weeksSince(settings().start) }
 function isDeload(){ return weekNo()%9===0 }
-function dayPlan(date){ const d=new Date(date+"T00:00").getDay(), p=prog(), sc=schedule(); const w=sc[d]; const extras=[]; if(p.abs[0]===d) extras.push("abs1"); if(p.abs[1]===d) extras.push("abs2"); if(p.prehab.includes(d)) extras.push("prehab"); return {w,extras} }
+function dayPlan(date){ const d=new Date(date+"T00:00").getDay(), p=prog(), sc=schedule(); const w=sc[d]; const extras=["shoulder"]; if([2,4,6].includes(d)) extras.push("shoulder3"); if(p.abs[0]===d) extras.push("abs1"); if(p.abs[1]===d) extras.push("abs2"); if(p.prehab.includes(d)) extras.push("prehab"); return {w,extras} }
 function dayChecks(date){ const p=dayPlan(date); const L=[]; if(p.w) L.push("w_"+p.w); p.extras.forEach(e=>L.push("x_"+e)); if(!kneeMode()) L.push("steps"); L.push("stretch","cals","protein","logwt","creatine","fishoil","vitd"); return L }
 function dayScore(date){ const r=get("day-"+date); const c=Object.assign({},r.c||{}); if(+r.steps>=8000) c.steps=true; if(r.wt) c.logwt=true; const L=dayChecks(date); return {n:L.filter(k=>c[k]).length,t:L.length,c} }
 function parseReps(r){
@@ -676,7 +802,7 @@ function parseReps(r){
 }
 function rngFor(pr,i){ return pr.rr? pr.rr[i]||pr.rr[pr.rr.length-1] : [pr.lo,pr.hi] }
 function fmtRest(s){ if(!s) return "—"; if(s===150) return "2-3 min"; if(s===105) return "1.5-2 min"; if(s<60) return s+"s"; const m=s/60; return (m%1? m.toFixed(1):m)+" min" }
-function incFor(name){ if(/Deadlift(?!.*Romanian)|Back Squat|Leg Press|Hip Thrust(?!.*Single)/.test(name)&&!/Dumbbell/.test(name)) return 10; if(/Plank|Bird Dog|Dead Bug|Palloff|Push-Ups|Hang|Wall Slides|Abductions|Circles/.test(name)) return 0; if(/Lateral|Face Pull|Rear Delt|Curl(?!.*Leg)|Extension(?!s)|Crunch/.test(name)) return 2.5; return 5 }
+function incFor(name){ if(/Band/.test(name)) return 0; if(/Deadlift(?!.*Romanian)|Back Squat|Leg Press|Hip Thrust(?!.*Single)/.test(name)&&!/Dumbbell/.test(name)) return 10; if(/Plank|Bird Dog|Dead Bug|Palloff|Push-Ups|Hang|Wall Slides|Abductions|Circles/.test(name)) return 0; if(/Lateral|Face Pull|Rear Delt|Curl(?!.*Leg)|Extension(?!s)|Crunch/.test(name)) return 2.5; return 5 }
 function ytLink(name){ const id=YT[name]; return id? "https://youtu.be/"+id : "https://www.youtube.com/results?search_query="+encodeURIComponent("Jeremy Ethier "+name.replace(/\(.*?\)/g,"")) }
 function t2m(t){ const [h,m]=t.split(":").map(Number); return h*60+m }
 function m2t(m){ m=((Math.round(m)%1440)+1440)%1440; let h=Math.floor(m/60), mm=m%60; const ap=h>=12?"pm":"am"; return (h%12||12)+":"+pad(mm)+" "+ap }
@@ -700,6 +826,7 @@ function advice(name,pr,hist){
   let allTop=true, anyLow=false;
   prev.sets.forEach((s,i)=>{ const [lo,hi]=rngFor(pr,i); const r=+s[1]; if(!(r>=hi)) allTop=false; if(s[1]!==""&&r<lo) anyLow=true });
   const unit=pr.unit==="sec"?"s":" reps";
+  if(allTop && /Band/.test(name)) return {cls:"up",txt:last+"Top of the range on every set → move up one band (or double up bands)."};
   if(allTop && inc) return {cls:"up",txt:last+"Top of the range on every set → add "+inc+" lb"+(w?" (try "+(w+inc)+")":"")+"."};
   if(allTop) return {cls:"up",txt:last+"Top of the range on every set → make it harder (slower reps, harder variation, or add load)."};
   if(anyLow) return {cls:"down",txt:last+"Fell under "+rngFor(pr,0)[0]+unit+" → drop the weight a step and build back up."};
@@ -712,7 +839,7 @@ function render(fromSync){
   const s=settings(), p=prog();
   $("#weekPill").textContent = "Week "+weekNo()+(isDeload()?" · Deload":"");
   $("#weekPill").className = "pill"+(isDeload()?" hot":"");
-  $("#hdrSub").textContent = "SHRED 2.0 · "+s.split+"-day V"+s.ver;
+  $("#hdrSub").textContent = homeKey()? "SHRED 2.0 · "+prog().label : "SHRED 2.0 · "+s.split+"-day V"+s.ver;
   if(fromSync && document.activeElement && document.activeElement.tagName==="INPUT") return;
   const v=$("#view");
   if(ui.tab==="today") v.innerHTML=viewToday();
@@ -732,7 +859,7 @@ function viewToday(){
   const ck=(k,t,s)=>`<button type="button" class="check ${c[k]?"on":""}" data-ck="${k}"><span class="box">✓</span><span><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:""}</span></button>`;
   let session="";
   if(plan.w){ const w=workout(plan.w); session+=ck("w_"+plan.w,w.name+" workout",w.ex.length+" exercises · ~60 min incl. warm-up"); }
-  plan.extras.forEach(e=>session+=ck("x_"+e,EXTRA[e].name, e==="prehab"?"4 moves, ~5 min":"2-move circuit × 3, after lifting or on a rest day"));
+  plan.extras.forEach(e=>session+=ck("x_"+e,EXTRA[e].name, e==="shoulder"?"6 moves, ~5 min · every day, light":e==="shoulder3"?"7 moves, ~12 min · Tue/Thu/Sat, light weights":e==="prehab"?"4 moves, ~5 min":"2-move circuit × 3, after lifting or on a rest day"));
   const isToday=date===TODAY;
   const go = plan.w || plan.extras[0];
   return `
@@ -814,7 +941,7 @@ function timelineCard(){
 
 function viewTrain(){
   const s=settings(), p=prog(), plan=dayPlan(TODAY);
-  const keys=[...p.keys,"abs1","abs2","prehab","home"];
+  const keys=[...p.keys,"shoulder","shoulder3","abs1","abs2","prehab","home"];
   const wk = keys.includes(ui.wk)? ui.wk : (plan.w || plan.extras[0] || p.keys[0]); ui.wk=wk;
   const seg=keys.map(k=>`<button type="button" class="${k===wk?"on":""}" data-wk="${k}">${EXTRA[k]?EXTRA[k].name.replace(" (5 min)",""):p.names[k]}</button>`).join("");
   const w=workout(wk);
@@ -833,15 +960,20 @@ function viewTrain(){
   if(w.circuit) tips.push("Circuit: one set of each back to back, rest 2 min, 3 rounds. Work up to 3×15, then add weight. Not on back-to-back days.");
   else if(w.home) tips.push("No-equipment routine (from SHRED 1.0), 3-4×/week with a rest day between. Every set 1-3 reps short of failure; if a set goes past 30 reps, move to the harder variation. Supersets: 30-45s between moves.");
   else if(hasSS) tips.push("Supersets (A1/A2…): first move, rest 1 min, second move, rest 1 min, repeat for all sets.");
+  if(w.homeProg==="bands") tips.push("Log the band in the weight box as a number: 1 = lightest. Write your color key once (e.g. 1 yellow, 2 red, 3 black). Top of the range on every set → next band up.");
+  if(w.homeProg==="bw") tips.push("Weight box = backpack/extra weight in lb. Leave it blank for plain bodyweight.");
+  if(w.homeProg&&s.len&&s.len!=="full") tips.push("30-min superset version paired by Claude from the PDF moves (not an official BWS version). 3 sets each.");
+  if(p.noLower&&w.homeProg) tips.push("Knee mode: Lower and Legs days are hidden. Those days are for your PT exercises.");
   if(hasTri) tips.push("Tri-sets (A1/A2/A3): 30s between moves, 1 min after each round.");
   if(hasRP) tips.push("Rest-pause: as many reps as you can, rest 15-20s, go again, until you hit 30 total. Log each mini-set.");
   const note = tips.map(t=>`<div class="tip">${t}</div>`).join("");
   const len=s.len||"full";
-  const lenSeg = EXTRA[wk]? "" : `<div class="row" style="gap:6px;margin-top:10px"><span class="label">Length</span>${[["full","Full ~60 min"],["30","30 min"],["15","15 min"]].map(([v,l])=>`<button type="button" class="btn sm ${len===v?"primary":"ghost"}" data-len="${v}">${l}</button>`).join("")}</div>${len!=="full"?`<p class="small muted">Time-saving version of your ${s.split}-day routine (same for V1-V3). Use it all week or just on busy days.</p>`:""}`;
+  const lenSeg = EXTRA[wk]? "" : `<div class="row" style="gap:6px;margin-top:10px"><span class="label">Length</span>${(p.home?[["full","Full (as written)"],["30","30 min supersets"]]:[["full","Full ~60 min"],["30","30 min"],["15","15 min"]]).map(([v,l])=>`<button type="button" class="btn sm ${(p.home&&len==="15"?"30":len)===v?"primary":"ghost"}" data-len="${v}">${l}</button>`).join("")}</div>${len!=="full"&&!p.home?`<p class="small muted">Time-saving version of your ${s.split}-day routine (same for V1-V3). Use it all week or just on busy days.</p>`:""}`;
   const verWk = weeksSince(s.verStart||s.start);
   return `<h2>Workouts</h2>
-  <div class="row between" style="margin-bottom:10px"><span class="small muted">${p.label} · Version ${s.ver} · week ${verWk} on this version</span><button type="button" class="btn sm ghost" data-tab="guide">Change</button></div>
-  <button type="button" class="check ${s.dbMode?"on":""}" data-dbmode="1" style="margin-bottom:10px"><span class="box">✓</span><span><div class="t" style="text-decoration:none;color:var(--ink)">Dumbbell mode</div><div class="s">Swap barbell, cable and machine lifts for their dumbbell alternatives</div></span></button>
+  <div class="row between" style="margin-bottom:10px"><span class="small muted">${p.home? p.label+(p.noLower?" · Upper / Push / Pull (Knee mode)":" · 5-day") : p.label+" · Version "+s.ver+" · week "+verWk+" on this version"}</span><button type="button" class="btn sm ghost" data-tab="guide">Change</button></div>
+  <div class="row" style="gap:6px;margin-bottom:10px;flex-wrap:wrap"><span class="label">Equipment</span>${[["","Full home gym"],["bands","Bands"],["db","Dumbbells"],["bw","Bodyweight"]].map(([v,l])=>`<button type="button" class="btn sm ${(homeKey()||"")===v?"primary":"ghost"}" data-home="${v}">${l}</button>`).join("")}</div>
+  ${p.home?"":`<button type="button" class="check ${s.dbMode?"on":""}" data-dbmode="1" style="margin-bottom:10px"><span class="box">✓</span><span><div class="t" style="text-decoration:none;color:var(--ink)">Dumbbell mode</div><div class="s">Swap barbell, cable and machine lifts for their dumbbell alternatives</div></span></button>`}
   <button type="button" class="check ${s.kneeMode?"on":""}" data-kneemode="1" style="margin-bottom:10px"><span class="box">✓</span><span><div class="t" style="text-decoration:none;color:var(--ink)">Knee mode</div><div class="s">Seated/lying stand-ins for anything that loads the knee or needs you standing. Turn off when you're cleared; your normal program and logs are untouched.</div></span></button>
   <div class="seg">${seg}</div>
   ${lenSeg}
@@ -872,7 +1004,7 @@ function exCard(wk,e,i){
   for(let j=0;j<nSets;j++){
     const [lo,hi]=rngFor(pr,j); const t=today[j]||["",""]; const pv=prev[j]||[];
     rows+=`<div class="n">${pr.rp?"Mini ":""}${j+1}${pr.rr?`<br><span style="font-size:10px">${lo}-${hi}</span>`:""}</div>
-      <input type="number" inputmode="decimal" step="0.5" aria-label="Set ${j+1} weight" data-set="${key}|${j}|0" value="${t[0]??""}" placeholder="${pv[0]??"lb"}">
+      <input type="number" inputmode="decimal" step="0.5" aria-label="Set ${j+1} weight" data-set="${key}|${j}|0" value="${t[0]??""}" placeholder="${pv[0]??(homeKey()==="bands"&&/Band/.test(name)?"band":homeKey()==="bw"?"+lb":"lb")}">
       <input type="number" inputmode="numeric" aria-label="Set ${j+1} ${pr.unit||"reps"}" data-set="${key}|${j}|1" value="${t[1]??""}" placeholder="${pv[1]??(pr.unit?"sec":"reps")}">`;
   }
   const a=advice(name,pr,hist);
@@ -1046,6 +1178,7 @@ document.addEventListener("click",async ev=>{
   if(t.dataset.swapopen){ ui.swapOpen[t.dataset.swapopen]=!ui.swapOpen[t.dataset.swapopen]; render(); return }
   if(t.dataset.swap){ const s=get("settings"); s.swaps=s.swaps||{}; if(t.dataset.clear) delete s.swaps[t.dataset.swap]; else s.swaps[t.dataset.swap]=t.dataset.alt; put("settings",s); render(); return }
   if(t.dataset.len){ const s=get("settings"); s.len=t.dataset.len; put("settings",s); render(); return }
+  if(t.dataset.home!==undefined){ const s=get("settings"); s.home=t.dataset.home; put("settings",s); ui.wk=null; render(); toast(s.home?HOME_PROGS[s.home].label+" on":"Back to your full home-gym program"); return }
   if(t.dataset.kneemode!==undefined){ const s=get("settings"); s.kneeMode=!settings().kneeMode; put("settings",s); render(); toast(s.kneeMode?"Knee mode on":"Knee mode off · back to the full program"); return }
   if(t.dataset.dbmode!==undefined){ const s=get("settings"); s.dbMode=!settings().dbMode; put("settings",s); render(); toast(s.dbMode?"Dumbbell mode on":"Dumbbell mode off"); return }
   if(t.dataset.gear){ const s=get("settings"); s.gear=Object.assign({},s.gear||{}); s.gear[t.dataset.gear]= gear()[t.dataset.gear]===false; put("settings",s); render(); return }
@@ -1077,7 +1210,7 @@ document.addEventListener("input",ev=>{
 document.addEventListener("change",ev=>{
   const el=ev.target;
   if(el.id==="sSplit"||el.id==="sVer"){ const s=get("settings"); if(el.id==="sSplit") s.split=el.value; else s.ver=el.value; s.verStart=TODAY; put("settings",s); ui.wk=null; render(); toast("Switched to "+settings().split+"-day V"+settings().ver); return }
-  if(el.dataset.sd!==undefined){ const s=get("settings"); const sp=settings().split; s.sched=s.sched||{}; s.sched[sp]=Object.assign({},schedule(),s.sched[sp]||{}); s.sched[sp][el.dataset.sd]=el.value; put("settings",s); render(); return }
+  if(el.dataset.sd!==undefined){ const s=get("settings"); const sp=schedKey(); s.sched=s.sched||{}; s.sched[sp]=Object.assign({},schedule(),s.sched[sp]||{}); s.sched[sp][el.dataset.sd]=el.value; put("settings",s); render(); return }
   if(["sWt","sWake","sBed","sStart","sBw"].includes(el.id)) render();
   if(el.id==="stepsIn"||el.id==="wIn") render();
 });
