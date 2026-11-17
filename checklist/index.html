@@ -545,7 +545,7 @@ function vKid(){
       if (!list.length) return '';
       return `<div class="group" style="--gc:${CATS[c].color}"><h3><span class="dot"></span>${CATS[c].label}</h3>
         ${list.map(it => `<button class="item ${p.done[it.id]?'on':''}" data-act="tick" data-id="${it.id}">
-          <span class="em">${esc(it.e || CATS[c].emoji)}</span><span class="tx">${esc(it.t)}</span><span class="box">${p.done[it.id]?'✔':''}</span></button>${it.id === 'stretch' && !p.done[it.id] ? `<a class="btn golink" href="stretch.html?kid=${encodeURIComponent(k.id)}">▶ Start stretch</a>` : ''}${it.id === 'declam' && !p.done[it.id] ? `<a class="btn golink" href="/declamation-dojo/">▶ Open Declamation Dojo</a>` : ''}`).join('')}
+          <span class="em">${esc(it.e || CATS[c].emoji)}</span><span class="tx">${esc(it.t)}</span><span class="box">${p.done[it.id]?'✔':''}</span></button>${it.id === 'stretch' && !p.done[it.id] ? `<a class="btn golink" href="stretch.html?kid=${encodeURIComponent(k.id)}">▶ Start stretch</a>` : ''}${it.id === 'declam' && !p.done[it.id] ? `<a class="btn golink" href="/declamation-dojo/">▶ Open Declamation Dojo</a>` : ''}${it.id === 'kkpm' && !p.done[it.id] ? `<a class="btn golink" href="https://youtu.be/jjHgz-vf8Uk" target="_blank" rel="noopener">▶ Dance video</a><a class="btn golink" href="https://music.apple.com/us/album/papuri-sa-diyos/1738497968?i=1738498127" target="_blank" rel="noopener">🎵 Song: Papuri sa Diyos</a>` : ''}`).join('')}
       </div>`;
     }).join('');
   }
