@@ -45,8 +45,9 @@
   #mkPanel .dot { width: 46px; height: 46px; border-radius: 50%; border: 3px solid rgba(255,255,255,.6); padding: 0; font-size: 20px; color: #fff; }
   #mkPanel .dot.on { border: 4px solid #ffd400; transform: scale(1.08); }
   #mkPanel input[type=range] { width: 100%; height: 40px; accent-color: #ff5aa8; }
-  #blushBtn { width: 100%; margin-top: 6px; font-size: 18px; font-weight: 700; padding: 10px; border-radius: 999px; border: 3px solid rgba(255,255,255,.6); background: rgba(255,255,255,.15); color: #fff; }
-  #blushBtn.on { border-color: #ffd400; background: rgba(255,90,140,.5); }
+  #mkPanel .tg { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  #mkPanel .tog { width: 100%; font-size: 18px; font-weight: 700; padding: 10px; border-radius: 999px; border: 3px solid rgba(255,255,255,.6); background: rgba(255,255,255,.15); color: #fff; }
+  #mkPanel .tog.on { border-color: #ffd400; background: rgba(255,90,140,.5); }
   #flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 20; transition: opacity .35s; }
 
   #preview { position: fixed; inset: 0; background: rgba(0,0,0,.92); z-index: 30; display: none; flex-direction: column;
@@ -79,7 +80,11 @@
   <div class="lbl">💋 Lips</div><div class="sw" id="lipSw"></div>
   <div class="lbl">👁️ Eyes</div><div class="sw" id="eyeSw"></div>
   <div class="lbl">✨ How much</div><input type="range" id="mkAmt" min="10" max="100" value="80">
-  <button id="blushBtn" class="on">🌸 Blush</button>
+  <div class="tg">
+    <button class="tog on" data-k="blush">🌸 Blush</button>
+    <button class="tog on" data-k="lashes">👁️ Lashes</button>
+    <button class="tog on" data-k="stars">⭐ Stars</button>
+  </div>
 </div>
 <div id="bar"><div id="picker"></div></div>
 <div id="flash"></div>
@@ -111,7 +116,7 @@ let landmarker = null, faces = [], smooth = [], lastVideoTime = -1, current = 'm
 const googly = []; // per face: pupil physics state
 const LIPS = [[235,20,110],[210,0,30],[255,110,80],[150,40,190],[255,80,170],null];
 const EYES = [[170,80,255],[40,120,255],[230,170,20],[30,190,120],[255,90,190],null];
-const mk = { lip: LIPS[0], eye: EYES[0], amt: 0.8, blush: true };
+const mk = { lip: LIPS[0], eye: EYES[0], amt: 0.8, blush: true, lashes: true, stars: true };
 const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
 
 function toast(t, ms = 2500) { const el = $('toast'); el.textContent = t; el.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => el.style.display = 'none', ms); }
@@ -450,7 +455,7 @@ const STICKERS = {
       // lashes on the outer half
       ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = Math.max(1.5, f.u * 0.007); ctx.lineCap = 'round';
       const ox = lid[0].x - lid[n - 1].x, oy = lid[0].y - lid[n - 1].y, ol = Math.hypot(ox, oy) || 1;
-      for (let k = 1; k < 5; k++) { const p = lid[k], len = f.u * (0.035 + 0.008 * (5 - k));
+      if (mk.lashes) for (let k = 1; k < 5; k++) { const p = lid[k], len = f.u * (0.035 + 0.008 * (5 - k));
         const dx = up.x + 0.6 * ox / ol, dy = up.y + 0.6 * oy / ol, dl = Math.hypot(dx, dy);
         ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + dx / dl * len, p.y + dy / dl * len); ctx.stroke(); }
     });
@@ -465,7 +470,7 @@ const STICKERS = {
     ctx.fillStyle = `rgba(255,255,255,${.4 * mk.amt})`; ctx.beginPath(); ctx.ellipse((shine.x + sh.x) / 2, (shine.y + sh.y) / 2, f.u * 0.035, f.u * 0.012, f.a, 0, 7); ctx.fill();
     }
     // star freckles
-    [[118, 0.2], [347, -0.3]].forEach(([i, r]) => local(f, f.p(i), () => {
+    if (mk.stars) [[118, 0.2], [347, -0.3]].forEach(([i, r]) => local(f, f.p(i), () => {
       ctx.rotate(r); ctx.fillStyle = '#ffd400'; ctx.beginPath();
       for (let k = 0; k < 10; k++) { const a = k * Math.PI / 5 - Math.PI / 2, rr = k % 2 ? 0.014 : 0.035; ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); }
       ctx.closePath(); ctx.fill();
@@ -517,6 +522,44 @@ const STICKERS = {
     });
   }},
 
+  dino: { icon: '🦖', draw(f) {
+    // row of spikes over the top of the head
+    local(f, f.p(10), () => {
+      ctx.translate(0, 0.06);
+      const R = 0.5, n = 7;
+      for (let k = 0; k < n; k++) {
+        const a = Math.PI + (k + 0.5) * Math.PI / n, cx = Math.cos(a) * R, cy = Math.sin(a) * R * 0.75 + 0.18;
+        const h = 0.16 + 0.05 * Math.sin(Math.PI * (k + 0.5) / n), w = 0.075, nx = Math.cos(a), ny = Math.sin(a);
+        ctx.fillStyle = k % 2 ? '#3fbf4f' : '#2ea043'; ctx.strokeStyle = '#1d6b2b'; ctx.lineWidth = 0.012;
+        ctx.beginPath(); ctx.moveTo(cx - ny * w, cy + nx * w); ctx.lineTo(cx + nx * h, cy + ny * h); ctx.lineTo(cx + ny * w, cy - nx * w); ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+    });
+    // green scale spots on the cheeks
+    [205, 425].forEach(i => local(f, f.p(i), () => {
+      ctx.fillStyle = 'rgba(46,160,67,.75)';
+      [[0, 0, .03], [.05, -.03, .02], [-.04, .04, .022], [.03, .05, .016]].forEach(([x, y, r]) => { ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); });
+    }));
+    // dino teeth when the mouth opens
+    if (mouthOpen(f) > 0.035) local(f, f.p(13), () => {
+      ctx.fillStyle = '#fff'; ctx.strokeStyle = '#999'; ctx.lineWidth = 0.005;
+      for (let k = -2; k <= 2; k++) { const x = k * 0.035; ctx.beginPath(); ctx.moveTo(x - 0.016, -0.005); ctx.lineTo(x, 0.045); ctx.lineTo(x + 0.016, -0.005); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+    });
+  }},
+
+  angry: { icon: '💢', draw(f) {
+    // manga anger mark: upper forehead near the temple, throbbing
+    const t = performance.now() / 1000, pulse = 1 + 0.12 * Math.max(0, Math.sin(t * 9));
+    local(f, f.p(297), () => {
+      ctx.translate(-0.03, -0.05); ctx.rotate(0.25); ctx.scale(pulse, pulse);
+      const piece = () => { ctx.beginPath(); ctx.moveTo(0.028, 0.12); ctx.quadraticCurveTo(0.034, 0.034, 0.12, 0.028); ctx.stroke(); };
+      ctx.lineCap = 'round';
+      for (const [col, lw] of [['#fff', 0.06], ['#e0182d', 0.034]]) {
+        ctx.strokeStyle = col; ctx.lineWidth = lw;
+        for (let k = 0; k < 4; k++) { ctx.save(); ctx.rotate(k * Math.PI / 2); piece(); ctx.restore(); }
+      }
+    });
+  }},
+
   none: { icon: '🙂', draw() {} },
 };
 
@@ -550,7 +593,7 @@ function swatches(el, list, key) {
 }
 swatches($('lipSw'), LIPS, 'lip'); swatches($('eyeSw'), EYES, 'eye');
 $('mkAmt').oninput = e => { mk.amt = e.target.value / 100; };
-$('blushBtn').onclick = () => { mk.blush = !mk.blush; $('blushBtn').classList.toggle('on', mk.blush); };
+document.querySelectorAll('#mkPanel .tog').forEach(b => b.onclick = () => { const k = b.dataset.k; mk[k] = !mk[k]; b.classList.toggle('on', mk[k]); });
 function showPanel() { $('mkPanel').style.display = current === 'makeup' ? 'block' : 'none'; }
 document.querySelectorAll('.pick').forEach(b => b.addEventListener('click', showPanel));
 
