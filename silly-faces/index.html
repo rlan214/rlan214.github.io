@@ -36,6 +36,17 @@
     width: 96px; height: 96px; border-radius: 50%; border: 7px solid #fff; background: rgba(255,255,255,.35); z-index: 6; padding: 0; }
   #snap:active { background: #fff; }
 
+  #homeBtn { position: fixed; top: calc(14px + env(safe-area-inset-top)); left: 14px; z-index: 6; width: 64px; height: 64px;
+    border-radius: 50%; border: 0; background: rgba(0,0,0,.45); font-size: 34px; padding: 0; }
+  #mkPanel { position: fixed; right: 12px; top: calc(14px + env(safe-area-inset-top)); z-index: 6; width: 190px; display: none;
+    background: rgba(0,0,0,.5); border-radius: 22px; padding: 12px; }
+  #mkPanel .lbl { font-size: 17px; font-weight: 700; margin: 4px 2px 6px; }
+  #mkPanel .sw { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+  #mkPanel .dot { width: 46px; height: 46px; border-radius: 50%; border: 3px solid rgba(255,255,255,.6); padding: 0; font-size: 20px; color: #fff; }
+  #mkPanel .dot.on { border: 4px solid #ffd400; transform: scale(1.08); }
+  #mkPanel input[type=range] { width: 100%; height: 40px; accent-color: #ff5aa8; }
+  #blushBtn { width: 100%; margin-top: 6px; font-size: 18px; font-weight: 700; padding: 10px; border-radius: 999px; border: 3px solid rgba(255,255,255,.6); background: rgba(255,255,255,.15); color: #fff; }
+  #blushBtn.on { border-color: #ffd400; background: rgba(255,90,140,.5); }
   #flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 20; transition: opacity .35s; }
 
   #preview { position: fixed; inset: 0; background: rgba(0,0,0,.92); z-index: 30; display: none; flex-direction: column;
@@ -44,7 +55,7 @@
   #preview .row { display: flex; gap: 18px; }
   #preview button { font-size: 28px; font-weight: 800; padding: 16px 34px; border-radius: 999px; border: 0; }
   #saveBtn { background: #2bd96b; color: #003316; }
-  #againBtn { background: #fff; color: #222; }
+  #againBtn, #homeBtn2 { background: #fff; color: #222; }
   #hint { font-size: 17px; opacity: .75; }
 
   #toast { position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
@@ -62,7 +73,14 @@
   <div id="msg"></div>
 </div>
 
+<button id="homeBtn" aria-label="Home">🏠</button>
 <button id="snap" aria-label="Take photo"></button>
+<div id="mkPanel">
+  <div class="lbl">💋 Lips</div><div class="sw" id="lipSw"></div>
+  <div class="lbl">👁️ Eyes</div><div class="sw" id="eyeSw"></div>
+  <div class="lbl">✨ How much</div><input type="range" id="mkAmt" min="10" max="100" value="80">
+  <button id="blushBtn" class="on">🌸 Blush</button>
+</div>
 <div id="bar"><div id="picker"></div></div>
 <div id="flash"></div>
 
@@ -71,6 +89,7 @@
   <div class="row">
     <button id="saveBtn">💾 Save</button>
     <button id="againBtn">✖ Again</button>
+    <button id="homeBtn2">🏠</button>
   </div>
   <div id="hint">Or press and hold the picture to save it</div>
 </div>
@@ -90,6 +109,10 @@ const $ = id => document.getElementById(id);
 
 let landmarker = null, faces = [], smooth = [], lastVideoTime = -1, current = 'mustache';
 const googly = []; // per face: pupil physics state
+const LIPS = [[235,20,110],[210,0,30],[255,110,80],[150,40,190],[255,80,170],null];
+const EYES = [[170,80,255],[40,120,255],[230,170,20],[30,190,120],[255,90,190],null];
+const mk = { lip: LIPS[0], eye: EYES[0], amt: 0.8, blush: true };
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
 
 function toast(t, ms = 2500) { const el = $('toast'); el.textContent = t; el.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => el.style.display = 'none', ms); }
 
@@ -300,6 +323,200 @@ const STICKERS = {
     });
   }},
 
+  koala: { icon: '🐨', draw(f) {
+    // big fluffy ears up at the sides of the head
+    [[103, 1], [332, -1]].forEach(([i, sx]) => local(f, f.p(i), () => {
+      ctx.save(); ctx.translate(sx * 0.12, -0.12);
+      ctx.fillStyle = '#9aa0a6'; ctx.strokeStyle = '#6b7075'; ctx.lineWidth = 0.014;
+      ctx.beginPath(); ctx.arc(0, 0, 0.2, 0, 7); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#f2e6ea'; ctx.beginPath(); ctx.arc(sx * -0.02, 0.02, 0.12, 0, 7); ctx.fill();
+      ctx.fillStyle = '#ffffff'; [[-.06, -.06], [.05, -.08], [.08, .03], [-.07, .06]].forEach(([x, y]) => { ctx.beginPath(); ctx.arc(x, y, 0.03, 0, 7); ctx.fill(); });
+      ctx.restore();
+    }));
+    // big dark koala nose
+    local(f, f.p(4), () => {
+      ctx.fillStyle = '#2a2a2e';
+      ctx.beginPath(); ctx.moveTo(-0.07, -0.13); ctx.quadraticCurveTo(0, -0.17, 0.07, -0.13);
+      ctx.quadraticCurveTo(0.11, 0.0, 0.08, 0.05); ctx.quadraticCurveTo(0, 0.09, -0.08, 0.05);
+      ctx.quadraticCurveTo(-0.11, 0.0, -0.07, -0.13); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.beginPath(); ctx.ellipse(-0.03, -0.09, 0.015, 0.03, 0, 0, 7); ctx.fill();
+    });
+  }},
+
+  kitty: { icon: '🐱', draw(f) {
+    local(f, f.p(10), () => {
+      [-1, 1].forEach(sx => {
+        ctx.fillStyle = '#ffb067'; ctx.strokeStyle = '#d9822b'; ctx.lineWidth = 0.014;
+        ctx.beginPath(); ctx.moveTo(sx * 0.10, -0.02); ctx.lineTo(sx * 0.30, -0.36); ctx.lineTo(sx * 0.40, 0.02); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ffc6d9'; ctx.beginPath(); ctx.moveTo(sx * 0.17, -0.03); ctx.lineTo(sx * 0.30, -0.26); ctx.lineTo(sx * 0.35, -0.03); ctx.closePath(); ctx.fill();
+      });
+    });
+    local(f, f.p(4), () => {
+      ctx.fillStyle = '#ff8fb1'; ctx.beginPath(); ctx.moveTo(-0.045, -0.02); ctx.lineTo(0.045, -0.02); ctx.lineTo(0, 0.03); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#333'; ctx.lineWidth = 0.009;
+      ctx.beginPath(); ctx.moveTo(0, 0.03); ctx.lineTo(0, 0.06); ctx.quadraticCurveTo(-0.04, 0.1, -0.07, 0.06); ctx.moveTo(0, 0.06); ctx.quadraticCurveTo(0.04, 0.1, 0.07, 0.06); ctx.stroke();
+      [-1, 1].forEach(sx => [-0.04, 0, 0.04].forEach(y => { ctx.beginPath(); ctx.moveTo(sx * 0.11, 0.04); ctx.lineTo(sx * 0.36, 0.04 + y * 1.8); ctx.stroke(); }));
+    });
+    [205, 425].forEach(i => local(f, f.p(i), () => { ctx.fillStyle = 'rgba(255,120,160,.4)'; ctx.beginPath(); ctx.arc(0, 0, 0.07, 0, 7); ctx.fill(); }));
+  }},
+
+  unicorn: { icon: '🦄', draw(f) {
+    local(f, f.p(10), () => {
+      ctx.translate(0, -0.02);
+      const g = ctx.createLinearGradient(0, -0.6, 0, 0);
+      g.addColorStop(0, '#fff6b0'); g.addColorStop(1, '#ffc93c');
+      ctx.fillStyle = g; ctx.strokeStyle = '#d9a400'; ctx.lineWidth = 0.012;
+      ctx.beginPath(); ctx.moveTo(-0.09, 0); ctx.lineTo(0, -0.6); ctx.lineTo(0.09, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#e0a800'; ctx.lineWidth = 0.014;
+      for (let k = 1; k < 5; k++) { const y = -k * 0.11, w = 0.09 * (1 + y / 0.6); ctx.beginPath(); ctx.moveTo(-w, y + 0.04); ctx.lineTo(w, y - 0.02); ctx.stroke(); }
+      // flower crown
+      const cols = ['#ff7ac6', '#8fd3ff', '#c39bff', '#7ee8a2', '#ffd36b'];
+      for (let k = -3; k <= 3; k++) { if (!k) continue; ctx.fillStyle = cols[(k + 3) % 5];
+        const x = k * 0.075, y = 0.01 + Math.abs(k) * 0.012; for (let p = 0; p < 5; p++) { const a = p * 1.2566; ctx.beginPath(); ctx.arc(x + Math.cos(a) * 0.025, y + Math.sin(a) * 0.025, 0.022, 0, 7); ctx.fill(); }
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, 0.015, 0, 7); ctx.fill(); }
+    });
+  }},
+
+  pirate: { icon: '🏴‍☠️', draw(f) {
+    // eye patch on one eye
+    local(f, f.p(473), () => {
+      ctx.strokeStyle = '#111'; ctx.lineWidth = 0.02;
+      ctx.beginPath(); ctx.moveTo(-0.5, -0.22); ctx.lineTo(0.5, 0.18); ctx.stroke();
+      ctx.fillStyle = '#111'; ctx.beginPath(); ctx.ellipse(0, 0, 0.12, 0.1, 0, 0, 7); ctx.fill();
+    });
+    // pirate hat
+    local(f, f.p(10), () => {
+      ctx.translate(0, 0.02);
+      ctx.fillStyle = '#1c1c1c';
+      ctx.beginPath(); ctx.moveTo(-0.55, 0); ctx.quadraticCurveTo(-0.45, -0.28, -0.2, -0.3);
+      ctx.quadraticCurveTo(0, -0.48, 0.2, -0.3); ctx.quadraticCurveTo(0.45, -0.28, 0.55, 0);
+      ctx.quadraticCurveTo(0, -0.12, -0.55, 0); ctx.fill();
+      ctx.strokeStyle = '#ffc93c'; ctx.lineWidth = 0.02;
+      ctx.beginPath(); ctx.moveTo(-0.52, -0.02); ctx.quadraticCurveTo(0, -0.14, 0.52, -0.02); ctx.stroke();
+      // skull
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, -0.26, 0.055, 0, 7); ctx.fill(); ctx.fillRect(-0.03, -0.23, 0.06, 0.04);
+      ctx.fillStyle = '#1c1c1c'; ctx.beginPath(); ctx.arc(-0.02, -0.265, 0.014, 0, 7); ctx.arc(0.02, -0.265, 0.014, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 0.014; ctx.beginPath(); ctx.moveTo(-0.08, -0.2); ctx.lineTo(0.08, -0.14); ctx.moveTo(0.08, -0.2); ctx.lineTo(-0.08, -0.14); ctx.stroke();
+    });
+  }},
+
+  mouse: { icon: '🐭', draw(f) {
+    // big round gray mouse ears with pink insides
+    [[103, 1], [332, -1]].forEach(([i, sx]) => local(f, f.p(i), () => {
+      ctx.save(); ctx.translate(sx * 0.16, -0.2); ctx.rotate(sx * 0.35);
+      ctx.fillStyle = '#b8bcc2'; ctx.strokeStyle = '#80858c'; ctx.lineWidth = 0.014;
+      ctx.beginPath(); ctx.ellipse(0, 0, 0.22, 0.25, 0, 0, 7); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ffb3c8'; ctx.beginPath(); ctx.ellipse(0, 0.02, 0.14, 0.17, 0, 0, 7); ctx.fill();
+      ctx.restore();
+    }));
+    // tiny pink nose, whiskers and two little teeth
+    local(f, f.p(4), () => {
+      ctx.fillStyle = '#ff6f9c'; ctx.beginPath(); ctx.arc(0, 0, 0.045, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.arc(-0.015, -0.015, 0.012, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#444'; ctx.lineWidth = 0.008;
+      [-1, 1].forEach(sx => [-0.05, 0, 0.05].forEach(y => { ctx.beginPath(); ctx.moveTo(sx * 0.07, 0.02); ctx.lineTo(sx * 0.38, 0.02 + y * 1.6); ctx.stroke(); }));
+    });
+    local(f, f.p(13), () => {
+      ctx.fillStyle = '#fff'; ctx.strokeStyle = '#bbb'; ctx.lineWidth = 0.006;
+      ctx.fillRect(-0.035, 0, 0.033, 0.05); ctx.strokeRect(-0.035, 0, 0.033, 0.05);
+      ctx.fillRect(0.002, 0, 0.033, 0.05); ctx.strokeRect(0.002, 0, 0.033, 0.05);
+    });
+  }},
+
+  makeup: { icon: '💄', draw(f) {
+    const pts = ids => ids.map(i => f.p(i));
+    const path = (list, move = true) => list.forEach((p, k) => (k === 0 && move) ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    const up = { x: Math.sin(f.a), y: -Math.cos(f.a) };
+    // blush
+    if (mk.blush) [205, 425].forEach(i => { const c = f.p(i), r = f.u * 0.11;
+      const g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, r);
+      g.addColorStop(0, `rgba(255,90,140,${.55 * mk.amt})`); g.addColorStop(1, 'rgba(255,90,140,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(c.x, c.y, r, 0, 7); ctx.fill(); });
+    // glitter eyeshadow + lashes
+    const lids = [[33, 246, 161, 160, 159, 158, 157, 173, 133], [263, 466, 388, 387, 386, 385, 384, 398, 362]];
+    lids.forEach(ids => {
+      const lid = pts(ids), n = lid.length;
+      const top = lid.map((p, k) => { const h = f.u * 0.075 * Math.sin(Math.PI * k / (n - 1)) + f.u * 0.01; return { x: p.x + up.x * h, y: p.y + up.y * h }; });
+      if (mk.eye) { ctx.save(); ctx.globalCompositeOperation = 'multiply';
+      const c = lid[Math.floor(n / 2)], g = ctx.createLinearGradient(c.x, c.y, c.x + up.x * f.u * .08, c.y + up.y * f.u * .08);
+      g.addColorStop(0, rgba(mk.eye, .9 * mk.amt)); g.addColorStop(1, rgba(mk.eye, .2 * mk.amt));
+      ctx.fillStyle = g; ctx.beginPath(); path(lid); path(top.slice().reverse(), false); ctx.closePath(); ctx.fill();
+      ctx.restore();
+      // sparkles
+      ctx.fillStyle = 'rgba(255,255,255,.9)';
+      for (let k = 1; k < n - 1; k++) { const t = (k * 37 % 10) / 10, p = { x: lid[k].x + (top[k].x - lid[k].x) * t, y: lid[k].y + (top[k].y - lid[k].y) * t };
+        ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(1, f.u * 0.006), 0, 7); ctx.fill(); }
+      }
+      // lashes on the outer half
+      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = Math.max(1.5, f.u * 0.007); ctx.lineCap = 'round';
+      const ox = lid[0].x - lid[n - 1].x, oy = lid[0].y - lid[n - 1].y, ol = Math.hypot(ox, oy) || 1;
+      for (let k = 1; k < 5; k++) { const p = lid[k], len = f.u * (0.035 + 0.008 * (5 - k));
+        const dx = up.x + 0.6 * ox / ol, dy = up.y + 0.6 * oy / ol, dl = Math.hypot(dx, dy);
+        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + dx / dl * len, p.y + dy / dl * len); ctx.stroke(); }
+    });
+    // lipstick (outer lip shape minus the open mouth)
+    const outer = pts([61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146]);
+    const inner = pts([78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95]);
+    if (mk.lip) {
+    ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = rgba(mk.lip, .95 * mk.amt);
+    ctx.beginPath(); path(outer); ctx.closePath(); path(inner); ctx.closePath(); ctx.fill('evenodd');
+    ctx.restore();
+    const shine = f.p(14), sh = f.p(17);
+    ctx.fillStyle = `rgba(255,255,255,${.4 * mk.amt})`; ctx.beginPath(); ctx.ellipse((shine.x + sh.x) / 2, (shine.y + sh.y) / 2, f.u * 0.035, f.u * 0.012, f.a, 0, 7); ctx.fill();
+    }
+    // star freckles
+    [[118, 0.2], [347, -0.3]].forEach(([i, r]) => local(f, f.p(i), () => {
+      ctx.rotate(r); ctx.fillStyle = '#ffd400'; ctx.beginPath();
+      for (let k = 0; k < 10; k++) { const a = k * Math.PI / 5 - Math.PI / 2, rr = k % 2 ? 0.014 : 0.035; ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); }
+      ctx.closePath(); ctx.fill();
+    }));
+  }},
+
+  flag: { icon: '🇵🇭', draw(f) {
+    [205, 425].forEach(i => local(f, f.p(i), () => {
+      ctx.rotate(-0.08);
+      const w = 0.2, h = 0.1, x0 = -w / 2, y0 = -h / 2;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(x0, y0, w, h); ctx.clip();
+      ctx.fillStyle = '#0038a8'; ctx.fillRect(x0, y0, w, h / 2);
+      ctx.fillStyle = '#ce1126'; ctx.fillRect(x0, 0, w, h / 2);
+      // white triangle at the hoist
+      const tw = h * Math.sqrt(3) / 2;
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x0 + tw, 0); ctx.lineTo(x0, y0 + h); ctx.closePath(); ctx.fill();
+      // sun with 8 rays
+      const sx = x0 + tw * 0.36, sy = 0;
+      ctx.fillStyle = '#fcd116'; ctx.strokeStyle = '#fcd116'; ctx.lineWidth = 0.004;
+      for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + Math.cos(a) * 0.022, sy + Math.sin(a) * 0.022); ctx.stroke(); }
+      ctx.beginPath(); ctx.arc(sx, sy, 0.01, 0, 7); ctx.fill();
+      // three stars
+      [[x0 + 0.007, y0 + 0.008], [x0 + 0.007, y0 + h - 0.008], [x0 + tw - 0.009, 0]].forEach(([px, py]) => {
+        ctx.beginPath(); for (let k = 0; k < 10; k++) { const a = k * Math.PI / 5 - Math.PI / 2, r = k % 2 ? 0.0025 : 0.006; ctx.lineTo(px + Math.cos(a) * r, py + Math.sin(a) * r); } ctx.closePath(); ctx.fill(); });
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 0.006; ctx.strokeRect(x0, y0, w, h);
+    }));
+  }},
+
+  sunstars: { icon: '☀️', draw(f) {
+    const star = (x, y, R) => { ctx.beginPath(); for (let k = 0; k < 10; k++) { const a = k * Math.PI / 5 - Math.PI / 2, r = k % 2 ? R * 0.42 : R; ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.stroke(); };
+    // Filipino-style 8-ray sun on the forehead
+    local(f, f.p(151), () => {
+      ctx.fillStyle = '#fcd116'; ctx.strokeStyle = '#c99a00'; ctx.lineWidth = 0.008;
+      for (let k = 0; k < 8; k++) { // each ray is a main ray flanked by two thin ones
+        const a = k * Math.PI / 4;
+        [[0, 0.04, 0.17], [-0.16, 0.015, 0.13], [0.16, 0.015, 0.13]].forEach(([da, w, len]) => {
+          const b = a + da, c = Math.cos(b), s2 = Math.sin(b);
+          ctx.beginPath(); ctx.moveTo(-s2 * w, c * w); ctx.lineTo(c * len, s2 * len); ctx.lineTo(s2 * w, -c * w); ctx.closePath(); ctx.fill(); ctx.stroke();
+        });
+      }
+      ctx.beginPath(); ctx.arc(0, 0, 0.065, 0, 7); ctx.fill(); ctx.stroke();
+    });
+    // three stars in an arc above the head
+    local(f, f.p(10), () => {
+      ctx.fillStyle = '#fcd116'; ctx.strokeStyle = '#c99a00'; ctx.lineWidth = 0.008;
+      star(-0.3, -0.14, 0.075); star(0, -0.26, 0.085); star(0.3, -0.14, 0.075);
+    });
+  }},
+
   none: { icon: '🙂', draw() {} },
 };
 
@@ -312,7 +529,7 @@ Object.entries(STICKERS).forEach(([key, s]) => {
   picker.appendChild(b);
 });
 
-// ---------- render loop ----------
+// ---------- smoothing ----------
 function smoothFaces(raw) {
   const out = raw.map((lm, fi) => {
     const prev = smooth[fi];
@@ -322,58 +539,133 @@ function smoothFaces(raw) {
   smooth = out; return out;
 }
 
-function render() {
-  if (landmarker && video.readyState >= 2 && video.currentTime !== lastVideoTime) {
-    lastVideoTime = video.currentTime;
-    try { const res = landmarker.detectForVideo(video, performance.now()); faces = smoothFaces(res.faceLandmarks || []); } catch (e) { }
+// ---------- makeup controls ----------
+function swatches(el, list, key) {
+  list.forEach(c => {
+    const b = document.createElement('button'); b.className = 'dot' + (c === mk[key] ? ' on' : '');
+    if (c) b.style.background = rgba(c, 1); else { b.style.background = 'rgba(255,255,255,.15)'; b.textContent = '✖'; }
+    b.onclick = () => { mk[key] = c; el.querySelectorAll('.dot').forEach(x => x.classList.toggle('on', x === b)); };
+    el.appendChild(b);
+  });
+}
+swatches($('lipSw'), LIPS, 'lip'); swatches($('eyeSw'), EYES, 'eye');
+$('mkAmt').oninput = e => { mk.amt = e.target.value / 100; };
+$('blushBtn').onclick = () => { mk.blush = !mk.blush; $('blushBtn').classList.toggle('on', mk.blush); };
+function showPanel() { $('mkPanel').style.display = current === 'makeup' ? 'block' : 'none'; }
+document.querySelectorAll('.pick').forEach(b => b.addEventListener('click', showPanel));
+
+// ---------- burst capture (pick the sharpest frame) ----------
+let burst = null; // { frames: [{img, faces, score}], need, done }
+const probe = document.createElement('canvas'); probe.width = 160; probe.height = 90;
+const pctx = probe.getContext('2d', { willReadFrequently: true });
+function sharpness(src) {
+  const vw = video.videoWidth, vh = video.videoHeight;
+  // score the middle of the frame (where faces are), downscaled
+  pctx.drawImage(src, vw * 0.2, vh * 0.15, vw * 0.6, vh * 0.7, 0, 0, 160, 90);
+  const d = pctx.getImageData(0, 0, 160, 90).data, g = new Float32Array(160 * 90);
+  for (let i = 0; i < g.length; i++) g[i] = d[i * 4] * .3 + d[i * 4 + 1] * .59 + d[i * 4 + 2] * .11;
+  let sum = 0, sq = 0, n = 0;
+  for (let y = 1; y < 89; y++) for (let x = 1; x < 159; x++) {
+    const i = y * 160 + x, l = 4 * g[i] - g[i - 1] - g[i + 1] - g[i - 160] - g[i + 160];
+    sum += l; sq += l * l; n++;
   }
+  const m = sum / n; return sq / n - m * m; // variance of Laplacian: higher = sharper
+}
+function grabFrame() {
+  const c = document.createElement('canvas'); c.width = video.videoWidth; c.height = video.videoHeight;
+  c.getContext('2d').drawImage(video, 0, 0);
+  burst.frames.push({ img: c, faces: faces, score: sharpness(c) });
+  if (burst.frames.length >= burst.need) finishBurst();
+}
+
+// ---------- render loop ----------
+let running = false, loopOn = false, lastAdvance = 0;
+function render() {
+  if (!running) { loopOn = false; return; }
+  const now = performance.now();
+  if (landmarker && video.readyState >= 2 && video.currentTime !== lastVideoTime) {
+    lastVideoTime = video.currentTime; lastAdvance = now;
+    try { const res = landmarker.detectForVideo(video, now); faces = smoothFaces(res.faceLandmarks || []); } catch (e) { }
+    if (burst && !burst.done) grabFrame();
+  }
+  // watchdog: camera frozen for 2.5s -> restart it
+  if (lastAdvance && now - lastAdvance > 2500) { lastAdvance = now; restartCamera(); }
   drawScene(DPR);
   requestAnimationFrame(render);
 }
-function drawScene(scale) {
+function startLoop() { running = true; if (!loopOn) { loopOn = true; requestAnimationFrame(render); } }
+
+function drawScene(scale, src = video, list = faces) {
   ctx.setTransform(scale, 0, 0, scale, 0, 0);
   ctx.imageSmoothingQuality = 'high';
   ctx.fillStyle = '#111'; ctx.fillRect(0, 0, W, H);
-  if (video.readyState >= 2) {
+  if (src !== video || video.readyState >= 2) {
     ctx.save(); ctx.translate(W, 0); ctx.scale(-1, 1);
-    ctx.drawImage(video, W - rect.x - rect.w, rect.y, rect.w, rect.h);
+    ctx.drawImage(src, W - rect.x - rect.w, rect.y, rect.w, rect.h);
     ctx.restore();
   }
-  faces.forEach((lm, i) => { if (lm.length >= 478) STICKERS[current].draw(frame(lm), i); });
+  list.forEach((lm, i) => { if (lm.length >= 478) STICKERS[current].draw(frame(lm), i); });
 }
 // Photo at the camera's full resolution (same framing as the screen)
-function photoCanvas() {
+function photoCanvas(src, list) {
   const k = Math.max(DPR, (video.videoWidth || 1) / rect.w);
   const c = document.createElement('canvas');
   c.width = Math.round(W * k); c.height = Math.round(H * k);
   ctx = c.getContext('2d');
-  try { drawScene(k); } finally { ctx = mainCtx; }
+  try { drawScene(k, src, list); } finally { ctx = mainCtx; }
   return c;
 }
 
-// ---------- start ----------
+// ---------- camera ----------
+async function openCamera() {
+  stopCamera();
+  const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
+  video.srcObject = stream; await video.play();
+  fitVideo(); lastVideoTime = -1; lastAdvance = performance.now();
+}
+function stopCamera() {
+  const s = video.srcObject; if (s) s.getTracks().forEach(t => t.stop());
+  video.srcObject = null;
+}
+let restarting = false;
+async function restartCamera() {
+  if (restarting || !running) return; restarting = true;
+  try { await openCamera(); } catch (e) { toast('Camera stuck. Tap 🏠 and start again.'); }
+  restarting = false;
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && running) restartCamera(); });
+video.addEventListener('loadedmetadata', fitVideo);
+
+// ---------- start / home ----------
 async function start() {
   $('goBtn').disabled = true; $('msg').textContent = 'Turning on the camera…';
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
-    video.srcObject = stream; await video.play();
-  } catch (e) {
-    $('msg').textContent = 'Camera blocked. Allow the camera in Safari, then try again.'; $('goBtn').disabled = false; return;
+  try { await openCamera(); }
+  catch (e) { $('msg').textContent = 'Camera blocked. Allow the camera in Safari, then try again.'; $('goBtn').disabled = false; return; }
+  resize();
+  if (!landmarker) {
+    $('msg').textContent = 'Getting the silly stuff ready…';
+    try {
+      const fileset = await FilesetResolver.forVisionTasks(WASM);
+      const opts = d => ({ baseOptions: { modelAssetPath: MODEL, delegate: d }, runningMode: 'VIDEO', numFaces: 3 });
+      try { landmarker = await FaceLandmarker.createFromOptions(fileset, opts('GPU')); }
+      catch (e) { landmarker = await FaceLandmarker.createFromOptions(fileset, opts('CPU')); }
+    } catch (e) {
+      $('msg').textContent = 'Could not load the face finder. Check the internet and try again.'; $('goBtn').disabled = false; return;
+    }
   }
-  video.addEventListener('loadedmetadata', fitVideo); resize();
-  $('msg').textContent = 'Getting the silly stuff ready…';
-  try {
-    const fileset = await FilesetResolver.forVisionTasks(WASM);
-    const opts = d => ({ baseOptions: { modelAssetPath: MODEL, delegate: d }, runningMode: 'VIDEO', numFaces: 3 });
-    try { landmarker = await FaceLandmarker.createFromOptions(fileset, opts('GPU')); }
-    catch (e) { landmarker = await FaceLandmarker.createFromOptions(fileset, opts('CPU')); }
-  } catch (e) {
-    $('msg').textContent = 'Could not load the face finder. Check the internet and try again.'; $('goBtn').disabled = false; return;
-  }
+  $('msg').textContent = ''; $('goBtn').disabled = false;
   $('start').style.display = 'none';
-  requestAnimationFrame(render);
+  startLoop();
+}
+function goHome() {
+  running = false; burst = null; stopCamera();
+  faces = []; smooth = []; googly.length = 0;
+  $('preview').style.display = 'none'; $('start').style.display = 'flex';
+  $('goBtn').disabled = false; $('msg').textContent = '';
 }
 $('goBtn').onclick = start;
+$('homeBtn').onclick = goHome;
+$('homeBtn2').onclick = goHome;
 
 // ---------- photo ----------
 let lastBlob = null;
@@ -383,14 +675,21 @@ function click() { // little shutter sound
     o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime + .13); } catch (e) { }
 }
 $('snap').onclick = () => {
-  if (!landmarker) return;
+  if (!landmarker || !running || burst) return;
   click();
   const fl = $('flash'); fl.style.transition = 'none'; fl.style.opacity = 1;
   requestAnimationFrame(() => { fl.style.transition = 'opacity .35s'; fl.style.opacity = 0; });
-  photoCanvas().toBlob(b => {
-    lastBlob = b; $('shot').src = URL.createObjectURL(b); $('preview').style.display = 'flex';
-  }, 'image/jpeg', 0.95);
+  burst = { frames: [], need: 5, done: false };
+  setTimeout(() => { if (burst && !burst.done) finishBurst(); }, 600); // safety
 };
+function finishBurst() {
+  const b = burst; if (!b || b.done) return; b.done = true;
+  if (!b.frames.length) { burst = null; return; }
+  const best = b.frames.reduce((x, y) => (y.score > x.score ? y : x));
+  photoCanvas(best.img, best.faces).toBlob(blob => {
+    burst = null; lastBlob = blob; $('shot').src = URL.createObjectURL(blob); $('preview').style.display = 'flex';
+  }, 'image/jpeg', 0.95);
+}
 $('againBtn').onclick = () => { $('preview').style.display = 'none'; };
 $('saveBtn').onclick = async () => {
   if (!lastBlob) return;
