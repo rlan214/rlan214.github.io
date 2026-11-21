@@ -326,6 +326,8 @@ $("backBtn").onclick=()=>{speechSynthesis?.cancel?.();cur==="home"?goLessons():g
 const LESSONS=[
  {id:"northeast",ico:"🧭",t:"Northeast States",d:"11 states · capitals · abbreviations · map test",open:()=>goHome(),
   best:()=>{const b=store.get("cc_best",{});return b.mix!=null?`Big Test best ${b.mix}%`:(Object.keys(b).length?"Started":"")}},
+ {id:"southeast",ico:"🌴",t:"Southeast Region",d:"12 states · capitals · guided notes",open:()=>{location.href="southeast.html"},
+  best:()=>{const b=store.get("se_best",{});return b.mix!=null?`Big Test best ${b.mix}%`:(Object.keys(b).length?"Started":"")}},
 ];
 function goLessons(){show("lessons");
   $("lessonList").innerHTML=LESSONS.map((L,k)=>[L,k]).reverse().map(([L,k])=>{const b=L.best?L.best():"";return `<button class="lesson" data-k="${k}"><div class="lico">${L.ico}</div><div><b>${L.t}</b><span>${L.d}</span>${b?`<div><span class="lbest">${b}</span></div>`:""}</div></button>`}).join("")
