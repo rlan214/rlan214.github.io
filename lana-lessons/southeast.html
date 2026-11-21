@@ -172,6 +172,15 @@ html{touch-action:manipulation;-webkit-text-size-adjust:100%}
 </style>
 <style>
 /* ---- Southeast additions ---- */
+.shortcut{margin-top:14px;background:#fff;border:3px solid var(--ink);border-radius:20px;padding:14px 16px;box-shadow:6px 6px 0 var(--paper2)}
+.shortcut h3{margin:0 0 6px;font-size:22px}
+.shortcut .sent{font:800 20px Nunito;line-height:1.5;background:#fff8e6;border-radius:12px;padding:8px 12px}
+.shortcut .sent b{color:var(--coral-d);font-size:24px}
+.pairs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:10px 0 6px}
+.pairs div{background:var(--sky);border:2px solid var(--ink);border-radius:12px;padding:6px 10px;font-size:16px}
+.pairs div i{font-style:normal;font-weight:800;background:var(--ink);color:#fff;border-radius:8px;padding:0 6px;margin-right:6px;font-size:14px}
+.shortcut .tip{font-size:15px;margin:6px 0 0}
+
 .studybtn{display:flex;align-items:center;gap:14px;width:100%;margin-top:14px;border:3px solid var(--ink);border-radius:20px;padding:14px 16px;background:var(--gold);font:inherit;color:var(--ink);box-shadow:0 5px 0 var(--ink);text-align:left}
 .studybtn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
 .studybtn .ico{font-size:34px}
@@ -208,7 +217,9 @@ html{touch-action:manipulation;-webkit-text-size-adjust:100%}
   #home .hint{grid-column:1;grid-row:3}
   #home .studybtn{grid-column:2;grid-row:1;margin-top:0;align-self:start}
   #home .modes{grid-column:2;grid-row:2/span 2;align-self:start}
-  #home .dad{grid-column:1/-1;grid-row:4}
+  #home .shortcut{grid-column:1;grid-row:4;margin-top:0;align-self:start}
+  #home .modes{grid-row:2/span 3}
+  #home .dad{grid-column:1/-1;grid-row:5}
 }
 </style>
 </head>
@@ -225,6 +236,20 @@ html{touch-action:manipulation;-webkit-text-size-adjust:100%}
     <div class="mapwrap"><svg class="map tappable" id="homeMap" viewBox="0 0 600 480"></svg></div>
     <p class="hint">Tap any state to learn about it</p>
     <button class="studybtn" id="studyBtn"><div class="ico">📖</div><div><b>Study the Notes</b><span>Her guided notes · tap a blank to check the answer</span></div></button>
+    <div class="shortcut" id="shortcut">
+      <h3>🧠 Shortcut: 12 states = 6 pairs</h3>
+      <div class="sent"><b>A</b>ll <b>L</b>azy <b>K</b>ids <b>T</b>ake <b>M</b>any <b>A</b>fternoon <b>W</b>alks, <b>V</b>ery <b>N</b>ice <b>S</b>unny <b>G</b>ood <b>F</b>un!</div>
+      <div class="pairs">
+        <div><i>1–2</i>Arkansas, Louisiana</div>
+        <div><i>3–4</i>Kentucky, Tennessee</div>
+        <div><i>5–6</i>Mississippi, Alabama</div>
+        <div><i>7–8</i>West Virginia, Virginia</div>
+        <div><i>9–10</i>North Carolina, South Carolina</div>
+        <div><i>11–12</i>Georgia, Florida</div>
+      </div>
+      <p class="tip">⭐ Twins: <b>West</b> Virginia comes before Virginia, <b>North</b> Carolina before South.<br>⭐ Charleston is <b>West Virginia's</b> capital. South Carolina's is <b>Columbia</b>.</p>
+      <div style="text-align:center;margin-top:10px"><button class="btn say sm" id="sayShort">🔊 Say it</button></div>
+    </div>
     <h3 class="section-title">Practice</h3>
     <div class="modes" id="modes"></div>
     <details class="dad">
@@ -612,6 +637,7 @@ function finish(){
 }
 function confetti(){const c=["#ef6a4c","#1f9e8f","#f3b43f","#b9c7ef","#f5b8d0"];for(let i=0;i<70;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=c[i%5];d.style.animationDuration=(1.8+Math.random()*1.8)+"s";d.style.animationDelay=Math.random()*.6+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),4500)}}
 
+$("sayShort").onclick=()=>say("All Lazy Kids Take Many Afternoon Walks, Very Nice Sunny Good Fun! One, Arkansas. Two, Louisiana. Three, Kentucky. Four, Tennessee. Five, Mississippi. Six, Alabama. Seven, West Virginia. Eight, Virginia. Nine, North Carolina. Ten, South Carolina. Eleven, Georgia. Twelve, Florida.");
 goHome();
 </script>
 </body>
