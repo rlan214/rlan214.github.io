@@ -561,17 +561,34 @@ const STICKERS = {
   }},
 
   mohawk: { icon: '🤘', draw(f) {
-    // punk mohawk: a narrow fan of tall spikes straight up from the top of the head
-    local(f, f.p(10), () => {
-      ctx.translate(0, 0.04);
-      const g = ctx.createLinearGradient(0, -0.7, 0, 0);
-      g.addColorStop(0, '#7fd8ff'); g.addColorStop(0.5, '#1e8cff'); g.addColorStop(1, '#0b4fc4');
-      ctx.fillStyle = g; ctx.strokeStyle = '#08368a'; ctx.lineWidth = 0.012; ctx.lineJoin = 'round';
-      const spikes = [[-0.12, 0.42, -0.28], [0.12, 0.42, 0.28], [-0.07, 0.56, -0.15], [0.07, 0.56, 0.15], [0, 0.66, 0]];
+    const o = f.p(10), c = Math.cos(f.a), sn = Math.sin(f.a);
+    const L = (x, y) => ({ x: o.x + (x * c - y * sn) * f.u, y: o.y + (x * sn + y * c) * f.u }); // local -> screen
+    const g = ctx.createLinearGradient(L(0, -1).x, L(0, -1).y, L(0, 0.3).x, L(0, 0.3).y);
+    g.addColorStop(0, '#7fd8ff'); g.addColorStop(0.45, '#1e8cff'); g.addColorStop(1, '#0b4fc4');
+    ctx.fillStyle = g; ctx.strokeStyle = '#08368a'; ctx.lineWidth = Math.max(2, f.u * 0.012); ctx.lineJoin = 'round';
+    // full hair cap: hairline along the top of the forehead, sides down past the temples, puffy outline over the head
+    const hairline = [454, 356, 389, 251, 284, 332, 297, 338, 10, 109, 67, 103, 54, 21, 162, 127, 234].map(i => f.p(i));
+    ctx.beginPath();
+    hairline.forEach((p, k) => k ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
+    let q = L(0.6, 0.35); ctx.lineTo(q.x, q.y);
+    const n = 14;
+    for (let k = 0; k <= n; k++) { // bumpy outline from right side over the top to left side
+      const t = Math.PI * k / n, x = 0.62 * Math.cos(t), y = 0.05 - 0.42 * Math.sin(t);
+      const t2 = Math.PI * (k + 0.5) / n, bx = 0.7 * Math.cos(t2), by = 0.05 - 0.5 * Math.sin(t2);
+      const p = L(x, y); if (k === 0) ctx.lineTo(p.x, p.y);
+      if (k < n) { const cp = L(bx, by), nx = L(0.62 * Math.cos(Math.PI * (k + 1) / n), 0.05 - 0.42 * Math.sin(Math.PI * (k + 1) / n)); ctx.quadraticCurveTo(cp.x, cp.y, nx.x, nx.y); }
+    }
+    q = L(-0.6, 0.35); ctx.lineTo(q.x, q.y);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // mohawk on top of the head
+    local(f, L(0, -0.38), () => {
+      const sg = ctx.createLinearGradient(0, -0.64, 0, 0.06);
+      sg.addColorStop(0, '#7fd8ff'); sg.addColorStop(0.5, '#1e8cff'); sg.addColorStop(1, '#0b4fc4');
+      ctx.fillStyle = sg; ctx.lineWidth = 0.012;
+      const spikes = [[-0.12, 0.4, -0.28], [0.12, 0.4, 0.28], [-0.07, 0.54, -0.15], [0.07, 0.54, 0.15], [0, 0.64, 0]];
       spikes.forEach(([x, h, tilt]) => {
-        ctx.beginPath(); ctx.moveTo(x - 0.07, 0); ctx.lineTo(x + tilt * h * 0.5, -h); ctx.lineTo(x + 0.07, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x - 0.075, 0.06); ctx.lineTo(x + tilt * h * 0.5, -h); ctx.lineTo(x + 0.075, 0.06); ctx.closePath(); ctx.fill(); ctx.stroke();
       });
-      ctx.fillStyle = '#0b4fc4'; ctx.beginPath(); ctx.ellipse(0, 0, 0.19, 0.05, 0, 0, 7); ctx.fill();
     });
   }},
 
