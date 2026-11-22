@@ -59,6 +59,40 @@
   .row2 button{flex:1;padding:10px 0;border-radius:10px;border:2px solid #2c5446;background:transparent;color:#cfe3d9;font-size:14px;font-weight:700}
   .row2 button.on{border-color:var(--gold);color:var(--gold)}
   footer{color:#6f9483;font-size:12px;text-align:center;padding:0 16px 20px}
+  .sets button.words{border-color:var(--gold);color:var(--gold)}
+  .sets button.words.sel{background:var(--gold);color:#1b1b1b}
+  body.dict .me,body.dict .tabs,body.dict main,body.dict footer{display:none}
+  #dict{display:none;padding:0 16px 24px;max-width:820px;margin:0 auto}
+  body.dict #dict{display:block}
+  #dict .top{display:flex;gap:8px;margin-bottom:8px}
+  #dict input{flex:1;min-width:0;padding:12px 14px;border-radius:12px;border:2px solid #2c5446;background:var(--card);color:#fff;font-size:17px;outline:none}
+  #dict input:focus{border-color:var(--gold)}
+  #dict .qbtn{padding:0 14px;border-radius:12px;border:none;background:var(--gold);color:#1b1b1b;font-size:16px;font-weight:800;white-space:nowrap}
+  .cats{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+  .cats button{flex:0 0 auto;padding:7px 11px;border-radius:18px;border:2px solid #2c5446;background:transparent;color:#cfe3d9;font-size:13px;font-weight:700;white-space:nowrap}
+  .cats button.sel{background:#1f5a3c;border-color:var(--gold);color:#fff}
+  .count{font-size:12px;color:var(--muted);margin:2px 2px 8px}
+  .terms{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+  .term{background:var(--card);border-radius:14px;padding:12px 14px;border-left:4px solid #2c5446}
+  .term.pb{border-left-color:var(--gold)}
+  .term .w{font-size:19px;font-weight:800}
+  .term .aka{font-size:12px;color:var(--muted);font-weight:600;margin-left:4px}
+  .term .tag{display:inline-block;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.4px;margin-top:2px}
+  .term .d{font-size:15.5px;line-height:1.4;margin-top:6px;color:#e2efe8}
+  .term .ex{font-size:14px;line-height:1.4;margin-top:6px;color:#ffd9b8}
+  .term .see{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .term .see button{padding:6px 10px;border-radius:10px;border:none;background:#235043;color:var(--gold);font-size:13px;font-weight:800}
+  .quiz{background:var(--card);border-radius:14px;padding:14px;margin-bottom:10px;display:none}
+  .quiz.show{display:block}
+  .quiz .qh{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-weight:700}
+  .quiz .qd{font-size:19px;font-weight:700;line-height:1.35;margin:8px 0 10px}
+  .quiz .qo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .quiz .qo button{padding:13px 8px;border-radius:10px;border:2px solid #2c5446;background:#1c3d33;color:#fff;font-size:16px;font-weight:700}
+  .quiz .qo button.ok{background:#1f7a46;border-color:#5fe39a}
+  .quiz .qo button.no{background:#6b2a12;border-color:var(--orange)}
+  .quiz .qf{display:flex;gap:8px;margin-top:10px}
+  .quiz .qf button{flex:1;padding:11px 0;border-radius:10px;border:none;font-size:15px;font-weight:800;background:#235043;color:#fff}
+  .quiz .qf #qNext{background:var(--gold);color:#1b1b1b}
   @keyframes pulse{0%{r:20;opacity:.9}100%{r:31;opacity:0}}
   .ring{animation:pulse 1.4s ease-out infinite}
 </style>
@@ -70,6 +104,16 @@
 </header>
 <div class="sets" id="sets"></div>
 <div class="tabs" id="tabs"></div>
+<section id="dict">
+  <div class="top">
+    <input id="dq" type="search" placeholder="🔍 Look up a word…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <button class="qbtn" id="qStart">🎯 Quiz me</button>
+  </div>
+  <div class="quiz" id="quiz"></div>
+  <div class="cats" id="cats"></div>
+  <div class="count" id="dcount"></div>
+  <div class="terms" id="terms"></div>
+</section>
 <main>
   <div class="courtwrap">
     <svg id="court" viewBox="0 -30 500 510" xmlns="http://www.w3.org/2000/svg">
@@ -483,12 +527,14 @@ function buildMe(){
   const l=document.createElement('button');l.id='lock';l.textContent=locked?'🔒':'🔓';l.title=locked?'Unlock position':'Lock position';
   l.onclick=()=>{if(!me&&!locked)return;locked=!locked;save('pb.lock.'+play().id,locked);buildMe()};box.appendChild(l);
 }
-function selectPlay(i){if(busy)return;autoOn=false;playIdx=i;save('pb.play2',i);k=0;path=[];loadPos();setView();buildMe();buildPlayers();buildNav();drawInstant();ui()}
+function selectPlay(i){if(busy)return;setDict(false);autoOn=false;playIdx=i;save('pb.play2',i);k=0;path=[];loadPos();setView();buildMe();buildPlayers();buildNav();drawInstant();ui()}
 function buildNav(){
   const cs=play().set;
   const s=$('sets');s.innerHTML='';
-  SETS.forEach((st,si)=>{const b=document.createElement('button');b.textContent=st.name;b.className=si===cs?'sel':'';
+  SETS.forEach((st,si)=>{const b=document.createElement('button');b.textContent=st.name;b.className=(!dictOn&&si===cs)?'sel':'';
     b.onclick=()=>selectPlay(PLAYS.findIndex(p=>p.set===si));s.appendChild(b)});
+  const w=document.createElement('button');w.textContent='📖 Words';w.className='words'+(dictOn?' sel':'');
+  w.onclick=()=>{if(busy)return;autoOn=false;setDict(true)};s.appendChild(w);
   const t=$('tabs');t.innerHTML='';
   PLAYS.forEach((p,i)=>{if(p.set!==cs)return;const b=document.createElement('button');b.textContent=p.name;b.className=i===playIdx?'sel':'';
     b.onclick=()=>selectPlay(i);t.appendChild(b)});
@@ -552,7 +598,182 @@ $('auto').onclick=async()=>{
   autoOn=false;ui();
 };
 
+// ===================== WORDS (basketball dictionary) =====================
+// c: category · d: meaning · ex: how it shows up in our plays · see: play ids to open
+const CATS=[['pb','⭐ Our Playbook'],['spot','📍 Court Spots'],['move','🏃 Moves'],['shot','🏀 Shots & Passes'],['rule','📏 Rules'],['def','🛡️ Defense'],['game','🎮 Game Words']];
+const WORDS=[
+ // --- our playbook ---
+ {w:'Pick',aka:'also called a screen',c:'pb',d:'Standing still in a defender\'s way so your teammate can run past and get open. Plant your feet, stay still, and keep your arms in — if you move while setting it, it\'s a foul.',ex:'"2 sets the pick for the 1" is the first step of "23", "24" and "25".',see:['23','15','BOX1']},
+ {w:'Off the pick',c:'pb',d:'Running right past your teammate\'s pick, shoulder-to-shoulder, so your defender bumps into the pick and you get free.',ex:'"1 moves right off the pick."',see:['23','55']},
+ {w:'Roll',aka:'pick and roll',c:'pb',d:'After you set a pick, you turn and cut toward the basket. You\'re often wide open because the defense is busy with the dribbler.',ex:'"5 rolls to the basket after 1 cuts off the pick."',see:['15','51']},
+ {w:'Post up',c:'pb',d:'Getting position close to the basket with your back to it, holding off your defender with your body, and showing your hands for the ball.',ex:'"5 gets position (posts up)."',see:['25']},
+ {w:'Flash',c:'pb',d:'A quick cut into the middle (the key) to get open for a pass. Fast and sudden — like a flash!',ex:'"5 posts up and 4 flashes."',see:['23','24']},
+ {w:'Cut',c:'pb',d:'A quick, sharp run to a new spot to get open. Cutting is how you lose your defender.',ex:'"1 cuts towards the basket."',see:['1R','15']},
+ {w:'V-cut',c:'pb',d:'Walk your defender one way, then plant your foot and burst back the other way. Your path makes the letter V.',ex:'"The 5 does a V cut back to the ball."',see:['PB1','PC']},
+ {w:'Clear out',c:'pb',d:'Getting out of the way to an open spot so you don\'t crowd your teammates and their space stays open.',ex:'"If the 1 does not receive the pass, clear out."',see:['1R','15']},
+ {w:'Replace',c:'pb',d:'Moving into the spot a teammate just left so that spot stays filled.',ex:'"The 2 replaces the 1 on top."',see:['1R']},
+ {w:'Catch-and-shoot',c:'pb',d:'Catching a pass and shooting right away with no dribble. Have your hands and feet ready before the ball gets there.',see:['51','41']},
+ {w:'Reset',aka:'restart',c:'pb',d:'Passing the ball back out and starting the play over when nothing is open. It\'s smart, not a mistake.',ex:'"1 passes back to the 2 up top and resets."',see:['15','55']},
+ {w:'Swing the ball',c:'pb',d:'Passing the ball from one side of the court to the other to move the defense.',ex:'"1 swings it to the 4."',see:['PB1']},
+ {w:'Soft spot',c:'pb',d:'An open space between defenders where you can catch the ball safely.',ex:'"1 finds a soft spot in the key."',see:['PB2','ARC']},
+ {w:'Outlet',c:'pb',d:'The safe, open teammate you can always pass to when you\'re in trouble — like a backup plan. An "outlet pass" is also the first quick pass after a rebound, out to the side, to start the fast break.',ex:'"The 1 circles around the strong side as an outlet."',see:['BOX1','BOX2']},
+ {w:'Safety',c:'pb',d:'The player who stays farther back as the safe pass and to stop a fast break if the other team gets the ball.',see:['STK']},
+ {w:'Zone offense',c:'pb',d:'Plays you run when the defense guards areas (zones) instead of people. You find the gaps between defenders.',ex:'Our zone offense is Zone "1".',see:['1R']},
+ {w:'1-3-1',c:'pb',d:'Lining up 1 player on top, 3 across the middle, and 1 down low. Our zone offense uses this shape.',see:['1R','1L']},
+ {w:'Man-to-man',aka:'man-on-man',c:'pb',d:'A defense where each player guards one person. Against it, we use picks and cuts to get open.',ex:'Man "2", "3" and "4" are our man-to-man plays.',see:['23','15','51']},
+ {w:'Press',aka:'full-court press',c:'pb',d:'When the defense guards you the whole court, right from the inbound pass, trying to trap you or steal the ball.',see:['PA1']},
+ {w:'Press break',c:'pb',d:'Our plan to get the ball inbounds and up the court safely when the other team is pressing.',see:['PA1','PB1','PC']},
+ {w:'Inbound',aka:'inbounds pass',c:'pb',d:'Passing the ball in from out of bounds to start play again. The inbounder can\'t step on the line.',ex:'In most of our plays the 1 is the inbounder.',see:['PA1','BOX1']},
+ {w:'Stack',c:'pb',d:'An out-of-bounds play where players line up in a single line, then all break to different spots at once.',see:['STK']},
+ {w:'Box',c:'pb',d:'An out-of-bounds play where 4 players stand in the corners of a square, then set picks for each other.',see:['BOX1','BOX2']},
+ {w:'Arc',c:'pb',d:'An out-of-bounds play where players line up in a curved line, then cut off the 5 one by one.',see:['ARC']},
+ {w:'Positions 1–5',c:'pb',d:'In our playbook, the numbers are spots to stand in, not how good you are. The 1 usually brings the ball up (point guard); the 4 and 5 often play closer to the basket.',ex:'Tap your number in a play to see your job.',see:['23']},
+ // --- court spots ---
+ {w:'Key',aka:'lane / paint',c:'spot',d:'The painted box in front of the basket.',ex:'"3 passes to the 4 (in the key)."',see:['23']},
+ {w:'Block',c:'spot',d:'The little painted square on the side of the key, close to the basket. It\'s a spot on the floor, not just blocking a shot!',ex:'"5 goes down to the block."',see:['23','15']},
+ {w:'Elbow',c:'spot',d:'The corners where the free-throw line meets the sides of the key — shaped like a bent elbow.',ex:'"3 cuts to the opposite elbow."',see:['15']},
+ {w:'Wing',c:'spot',d:'The spots out on the sides of the court, between the top and the corner.',ex:'"1 passes the ball to the 3 on the right wing."',see:['23','1R']},
+ {w:'Corner',c:'spot',d:'Out near the sideline, low by the baseline.',ex:'"The 4 passes to the 3 in the corner."',see:['1R']},
+ {w:'Top of the key',aka:'up top',c:'spot',d:'The middle spot out past the free-throw line, where the point guard usually starts.',see:['1R']},
+ {w:'High post',c:'spot',d:'The area around the free-throw line.',ex:'"The 4 passes to the 5 at the high post."',see:['1R']},
+ {w:'Low post',aka:'down low',c:'spot',d:'The area close to the basket, next to the key.',ex:'"3 passes to the 5 (down low)."',see:['23','25']},
+ {w:'Baseline',c:'spot',d:'The end line under the basket.',ex:'"2 runs the baseline."',see:['51']},
+ {w:'Sideline',c:'spot',d:'The long lines on the sides of the court. Step on one with the ball and it\'s out of bounds.'},
+ {w:'Free-throw line',aka:'foul line',c:'spot',d:'The line in front of the basket where you shoot free throws.',ex:'"2 breaks to the foul line."',see:['PA2']},
+ {w:'Half-court line',c:'spot',d:'The line across the middle that splits the court into two halves.'},
+ {w:'Three-point line',c:'spot',d:'The big curved line. A shot from behind it is worth 3 points.'},
+ {w:'Strong side',c:'spot',d:'The side of the court where the ball is.',see:['BOX1']},
+ {w:'Weak side',c:'spot',d:'The side of the court away from the ball.',ex:'"Clear out (to weak side block)."',see:['51']},
+ {w:'Out of bounds',c:'spot',d:'Anywhere outside the lines. The lines themselves count as out!'},
+ // --- moves ---
+ {w:'Dribble',c:'move',d:'Bouncing the ball with one hand while you move. Keep your eyes up and the ball low.'},
+ {w:'Drive',c:'move',d:'Dribbling hard toward the basket to score or make a pass.',ex:'"1 drives to the basket."',see:['15','1R']},
+ {w:'Pivot',c:'move',d:'Keeping one foot planted while you turn on it with the ball. Lets you look around without traveling.'},
+ {w:'Triple threat',c:'move',d:'Holding the ball low and ready, knees bent, so you can shoot, pass, OR dribble. The defense can\'t guess.'},
+ {w:'Give-and-go',c:'move',d:'Pass to a teammate, then cut to the basket right away to get the ball back.'},
+ {w:'Backdoor cut',c:'move',d:'When your defender is guarding you too close, you cut behind them toward the basket.'},
+ {w:'Jab step',c:'move',d:'A quick fake step with one foot to make your defender move, while your pivot foot stays put.'},
+ {w:'Fast break',c:'move',d:'Racing up the court to score before the other team\'s defense gets back.'},
+ {w:'Box out',c:'move',d:'When a shot goes up, you turn, put your back on the other player, and keep them behind you so you can get the rebound.'},
+ {w:'Rebound',c:'move',d:'Grabbing the ball after a missed shot.',ex:'"1, 5 and 3 get position for a possible rebound."',see:['1R']},
+ // --- shots & passes ---
+ {w:'Layup',c:'shot',d:'A close shot where you lay the ball off the backboard while moving to the basket. Right side: jump off your left foot.'},
+ {w:'Jump shot',c:'shot',d:'A shot where you jump straight up and release the ball at the top.'},
+ {w:'Free throw',c:'shot',d:'An open shot from the free-throw line after a foul. Each one is worth 1 point.'},
+ {w:'Three-pointer',c:'shot',d:'A shot from behind the three-point line. Worth 3 points.'},
+ {w:'Bank shot',c:'shot',d:'A shot that bounces off the backboard into the basket.'},
+ {w:'Swish',c:'shot',d:'A shot that goes in without touching the rim. Nothing but net!'},
+ {w:'Air ball',c:'shot',d:'A shot that misses everything — the rim, the net and the backboard.'},
+ {w:'Chest pass',c:'shot',d:'A straight, two-handed pass from your chest to your teammate\'s chest. Step toward them as you pass.'},
+ {w:'Bounce pass',c:'shot',d:'A pass that bounces once on the floor before reaching your teammate, about two-thirds of the way there.'},
+ {w:'Overhead pass',c:'shot',d:'A two-handed pass thrown from above your head. Good for passing over a defender.'},
+ {w:'Lob',c:'shot',d:'A high, soft pass thrown up over the defense.'},
+ {w:'Assist',c:'shot',d:'A pass that leads right to a teammate scoring a basket.'},
+ // --- rules ---
+ {w:'Travel',aka:'walking',c:'rule',d:'Taking too many steps with the ball without dribbling, or moving your pivot foot. The other team gets the ball.'},
+ {w:'Double dribble',c:'rule',d:'Dribbling with two hands at once, or stopping your dribble and then dribbling again. The other team gets the ball.'},
+ {w:'Carry',aka:'palming',c:'rule',d:'Putting your hand under the ball while you dribble and sort of holding it. It\'s a violation.'},
+ {w:'Foul',c:'rule',d:'Illegal contact with another player — pushing, holding, hitting arms, or tripping.'},
+ {w:'Shooting foul',c:'rule',d:'A foul on a player who is shooting. They get free throws: 2 for a regular shot, 3 for a three-point shot, or 1 if the shot went in anyway.'},
+ {w:'Charge',c:'rule',d:'An offensive foul when the player with the ball runs into a defender who was already set in their spot.'},
+ {w:'Fouling out',c:'rule',d:'When a player gets too many fouls in one game (usually 5) and has to sit out the rest of it.'},
+ {w:'Bonus',c:'rule',d:'After a team gets a certain number of fouls, the other team gets free throws on every foul — even ones that weren\'t on a shot.'},
+ {w:'Three seconds',c:'rule',d:'On offense, you can\'t stand inside the key for more than 3 seconds in a row. Keep moving in and out!'},
+ {w:'Five seconds',c:'rule',d:'When you inbound the ball, you have 5 seconds to pass it in.'},
+ {w:'Over and back',aka:'backcourt violation',c:'rule',d:'Once your team brings the ball past half court, you can\'t bring it back over the half-court line.'},
+ {w:'Jump ball',aka:'held ball',c:'rule',d:'When two players from different teams grab the ball at the same time. In most youth leagues, the teams take turns getting it (the possession arrow).'},
+ {w:'Violation',c:'rule',d:'Breaking a rule that isn\'t a foul (like a travel). The other team gets the ball, but no free throws.'},
+ {w:'Turnover',c:'rule',d:'Losing the ball to the other team before your team shoots — a bad pass, a steal, a travel, or stepping out of bounds.'},
+ // --- defense ---
+ {w:'Defense',c:'def',d:'Trying to stop the other team from scoring when they have the ball.'},
+ {w:'Defensive stance',c:'def',d:'Knees bent, feet wide, hands up and active, staying between your player and the basket.'},
+ {w:'Help defense',c:'def',d:'Leaving your player for a moment to stop someone driving to the basket, then getting back.'},
+ {w:'Deny',c:'def',d:'Keeping your arm and body in the passing lane so your player can\'t catch the ball.'},
+ {w:'Steal',c:'def',d:'Taking the ball away from the other team without fouling.'},
+ {w:'Blocked shot',c:'def',d:'Hitting the ball away while it\'s going up on a shot. Go for the ball, not the arm!'},
+ {w:'Switch',c:'def',d:'When two defenders trade who they are guarding, usually after a pick. Call it out loud: "Switch!"'},
+ {w:'Trap',c:'def',d:'Two defenders guarding the player with the ball at the same time to force a bad pass. Presses use traps.'},
+ {w:'Zone defense',c:'def',d:'Each defender guards an area of the court instead of one player.'},
+ // --- game words ---
+ {w:'Possession',c:'game',d:'Which team has the ball.'},
+ {w:'Offense',c:'game',d:'The team with the ball, trying to score.'},
+ {w:'Transition',c:'game',d:'The moment the ball changes teams and everyone switches from offense to defense (or back). Sprint!'},
+ {w:'Tip-off',c:'game',d:'The jump ball at center court that starts the game.'},
+ {w:'Timeout',c:'game',d:'A short break a coach calls to talk to the team.'},
+ {w:'Substitution',aka:'sub',c:'game',d:'Swapping a player on the court with one from the bench. Wait at the scorer\'s table until the ref waves you in.'},
+ {w:'Ball handler',c:'game',d:'The player who has the ball and is dribbling.'},
+ // --- extra words worth knowing ---
+ {w:'Rim',c:'spot',d:'The orange metal ring of the basket.'},
+ {w:'Backboard',c:'spot',d:'The board behind the rim. The little square on it is your aiming spot for layups and bank shots.'},
+ {w:'Frontcourt',c:'spot',d:'The half of the court where your team is trying to score.'},
+ {w:'Backcourt',c:'spot',d:'The half of the court your team is defending — where you bring the ball up from.'},
+ {w:'Mid-range',c:'shot',d:'A shot from between the key and the three-point line.'},
+ {w:'Put-back',c:'shot',d:'Grabbing an offensive rebound and shooting it right back up.'},
+ {w:'And-one',c:'shot',d:'When you make the shot even though you got fouled. The basket counts AND you get 1 free throw.'},
+ {w:'Pump fake',aka:'shot fake',c:'move',d:'Pretending to shoot so your defender jumps, then driving or shooting once they\'re in the air. Feet stay put!'},
+ {w:'Crossover',c:'move',d:'Dribbling the ball quickly from one hand to the other in front of you to change direction.'},
+ {w:'Spacing',c:'move',d:'Staying spread out on the court so defenders can\'t guard two people at once. Bunching up makes it easy for the defense.'},
+ {w:'Loose ball',c:'move',d:'A ball nobody has control of. Whoever hustles gets it!'},
+ {w:'Talk',aka:'communication',c:'def',d:'Calling out to your teammates on the court: "Ball!", "Pick left!", "Switch!", "Help!" Loud teams play better defense.'},
+ {w:'Close out',c:'def',d:'Running out to a player who just caught the ball, then taking short, choppy steps with a hand up so they can\'t blow past you.'},
+ {w:'Goaltending',c:'rule',d:'Touching a shot while it\'s coming down toward the basket, or on the rim. The basket counts for the other team.'},
+ {w:'Team fouls',c:'rule',d:'All the fouls your whole team has added up in a half. Too many puts the other team in the bonus.'},
+ {w:'Technical foul',c:'rule',d:'A foul for bad sportsmanship, like arguing with the ref, or some rule mistakes. The other team gets free throws.'},
+ {w:'Referee',aka:'ref',c:'game',d:'The official who calls fouls and violations with a whistle. Always be respectful to the ref.'},
+ {w:'Scoreboard',c:'game',d:'Shows the score, the time left, the period, and team fouls.'},
+ {w:'Hustle',c:'game',d:'Playing hard all the time — sprinting back, diving for loose balls, boxing out. Anyone can hustle!'}
+];
+WORDS.sort((a,b)=>a.w.localeCompare(b.w));
+
+let dictOn=load('pb.dict',false), dCat='all', dq='', qz=null;
+function setDict(on){
+  dictOn=on;save('pb.dict',on);document.body.classList.toggle('dict',on);
+  buildNav();if(on){$('sub').textContent='Guardian Angels · Basketball Words';renderDict();window.scrollTo(0,0)}
+}
+function openPlay(id){const i=PLAYS.findIndex(p=>p.id===id);if(i>=0){selectPlay(i);window.scrollTo(0,0)}}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function renderDict(){
+  const c=$('cats');
+  c.innerHTML=[['all','All']].concat(CATS).map(([k,n])=>`<button data-k="${k}" class="${dCat===k?'sel':''}">${n}</button>`).join('');
+  c.querySelectorAll('button').forEach(b=>b.onclick=()=>{dCat=b.dataset.k;renderDict()});
+  const q=dq.trim().toLowerCase();
+  const list=WORDS.filter(x=>(dCat==='all'||x.c===dCat)&&(!q||(x.w+' '+(x.aka||'')+' '+x.d+' '+(x.ex||'')).toLowerCase().includes(q)));
+  list.sort((a,b)=>{if(q){const sa=a.w.toLowerCase().startsWith(q)||(a.aka||'').toLowerCase().includes(q),sb=b.w.toLowerCase().startsWith(q)||(b.aka||'').toLowerCase().includes(q);if(sa!==sb)return sa?-1:1}return 0});
+  $('dcount').textContent=list.length+(list.length===1?' word':' words')+(q?' found':'');
+  const catName=k=>(CATS.find(x=>x[0]===k)||['',''])[1];
+  $('terms').innerHTML=list.length?list.map(x=>{
+    const see=(x.see||[]).map(id=>{const p=PLAYS.find(p=>p.id===id);return p?`<button data-id="${id}">▶ See it: ${esc(SETS[p.set].name)} ${esc(p.name)}</button>`:''}).join('');
+    return `<div class="term ${x.c==='pb'?'pb':''}"><div class="w">${esc(x.w)}${x.aka?`<span class="aka">(${esc(x.aka)})</span>`:''}</div>`+
+      `<div class="tag">${catName(x.c)}</div><div class="d">${esc(x.d)}</div>`+
+      (x.ex?`<div class="ex">In our plays: ${esc(x.ex)}</div>`:'')+(see?`<div class="see">${see}</div>`:'')+'</div>'}).join('')
+    :'<div class="term"><div class="d">No words match that. Try a different spelling, or ask Coach!</div></div>';
+  $('terms').querySelectorAll('.see button').forEach(b=>b.onclick=()=>openPlay(b.dataset.id));
+}
+$('dq').addEventListener('input',e=>{dq=e.target.value;renderDict()});
+
+// ---- quiz: read the meaning, pick the word ----
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function quizNew(){
+  const pool=WORDS.filter(x=>dCat==='all'||x.c===dCat);const src=pool.length>=4?pool:WORDS;
+  const ans=src[Math.floor(Math.random()*src.length)];
+  const others=shuffle(src.filter(x=>x!==ans)).slice(0,3);
+  qz={...(qz||{n:0,right:0}),ans,opts:shuffle([ans,...others]),done:false};renderQuiz();
+}
+function renderQuiz(){
+  const el=$('quiz');if(!qz){el.classList.remove('show');$('qStart').textContent='🎯 Quiz me';return}
+  el.classList.add('show');$('qStart').textContent='✕ Stop quiz';
+  el.innerHTML=`<div class="qh"><span>WHICH WORD MEANS…</span><span>⭐ ${qz.right} / ${qz.n}</span></div>`+
+   `<div class="qd">${esc(qz.ans.d)}</div><div class="qo">`+qz.opts.map((o,i)=>{
+     let cl='';if(qz.done){if(o===qz.ans)cl='ok';else if(i===qz.pick)cl='no'}
+     return `<button data-i="${i}" class="${cl}">${esc(o.w)}</button>`}).join('')+'</div>'+
+   (qz.done?`<div class="qf"><button id="qNext">Next word ▶</button></div>`:'');
+  el.querySelectorAll('.qo button').forEach(b=>b.onclick=()=>{if(qz.done)return;qz.pick=+b.dataset.i;qz.done=true;qz.n++;if(qz.opts[qz.pick]===qz.ans)qz.right++;renderQuiz()});
+  if(qz.done)$('qNext').onclick=quizNew;
+}
+$('qStart').onclick=()=>{if(qz){qz=null;renderQuiz()}else{qz={n:0,right:0};quizNew()}};
+
 setView();buildMe();buildNav();buildPlayers();drawInstant();ui();
+if(dictOn)setDict(true);
 </script>
 </body>
 </html>
