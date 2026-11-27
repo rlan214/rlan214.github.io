@@ -161,7 +161,7 @@
       <div class="tools" id="bTools"></div>
       <div class="bhint" id="bHint"></div>
       <div class="brow"><button id="bUndo">↶ Undo</button><button id="bClear">🧽 Erase lines</button><button id="bReset">⟲ Reset</button></div>
-      <div class="brow"><button id="bCourt">Full court</button><button id="bDef">❌ Defense</button></div>
+      <div class="brow"><button id="bCourt">Full court</button><button id="bDef">🔴 Defense</button></div>
     </div>
     <div class="bbox">
       <div class="h">START FROM A PLAY</div>
@@ -882,7 +882,7 @@ function renderBoard(){
   bsvg.setAttribute('viewBox',bst.full?'0 -30 500 980':'0 -30 500 530');
   $('bLines').innerHTML=bst.lines.map(lineSVG).join('');
   let h='';
-  if(bst.def)for(let i=1;i<=5;i++){const [x,y]=bst.pos['x'+i];h+=`<g data-pc="x${i}" transform="translate(${x},${y})"><circle r="22" fill="transparent"/><text y="7" text-anchor="middle" font-size="24" font-weight="900" fill="#c0392b" stroke="#fff" stroke-width="1">X${i}</text></g>`}
+  if(bst.def)for(let i=1;i<=5;i++){const [x,y]=bst.pos['x'+i];h+=`<g data-pc="x${i}" transform="translate(${x},${y})"><circle r="17" fill="#c0392b" stroke="#fff" stroke-width="2.5"/><text y="6.5" text-anchor="middle" font-size="19" font-weight="900" fill="#fff">${i}</text></g>`}
   for(let i=1;i<=5;i++){const [x,y]=bst.pos['o'+i];h+=`<g data-pc="o${i}" transform="translate(${x},${y})"><circle r="17" fill="#1f5a3c" stroke="#fff" stroke-width="2.5"/><text y="6.5" text-anchor="middle" font-size="19" font-weight="900" fill="#fff">${i}</text></g>`}
   const [bx,by]=bst.pos.ball;h+=`<g data-pc="ball" transform="translate(${bx},${by})"><circle r="16" fill="transparent"/><circle r="9" fill="#e8590c" stroke="#5a2300" stroke-width="1.5"/></g>`;
   $('bPieces').innerHTML=h;
@@ -890,7 +890,7 @@ function renderBoard(){
   $('bTools').querySelectorAll('button').forEach(b=>b.onclick=()=>{bTool=b.dataset.t;renderBoard()});
   $('bHint').textContent=TOOLS.find(t=>t[0]===bTool)[2]+(bTool!=='move'&&bTool!=='erase'?' Start on a player to draw from them. Switch to ✋ Move to drag players.':'');
   $('bCourt').textContent=bst.full?'Half court':'Full court';
-  $('bDef').classList.toggle('on',bst.def);$('bDef').textContent=bst.def?'❌ Defense: on':'❌ Defense: off';
+  $('bDef').classList.toggle('on',bst.def);$('bDef').textContent=bst.def?'🔴 Defense: on':'🔴 Defense: off';
   $('bUndo').disabled=!bHist.length;
 }
 bsvg.addEventListener('pointerdown',e=>{
