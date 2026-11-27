@@ -64,6 +64,28 @@
   body.dict .me,body.dict .tabs,body.dict main,body.dict footer{display:none}
   #dict{display:none;padding:0 16px 24px;max-width:820px;margin:0 auto}
   body.dict #dict{display:block}
+  body.board .me,body.board .tabs,body.board main,body.board footer{display:none}
+  #board{display:none;padding:0 16px 24px}
+  body.board #board{display:flex;flex-wrap:wrap;gap:12px}
+  .bwrap{flex:1 1 440px;max-width:640px;margin:0 auto}
+  #bsvg{width:100%;height:auto;max-height:82vh;display:block;border-radius:14px;touch-action:none;user-select:none;-webkit-user-select:none}
+  .bside{flex:1 1 280px;display:flex;flex-direction:column;gap:10px}
+  .bbox{background:var(--card);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+  .bbox .h{font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.4px}
+  .tools{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .tools button,.brow button{padding:11px 4px;border-radius:10px;border:2px solid #2c5446;background:#1c3d33;color:#fff;font-size:14px;font-weight:800}
+  .tools button.sel{border-color:var(--gold);color:var(--gold);background:#215043}
+  .brow{display:flex;gap:6px}
+  .brow button{flex:1}
+  .brow button.on{border-color:var(--gold);color:var(--gold)}
+  .bhint{font-size:13px;color:#cfe3d9;line-height:1.4}
+  .bbox select,.bbox input{width:100%;padding:11px;border-radius:10px;border:2px solid #2c5446;background:#1c3d33;color:#fff;font-size:15px}
+  .saved{display:flex;flex-direction:column;gap:6px}
+  .saved .it{display:flex;gap:6px}
+  .saved .it button{padding:10px;border-radius:10px;border:2px solid #2c5446;background:#1c3d33;color:#fff;font-size:15px;font-weight:700}
+  .saved .it .ld{flex:1;text-align:left}
+  .saved .it .del.sure{background:#6b2a12;border-color:var(--orange)}
+  .saved .none{font-size:13px;color:var(--muted)}
   #dict .top{display:flex;gap:8px;margin-bottom:8px}
   #dict input{flex:1;min-width:0;padding:12px 14px;border-radius:12px;border:2px solid #2c5446;background:var(--card);color:#fff;font-size:17px;outline:none}
   #dict input:focus{border-color:var(--gold)}
@@ -104,6 +126,55 @@
 </header>
 <div class="sets" id="sets"></div>
 <div class="tabs" id="tabs"></div>
+<section id="board">
+  <div class="bwrap">
+    <svg id="bsvg" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bWood" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ecc994"/><stop offset=".5" stop-color="#e2b97d"/><stop offset="1" stop-color="#eccb98"/></linearGradient>
+        <marker id="bRun" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f4d3a"/></marker>
+        <marker id="bPass" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e8590c"/></marker>
+        <marker id="bDrib" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#3b2a8f"/></marker>
+      </defs>
+      <rect x="-20" y="-60" width="540" height="1060" fill="#0c1d15"/>
+      <rect x="10" y="20" width="480" height="900" fill="url(#bWood)" stroke="#fff" stroke-width="4"/>
+      <g fill="none" stroke="#1f4d3a" stroke-width="3">
+        <rect x="190" y="20" width="120" height="190" fill="#d9ad6f"/>
+        <circle cx="250" cy="210" r="60"/>
+        <path d="M40 20 L40 60 A210 210 0 0 0 460 60 L460 20"/>
+        <line x1="10" y1="470" x2="490" y2="470"/>
+        <circle cx="250" cy="470" r="60"/>
+        <rect x="190" y="730" width="120" height="190" fill="#d9ad6f"/>
+        <circle cx="250" cy="730" r="60"/>
+        <path d="M40 920 L40 880 A210 210 0 0 1 460 880 L460 920"/>
+      </g>
+      <line x1="222" y1="40" x2="278" y2="40" stroke="#333" stroke-width="4"/>
+      <circle cx="250" cy="52" r="9" fill="none" stroke="#e8590c" stroke-width="3"/>
+      <line x1="222" y1="900" x2="278" y2="900" stroke="#333" stroke-width="4"/>
+      <circle cx="250" cy="888" r="9" fill="none" stroke="#e8590c" stroke-width="3"/>
+      <text x="250" y="482" text-anchor="middle" font-size="30" font-weight="900" font-family="Georgia,serif" fill="#1f4d3a" opacity=".85">GA</text>
+      <g id="bLines"></g><g id="bLive"></g><g id="bPieces"></g>
+    </svg>
+  </div>
+  <div class="bside">
+    <div class="bbox">
+      <div class="h">TOOL</div>
+      <div class="tools" id="bTools"></div>
+      <div class="bhint" id="bHint"></div>
+      <div class="brow"><button id="bUndo">↶ Undo</button><button id="bClear">🧽 Erase lines</button><button id="bReset">⟲ Reset</button></div>
+      <div class="brow"><button id="bCourt">Full court</button><button id="bDef">❌ Defense</button></div>
+    </div>
+    <div class="bbox">
+      <div class="h">START FROM A PLAY</div>
+      <select id="bFrom"></select>
+    </div>
+    <div class="bbox">
+      <div class="h">SAVE THIS BOARD</div>
+      <div class="brow"><input id="bName" placeholder="Name it (like &quot;My 21&quot;)" maxlength="40"><button id="bSave" style="flex:0 0 auto;padding:0 14px">💾 Save</button></div>
+      <div class="h" style="margin-top:4px">MY BOARDS</div>
+      <div class="saved" id="bSaved"></div>
+    </div>
+  </div>
+</section>
 <section id="dict">
   <div class="top">
     <input id="dq" type="search" placeholder="🔍 Look up a word…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
@@ -531,10 +602,12 @@ function selectPlay(i){if(busy)return;setDict(false);autoOn=false;playIdx=i;save
 function buildNav(){
   const cs=play().set;
   const s=$('sets');s.innerHTML='';
-  SETS.forEach((st,si)=>{const b=document.createElement('button');b.textContent=st.name;b.className=(!dictOn&&si===cs)?'sel':'';
+  SETS.forEach((st,si)=>{const b=document.createElement('button');b.textContent=st.name;b.className=(!dictOn&&!boardOn&&si===cs)?'sel':'';
     b.onclick=()=>selectPlay(PLAYS.findIndex(p=>p.set===si));s.appendChild(b)});
   const w=document.createElement('button');w.textContent='📖 Words';w.className='words'+(dictOn?' sel':'');
   w.onclick=()=>{if(busy)return;autoOn=false;setDict(true)};s.appendChild(w);
+  const bd=document.createElement('button');bd.textContent='🧑‍🏫 Board';bd.className='words'+(boardOn?' sel':'');
+  bd.onclick=()=>{if(busy)return;autoOn=false;setBoard(true)};s.appendChild(bd);
   const t=$('tabs');t.innerHTML='';
   PLAYS.forEach((p,i)=>{if(p.set!==cs)return;const b=document.createElement('button');b.textContent=p.name;b.className=i===playIdx?'sel':'';
     b.onclick=()=>selectPlay(i);t.appendChild(b)});
@@ -727,6 +800,7 @@ WORDS.sort((a,b)=>a.w.localeCompare(b.w));
 
 let dictOn=load('pb.dict',false), dCat='all', dq='', qz=null;
 function setDict(on){
+  if(boardOn){boardOn=false;save('pb.board',false);document.body.classList.remove('board')}
   dictOn=on;save('pb.dict',on);document.body.classList.toggle('dict',on);
   buildNav();if(on){$('sub').textContent='Guardian Angels · Basketball Words';renderDict();window.scrollTo(0,0)}
 }
@@ -772,8 +846,107 @@ function renderQuiz(){
 }
 $('qStart').onclick=()=>{if(qz){qz=null;renderQuiz()}else{qz={n:0,right:0};quizNew()}};
 
+// ===================== COACHING BOARD =====================
+let boardOn=load('pb.board',false);
+const BS={o:{1:[250,330],2:[95,255],3:[405,255],4:[90,95],5:[410,95]},x:{1:[250,290],2:[120,225],3:[380,225],4:[130,95],5:[370,95]}};
+function freshBoard(full){const pos={};for(let i=1;i<=5;i++){pos['o'+i]=BS.o[i].slice();pos['x'+i]=BS.x[i].slice()}pos.ball=[268,316];return{full:!!full,def:true,pos,lines:[]}}
+let bst=load('pb.board.cur',null);if(!bst||!bst.pos)bst=freshBoard(false);
+let bTool='move',bHist=[],bDrag=null;
+const TOOLS=[['move','✋ Move','Drag players and the ball to new spots.'],['run','➡️ Cut','Draw a cut: solid arrow where a player runs.'],
+  ['pass','🏀 Pass','Draw a pass: dashed orange arrow.'],['drib','〰️ Dribble','Draw a dribble: wavy purple arrow.'],
+  ['pick','🧱 Pick','Draw to where the pick is set: line with a flat end.'],['erase','🧽 Erase','Tap a line to erase it.']];
+const bsvg=$('bsvg');
+function setBoard(on){
+  if(on&&dictOn){dictOn=false;save('pb.dict',false);document.body.classList.remove('dict')}
+  boardOn=on;save('pb.board',on);document.body.classList.toggle('board',on);buildNav();
+  if(on){$('sub').textContent='Guardian Angels · Coaching Board';renderBoard();renderSaved();window.scrollTo(0,0)}
+}
+function bSave(){save('pb.board.cur',bst)}
+function bPush(){bHist.push(JSON.stringify(bst));if(bHist.length>60)bHist.shift()}
+function bClampY(y){return Math.max(-20,Math.min(bst.full?940:500,y))}
+function bPt(e){const p=bsvg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const r=p.matrixTransform(bsvg.getScreenCTM().inverse());return[Math.max(0,Math.min(500,r.x)),bClampY(r.y)]}
+function wavy(pts){ // zigzag along the path for dribbles
+  const out=[];const L=segLens(pts),tot=L[L.length-1];if(tot<20)return pts;const n=Math.floor(tot/12);
+  for(let i=0;i<=n;i++){const t=i/n,a=pointAt(pts,Math.max(0,t-.01)),b=pointAt(pts,Math.min(1,t+.01));let dx=b[0]-a[0],dy=b[1]-a[1];const l=Math.hypot(dx,dy)||1;dx/=l;dy/=l;
+    const c=pointAt(pts,t),o=(i===0||i>=n-1)?0:(i%2?6:-6);out.push([c[0]-dy*o,c[1]+dx*o])}return out}
+function lineSVG(ln,i){
+  const P=a=>a.map(p=>p.map(v=>Math.round(v)).join(',')).join(' ');let pts=ln.pts;if(pts.length<2)return'';
+  const hit=`<polyline data-ln="${i}" points="${P(pts)}" fill="none" stroke="transparent" stroke-width="22"/>`;
+  if(ln.k==='pass')return `<polyline points="${P(pts)}" fill="none" stroke="#e8590c" stroke-width="3.5" stroke-dasharray="8 7" marker-end="url(#bPass)"/>`+hit;
+  if(ln.k==='drib')return `<polyline points="${P(wavy(pts))}" fill="none" stroke="#3b2a8f" stroke-width="3" stroke-linejoin="round" marker-end="url(#bDrib)"/>`+hit;
+  if(ln.k==='pick'){const e=pts[pts.length-1],q=pts[Math.max(0,pts.length-4)];let dx=e[0]-q[0],dy=e[1]-q[1];const L=Math.hypot(dx,dy)||1;dx/=L;dy/=L;
+    return `<polyline points="${P(pts)}" fill="none" stroke="#1f4d3a" stroke-width="3.5" stroke-linejoin="round"/><line x1="${e[0]-dy*15}" y1="${e[1]+dx*15}" x2="${e[0]+dy*15}" y2="${e[1]-dx*15}" stroke="#1f4d3a" stroke-width="6" stroke-linecap="round"/>`+hit}
+  return `<polyline points="${P(pts)}" fill="none" stroke="#1f4d3a" stroke-width="3.5" stroke-linejoin="round" marker-end="url(#bRun)"/>`+hit;
+}
+function renderBoard(){
+  bsvg.setAttribute('viewBox',bst.full?'0 -30 500 980':'0 -30 500 530');
+  $('bLines').innerHTML=bst.lines.map(lineSVG).join('');
+  let h='';
+  if(bst.def)for(let i=1;i<=5;i++){const [x,y]=bst.pos['x'+i];h+=`<g data-pc="x${i}" transform="translate(${x},${y})"><circle r="22" fill="transparent"/><text y="7" text-anchor="middle" font-size="24" font-weight="900" fill="#c0392b" stroke="#fff" stroke-width="1">X${i}</text></g>`}
+  for(let i=1;i<=5;i++){const [x,y]=bst.pos['o'+i];h+=`<g data-pc="o${i}" transform="translate(${x},${y})"><circle r="17" fill="#1f5a3c" stroke="#fff" stroke-width="2.5"/><text y="6.5" text-anchor="middle" font-size="19" font-weight="900" fill="#fff">${i}</text></g>`}
+  const [bx,by]=bst.pos.ball;h+=`<g data-pc="ball" transform="translate(${bx},${by})"><circle r="16" fill="transparent"/><circle r="9" fill="#e8590c" stroke="#5a2300" stroke-width="1.5"/></g>`;
+  $('bPieces').innerHTML=h;
+  $('bTools').innerHTML=TOOLS.map(t=>`<button data-t="${t[0]}" class="${bTool===t[0]?'sel':''}">${t[1]}</button>`).join('');
+  $('bTools').querySelectorAll('button').forEach(b=>b.onclick=()=>{bTool=b.dataset.t;renderBoard()});
+  $('bHint').textContent=TOOLS.find(t=>t[0]===bTool)[2]+(bTool!=='move'&&bTool!=='erase'?' Start on a player to draw from them. Switch to ✋ Move to drag players.':'');
+  $('bCourt').textContent=bst.full?'Half court':'Full court';
+  $('bDef').classList.toggle('on',bst.def);$('bDef').textContent=bst.def?'❌ Defense: on':'❌ Defense: off';
+  $('bUndo').disabled=!bHist.length;
+}
+bsvg.addEventListener('pointerdown',e=>{
+  const pc=e.target.closest('[data-pc]'),ln=e.target.closest('[data-ln]');
+  if(bTool==='erase'){if(ln){bPush();bst.lines.splice(+ln.dataset.ln,1);bSave();renderBoard()}return}
+  e.preventDefault();bsvg.setPointerCapture(e.pointerId);
+  const p=bPt(e);
+  if(bTool==='move'){if(pc){bPush();const k=pc.dataset.pc;bDrag={type:'piece',k,off:[bst.pos[k][0]-p[0],bst.pos[k][1]-p[1]],moved:false}}return}
+  bPush();bDrag={type:'line',k:bTool,pts:[pc?bst.pos[pc.dataset.pc].slice():p]};
+});
+bsvg.addEventListener('pointermove',e=>{
+  if(!bDrag)return;const p=bPt(e);
+  if(bDrag.type==='piece'){bst.pos[bDrag.k]=[Math.max(12,Math.min(488,p[0]+bDrag.off[0])),bClampY(p[1]+bDrag.off[1])];bDrag.moved=true;
+    const g=bsvg.querySelector(`[data-pc="${bDrag.k}"]`);g.setAttribute('transform',`translate(${bst.pos[bDrag.k]})`);return}
+  const last=bDrag.pts[bDrag.pts.length-1];if(Math.hypot(p[0]-last[0],p[1]-last[1])<5)return;
+  bDrag.pts.push(p);$('bLive').innerHTML=lineSVG({k:bDrag.k,pts:bDrag.pts},-1);
+});
+function bEnd(){
+  if(!bDrag)return;const d=bDrag;bDrag=null;$('bLive').innerHTML='';
+  if(d.type==='piece'){if(!d.moved)bHist.pop()}
+  else{const L=segLens(d.pts);if(d.pts.length<2||L[L.length-1]<18)bHist.pop();else bst.lines.push({k:d.k,pts:d.pts})}
+  bSave();renderBoard();
+}
+bsvg.addEventListener('pointerup',bEnd);bsvg.addEventListener('pointercancel',bEnd);
+$('bUndo').onclick=()=>{if(!bHist.length)return;bst=JSON.parse(bHist.pop());bSave();renderBoard()};
+$('bClear').onclick=()=>{if(!bst.lines.length)return;bPush();bst.lines=[];bSave();renderBoard()};
+$('bReset').onclick=()=>{bPush();bst=freshBoard(bst.full);bSave();renderBoard()};
+$('bCourt').onclick=()=>{bPush();bst.full=!bst.full;if(!bst.full)for(const k in bst.pos)bst.pos[k][1]=Math.min(bst.pos[k][1],490);bSave();renderBoard()};
+$('bDef').onclick=()=>{bPush();bst.def=!bst.def;bSave();renderBoard()};
+// start from a play's starting spots
+$('bFrom').innerHTML='<option value="">Pick a play…</option>'+PLAYS.map((p,i)=>`<option value="${i}">${esc(SETS[p.set].name)} · ${esc(p.name)}</option>`).join('');
+$('bFrom').onchange=e=>{const v=e.target.value;if(v==='')return;const p=PLAYS[+v];bPush();
+  const nb=freshBoard(p.view==='full');nb.def=bst.def;for(let i=1;i<=5;i++)if(p.start[i]){const o=p.start[i];nb.pos['o'+i]=o.slice();
+    const top=o[1]<470,rim=top?[250,52]:[250,888];let dx=rim[0]-o[0],dy=rim[1]-o[1];const l=Math.hypot(dx,dy)||1;
+    nb.pos['x'+i]=[Math.max(12,Math.min(488,o[0]+dx/l*38)),o[1]+dy/l*38]}
+  const b=nb.pos['o'+(p.ball||1)];nb.pos.ball=[b[0]+14,b[1]-14];bst=nb;bSave();renderBoard();e.target.value=''};
+// saved boards
+let bDelArm=null;
+function renderSaved(){
+  const list=load('pb.boards',[]);const el=$('bSaved');
+  if(!list.length){el.innerHTML='<div class="none">Nothing saved yet.</div>';return}
+  el.innerHTML=list.map((b,i)=>`<div class="it"><button class="ld" data-i="${i}">📋 ${esc(b.name)}</button><button class="del ${bDelArm===i?'sure':''}" data-d="${i}">${bDelArm===i?'Delete?':'🗑'}</button></div>`).join('');
+  el.querySelectorAll('.ld').forEach(b=>b.onclick=()=>{const s=load('pb.boards',[])[+b.dataset.i];if(!s)return;bPush();bst=JSON.parse(JSON.stringify(s.state));bDelArm=null;bSave();renderBoard();renderSaved();window.scrollTo(0,0)});
+  el.querySelectorAll('.del').forEach(b=>b.onclick=()=>{const i=+b.dataset.d;if(bDelArm!==i){bDelArm=i;renderSaved();return}
+    const l=load('pb.boards',[]);l.splice(i,1);save('pb.boards',l);bDelArm=null;renderSaved()});
+}
+$('bSave').onclick=()=>{
+  const name=$('bName').value.trim()||('Board '+new Date().toLocaleDateString());
+  const l=load('pb.boards',[]);const ex=l.findIndex(b=>b.name.toLowerCase()===name.toLowerCase());
+  const item={name,state:JSON.parse(JSON.stringify(bst)),t:Date.now()};
+  if(ex>=0)l[ex]=item;else l.unshift(item);save('pb.boards',l);$('bName').value='';
+  $('bSave').textContent='✅ Saved';setTimeout(()=>$('bSave').textContent='💾 Save',1200);renderSaved();
+};
+
 setView();buildMe();buildNav();buildPlayers();drawInstant();ui();
-if(dictOn)setDict(true);
+if(dictOn)setDict(true);else if(boardOn)setBoard(true);
 </script>
 </body>
 </html>
